@@ -90,7 +90,7 @@ MIDDLEWARE = [
 
 CSRF_TRUSTED_ORIGINS = [
 
-    "https://3282-102-180-209-249.ngrok-free.app"qa
+    "https://3282-102-180-209-249.ngrok-free.app"
     
 
 ]
