@@ -1,0 +1,1022 @@
+{% load static %}
+<
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+        <title>Sidebar Fermable</title>
+        <style>
+            :root {
+                --primary-color: #008000;
+                --secondary-color: #ffffff;
+                --dark-color: #008000;
+                --light-color: #f8f9fa;
+                --accent-color: #1b5e20;
+                --hover-color: rgba(56, 142, 60, 0.2);
+                --hover-text-color: #000000;
+                --logout-color: #e63946;
+                --logout-hover: #c1121f;
+                --transition-speed: 0.3s;
+                --sidebar-width: 250px;
+                --sidebar-collapsed: 80px;
+                --stickybar-width: 15px;
+            }
+    
+            body {
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: var(--light-color);
+                display: flex;
+                min-height: 100vh;
+                color: #333;
+                transition: margin-left var(--transition-speed) ease;
+            }
+    
+            /* Conteneur principal de la sidebar */
+            .sidebar-container {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                display: flex;
+                z-index: 100;
+            }
+    
+            /* Barre collante pour ouvrir/fermer */
+            .sticky-bar {
+                width: var(--stickybar-width);
+                background-color: var(--primary-color);
+                cursor: pointer;
+                transition: all var(--transition-speed) ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                z-index: 101;
+            }
+    
+            .sticky-bar:hover {
+                background-color: var(--dark-color);
+                width: calc(var(--stickybar-width) + 5px);
+            }
+    
+            .sticky-bar::after {
+                content: '›';
+                font-size: 1.2rem;
+                transition: transform var(--transition-speed) ease;
+            }
+    
+            /* Menu de navigation */
+            .navbar {
+                background: var(--secondary-color);
+                width: var(--sidebar-width);
+                height: 100vh;
+                padding: 20px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: all var(--transition-speed) ease;
+                position: relative;
+            }
+    
+            /* Style pour la sidebar réduite */
+            .sidebar-collapsed .navbar {
+                transform: translateX(calc(-100% + var(--stickybar-width)));
+            }
+    
+            .sidebar-collapsed .sticky-bar::after {
+                transform: rotate(180deg);
+            }
+    
+            .sidebar-collapsed .nav-text,
+            .sidebar-collapsed .user-name,
+            .sidebar-collapsed .user-role {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                margin: 0;
+                overflow: hidden;
+                transition: all calc(var(--transition-speed) * 0.8) ease;
+            }
+    
+            .sidebar-collapsed .user-avatar {
+                width: 40px;
+                height: 40px;
+                transition: all var(--transition-speed) ease;
+            }
+    
+            .sidebar-collapsed .logout-btn .nav-text {
+                display: none;
+            }
+    
+            .sidebar-collapsed .logout-btn {
+                justify-content: center;
+                padding: 12px 0;
+            }
+    
+            /* User info */
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 30px;
+                padding: 0 15px;
+                width: 100%;
+            }
+    
+            .user-avatar {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid var(--accent-color);
+                filter: grayscale(100%) brightness(0);
+                transition: all var(--transition-speed) ease;
+            }
+    
+            .user-name,
+            .user-role {
+                color: #000;
+                margin: 8px 0 0;
+                white-space: nowrap;
+                text-align: center;
+                width: 100%;
+                font-weight: 700;
+                transition: all calc(var(--transition-speed) * 0.8) ease;
+            }
+    
+            .user-role {
+                font-size: 0.8em;
+                color: #666;
+                font-weight: 500;
+            }
+    
+            /* Nav items */
+            .nav-items {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+                padding: 0 10px;
+            }
+    
+                /* ... (conservez les autres styles existants) ... */
+            
+                /* Styles améliorés pour les boutons de navigation */
+                .nav-link {
+                    display: flex;
+                    align-items: center;
+                    color: #000;
+                    text-decoration: none;
+                    padding: 12px 16px;
+                    margin: 4px 10px;
+                    border-radius: 6px;
+                    transition: all var(--transition-speed) cubic-bezier(0.25, 0.8, 0.25, 1);
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    white-space: nowrap;
+                    position: relative;
+                    overflow: hidden;
+                }
+            
+                .nav-link:hover {
+                    background-color: var(--hover-color);
+                    transform: translateX(3px);
+                }
+            
+                .nav-link.active {
+                    background: var(--primary-color);
+                    box-shadow: 0 2px 8px rgba(56, 142, 60, 0.2);
+                    color: white;
+                    transform: translateX(3px);
+                }
+            
+                .nav-link.active::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    height: 100%;
+                    width: 3px;
+                    background-color: var(--accent-color);
+                    border-radius: 0 3px 3px 0;
+                }
+            
+                
+            
+                /* Animation subtile au survol */
+                .nav-link:hover .icon-container {
+                    transform: scale(1.05);
+                }
+            
+                .nav-link.active .icon-container {
+                    transform: scale(1.1);
+                    animation: gentlePulse 1.5s infinite;
+                }
+            
+                @keyframes gentlePulse {
+                    0%, 100% { transform: scale(1.1); }
+                    50% { transform: scale(1.15); }
+                }
+            
+                /* Style des icônes */
+                .icon-container {
+                    width: 22px;
+                    height: 22px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform var(--transition-speed) ease;
+                }
+            
+                .nav-link img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    filter: brightness(0) saturate(100%);
+                    transition: filter var(--transition-speed) ease;
+                }
+            
+                .nav-link.active img {
+                    filter: brightness(0) invert(1);
+                }
+            
+                /* Texte des boutons */
+                .nav-text {
+                    margin-left: 14px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all var(--transition-speed) ease;
+                }
+        
+   
+                
+               
+       
+    
+            /* Main content */
+            .main-content {
+                flex-grow: 1;
+                margin-left: calc(var(--sidebar-width) + var(--stickybar-width));
+                padding: 30px;
+                transition: margin-left var(--transition-speed) ease;
+            }
+    
+            .sidebar-collapsed ~ .main-content {
+                margin-left: var(--stickybar-width);
+            }
+    
+            /* Container header */
+            .container-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                position: relative;
+                padding-bottom: 10px;
+            }
+    
+            .container-header::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
+                animation: loadBar 1s ease forwards;
+            }
+    
+            @keyframes loadBar {
+                0% {
+                    width: 0%;
+                    opacity: 0;
+                }
+                100% {
+                    width: 100%;
+                    opacity: 1;
+                }
+            }
+    
+            h2 {
+                color: var(--dark-color);
+                font-weight: 600;
+                margin: 0;
+                font-size: 28px;
+            }
+    
+            /* Ripple effect */
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.3);
+                transform: scale(0);
+                animation: ripple var(--transition-speed) linear;
+                pointer-events: none;
+            }
+    
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+    
+            /* Responsive */
+            @media (max-width: 768px) {
+                .sidebar-container {
+                    transform: translateX(calc(-100% + var(--stickybar-width)));
+                }
+    
+                .sidebar-container.open {
+                    transform: translateX(0);
+                }
+    
+                .main-content {
+                    margin-left: var(--stickybar-width);
+                }
+            }
+            .navbar {
+                overflow-x: auto; /* Permet le défilement horizontal si nécessaire */
+                white-space: nowrap; /* Empêche le retour à la ligne des éléments enfants */
+            }
+
+            
+        </style>
+        
+           
+      
+        
+    </head>
+    <body>
+        
+        <div class="sidebar-container" id="sidebarContainer">
+            <div class="sticky-bar" id="stickyBar"></div>
+            <div class="navbar">
+                <!-- User info -->
+                {% if user.is_authenticated %}
+                <div class="user-info">
+                    <img src="{% static 'images/utilisateur.png' %}" alt="Utilisateur" class="user-avatar">
+                    <p class="user-name">{{ user.username }}</p>
+                    <p class="user-role">{{ user.email }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Navigation items -->
+                <div class="nav-items">
+                    <!-- Accueil -->
+                    <a href="{% url 'Statistique' %}" class="nav-link {% if request.resolver_match.url_name == 'Statistique' %}active{% endif %}" id="home-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/accueil.png' %}" alt="Accueil">
+                        </div>
+                        <span class="nav-text">Accueil</span>
+                    </a>
+                
+                    <!-- Capteurs -->
+                    <a href="{% url 'liste_des_capteurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_capteurs' %}active{% endif %}" id="capteurs-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/betail.png' %}" alt="Capteurs">
+                        </div>
+                        <span class="nav-text">Betail</span>
+                    </a>
+                
+                
+                    <!-- Localisation -->
+                    <a href="{% url 'liste_des_zones' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_zones' %}active{% endif %}" id="localisation-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/zone.png' %}" alt="Localisation">
+                        </div>
+                        <span class="nav-text">Zone de securite </span>
+                    </a>
+
+
+                      <!-- Localisation -->
+                      <a href="{% url 'suivrebetail' %}" class="nav-link {% if request.resolver_match.url_name == 'suivrebetail' %}active{% endif %}" id="localisation-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/localisation.png' %}" alt="Localisation">
+                        </div>
+                        <span class="nav-text">Suivre le betail </span>
+                        </a>
+          
+                           
+               
+                    <script>
+                        // Fonction pour récupérer et mettre à jour le nombre de notifications non lues
+                        function updateUnreadMessagesCount() {
+                            fetch("{% url 'unread_messages_count' %}")
+                                .then(response => response.json())  // Convertir la réponse en JSON
+                                .then(data => {
+                                    // Mettre à jour le badge avec le nombre de messages non lus
+                                    const unreadCount = data.unread_count;
+                                    const unreadCountElement = document.getElementById("unread-count");
+                                    
+                                    // Mettre à jour le contenu du badge
+                                    unreadCountElement.textContent = unreadCount;
+                    
+                                    // Si il n'y a pas de messages non lus, on peut éventuellement cacher le badge
+                                    if (unreadCount === 0) {
+                                        unreadCountElement.style.display = "none"; // cacher le badge si zéro
+                                    } else {
+                                        unreadCountElement.style.display = "inline"; // afficher le badge
+                                    }
+                                })
+                                .catch(error => console.error('Erreur lors de la récupération des messages non lus:', error));
+                        }
+                    
+                        // Appeler la fonction de mise à jour lorsque la page est chargée
+                        document.addEventListener('DOMContentLoaded', updateUnreadMessagesCount);
+                    
+                        // Appeler la fonction pour mettre à jour en temps réel si tu souhaites rafraîchir
+                        setInterval(updateUnreadMessagesCount, 10000);  // Rafraîchir toutes les 10 secondes
+                    </script>
+             
+                    
+                    <div class="nav-dropdown {% if request.resolver_match.url_name == 'liste_des_roles' or request.resolver_match.url_name == 'liste_des_utilisateurs' %}open{% endif %}">
+                        <button class="nav-link dropdown-toggle" id="users-toggle">
+                            <div class="icon-container">
+                                <img src="{% static 'images/users.png' %}" alt="Utilisateurs">
+                            </div>
+                            <span class="nav-text">Utilisateurs</span>
+                            <span class="arrow">&#9654;</span>
+                        </button>
+                    
+                        <div class="dropdown-menu" id="users-menu">
+
+
+                            <a href="{% url 'liste_des_utilisateurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_utilisateurs' %}active{% endif %}">
+                                <div class="icon-container">
+                                    <img src="{% static 'images/liste.png' %}" alt="Liste d'Utilisateurs">
+                                </div>
+                                <span class="nav-text">Liste utilisateurs</span>
+                            </a>
+
+                            <a href="{% url 'liste_des_roles' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_roles' %}active{% endif %}">
+                                <div class="icon-container">
+                                    <img src="{% static 'images/roles.png' %}" alt="Permissions">
+                                </div>
+                                <span class="nav-text">Rôles utilisateurs</span>
+                            </a>
+                            
+                        </div>
+
+                        <a href="{% url 'parametre' %}" class="nav-link {% if request.resolver_match.url_name == 'parametre' %}active{% endif %}">
+                            <div class="icon-container">
+                                <img src="{% static 'images/parametre.png' %}" alt="parametre">
+                            </div>
+                            <span class="nav-text">Paramètres</span>
+                        </a>
+                    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('users-toggle');
+        const dropdown = toggle.closest('.nav-dropdown');
+    
+        toggle.addEventListener('click', function () {
+            dropdown.classList.toggle('open');
+        });
+    });
+    
+</script>                    
+
+
+        </div>
+        
+    
+    </div>
+</div>
+
+
+<style>
+    .alert {
+        font-size: 14px;
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%; /* Prendre toute la largeur disponible */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 4px solid;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: alertEnter 0.4s forwards;
+    }
+
+    @keyframes alertEnter {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert.alert-exit {
+        animation: alertExit 0.4s forwards;
+    }
+
+    @keyframes alertExit {
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+
+    .alert-success {
+        background-color: #008000; /* Vert foncé */
+        color: white;
+        font-weight: bold;
+        border-left-color: #008000; /* Bordure vert plus clair */
+    }
+
+    .alert-danger {
+        background-color: #ef4444; /* Rouge foncé */
+        color: white;
+        font-weight: bold;
+        border-left-color: #ef4444; /* Bordure rouge plus clair */
+    }
+
+    .alert-info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        font-weight: bold;
+        border-left-color: #3b82f6;
+    }
+
+    .alert-warning {
+        background-color: #ef4444; /* Rouge foncé */
+        color: white;
+        font-weight: bold;
+        /*border-left-color: #facc15;*/
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 1rem;
+        color: inherit;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+</style>
+
+{% if messages %}
+    <div class="alerts-container" style="position: fixed; top: 20px; right: 20px; z-index: 1100; width: 100%; max-width: 90%;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+                <div>
+                    {% if 'success' in message.tags %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    {% elif 'error' in message.tags or 'danger' in message.tags %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    {% elif 'info' in message.tags %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                        </svg>
+                    {% elif 'warning' in message.tags %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    {% endif %}
+                    {{ message }}
+                </div>
+                <button type="button" class="alert-close" onclick="dismissAlert('alert-{{ forloop.counter }}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1rem; height: 1rem;">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+<script>
+    function dismissAlert(id) {
+        const alert = document.getElementById(id);
+        alert.classList.add('alert-exit');
+        setTimeout(() => alert.remove(), 400);
+    }
+</script>
+        
+        <div class="main-content">
+       
+        
+        
+            {% block content %}
+            
+            {% endblock %}
+        </div>
+
+   <!-- Bande blanche en haut -->
+   <div class="top-white-bar">
+    <div class="top-right-bar">
+        <!-- Notifications -->
+        <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" id="notifications-link">
+            <div class="icon-container" style="position: relative;">
+                <img src="{% static 'images/notifications.png' %}" alt="Notifications">
+                {% if unread_count > 0 %}
+                    <span class="notification-badge" id="unread-count">{{ unread_count }}</span>
+                {% else %}
+                    <span class="notification-badge" id="unread-count" style="display: none;">0</span>
+                {% endif %}
+            </div>
+        </a>
+
+        <!-- Profil (Icône Person) -->
+        <a href="#" class="nav-link" id="profile-link" data-user-id="{{ user.id }}">
+            <div class="icon-container" style="position: relative;">
+                <img src="{% static 'images/usr.png' %}" alt="Profile">
+            </div>
+        </a>
+        
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initUserProfileModal = () => {
+                const profileLink = document.getElementById('profile-link');
+                if (!profileLink) return;
+        
+                const config = {
+                    apiUrl: '/utilisateurs/profil_utilisateur/',
+                    modalStyling: {
+                        zIndex: 999999,
+                        backdropOpacity: 0.4,
+                        background: '#ffffff',
+                        accentColor: '#008000'
+                    }
+                };
+        
+                const fetchUserProfile = async (userId) => {
+                    try {
+                        const response = await fetch(`${config.apiUrl}${userId}/`);
+                        if (!response.ok) throw new Error('Erreur réseau');
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Erreur fetch:', error);
+                        throw error;
+                    }
+                };
+        
+                const renderProfileModal = (userData) => {
+                    return Swal.fire({
+                        title: `<span style="color: black; font-weight: bold;">${userData.username} <span class="user-badge">👤</span></span>`,
+                        html: `
+                            <div style="text-align: left; color: black;">
+                                <div style="margin-bottom: 15px;">
+                                    <div style="font-weight: bold; color: black;">Nom complet</div>
+                                    <div>${userData.first_name || '-'} ${userData.last_name || '-'}</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="font-weight: bold; color: black;">Nom d'utilisateur</div>
+                                    <div>${userData.username}</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="font-weight: bold; color: black;">Email</div>
+                                    <div>${userData.email || 'Non renseigné'}</div>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <div style="font-weight: bold; color: black;">Téléphone</div>
+                                    <div>${userData.telephone || 'Non renseigné'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: black;">Rôle</div>
+                                    <div>${userData.role || 'Utilisateur'}</div>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'info',
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                        background: config.modalStyling.background,
+                        width: '500px',
+                        padding: '2rem',
+                        backdrop: `rgba(0, 0, 0, ${config.modalStyling.backdropOpacity})`,
+                        customClass: {
+                            container: 'swal2-custom-container',
+                            popup: 'swal2-custom-popup'
+                        },
+                        didOpen: () => {
+                            const popup = Swal.getPopup();
+                            popup.style.zIndex = `${config.modalStyling.zIndex}`;
+                            popup.animate([{ opacity: 0 }, { opacity: 1 }], {
+                                duration: 300,
+                                easing: 'ease-out'
+                            });
+                        }
+                    });
+                };
+                
+                profileLink.addEventListener('click', async (e) => {
+                    e.preventDefault();
+        
+                    Swal.fire({
+                        title: 'Chargement...',
+                        allowOutsideClick: false,
+                        background: config.modalStyling.background,
+                        didOpen: () => Swal.showLoading()
+                    });
+        
+                    try {
+                        const userData = await fetchUserProfile(profileLink.dataset.userId);
+                        Swal.close();
+                        await renderProfileModal(userData);
+                    } catch (error) {
+                        Swal.fire({
+                            title: 'Erreur',
+                            text: 'Impossible de charger les informations',
+                            icon: 'error',
+                            background: config.modalStyling.background
+                        });
+                    }
+                });
+            };
+        
+            if (typeof Swal !== 'undefined') {
+                initUserProfileModal();
+            } else {
+                console.error('SweetAlert2 non chargé');
+            }
+        });
+        </script>
+        
+            
+        
+        
+        
+
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn" id="logout-btn">
+                <div class="icon-container">
+                    <img src="{% static 'images/shutdown.png' %}" alt="Déconnexion">
+                </div>
+                <span class="nav-text"></span>
+            </button>
+        </form>
+       
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const logoutForm = document.querySelector('.logout-form');
+            
+                if (logoutForm) {
+                    logoutForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+            
+                        const bodyClass = document.body.className;
+                        const isDark = bodyClass.includes('dark-theme');
+            
+                        Swal.fire({
+                            title: 'Déconnexion ? 😢',
+                            text: "Voulez-vous vous déconnecter ?",
+                            icon: 'question',
+                            iconColor: isDark ? '#f1c40f' : '#e74c3c',
+                            background: isDark ? '#2c3e50' : '#ffffff',
+                            color: isDark ? '#ecf0f1' : '#333',
+                            showCancelButton: true,
+                            confirmButtonColor: isDark ? '#3498db' : '#e74c3c',
+                            cancelButtonColor: '#28a745', // ✅ Vert (Bootstrap "success")
+                            confirmButtonText: 'Oui, déconnecte-moi',
+                            cancelButtonText: 'Rester connecté',
+                            customClass: {
+                                popup: 'rounded-xl shadow-lg'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                logoutForm.submit();
+                            }
+                        });
+                    });
+                }
+            });
+        </script>
+        
+
+            
+                    
+    </div>
+</div>
+
+
+
+        <style>
+            .top-white-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 40px;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                padding: 0 20px;
+                z-index: 1000;
+            }
+            
+            .top-right-bar {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+            
+          
+            .main-content {
+                margin-top: 30px; /* Assez pour libérer l'espace de la barre blanche */
+            }
+            
+            .navbar {
+                padding-top: 40px;
+            }
+
+            .logout-form {
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .logout-btn {
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+            
+            .logout-btn .icon-container {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .logout-btn img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                filter: none;
+            }
+            
+            
+        </style>
+   
+    </body>
+    </html>
+
+    <style>
+        .notification-badge {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            transform: translate(50%, -50%);
+            background-color: red;
+            color: white;
+            font-weight:bold;
+            font-size: 10px;         /* Plus petit */
+            line-height: 1;
+            min-width: 16px;         /* Taille minimale */
+            height: 16px;
+            border-radius: 50%;      /* Cercle parfait */
+            padding: 0 4px;          /* Réduction de l’espace intérieur */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        
+    </style>
+        
+    <style>
+        .nav-dropdown {
+            width: 100%;
+            position: relative; /* Ajouter cette propriété pour positionner correctement les éléments */
+        }
+    
+        .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+            border: none;
+            background: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            color: inherit;
+            text-align: left;
+        }
+    
+     
+        .arrow {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+    
+        .dropdown-menu {
+            display: none;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+            margin-left: 15px; /* Garder la marge pour les aligner correctement */
+        }
+    
+        .nav-dropdown.open .dropdown-menu {
+            display: flex;
+        }
+    
+        .nav-dropdown.open .arrow {
+            transform: rotate(90deg);
+        }
+    
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarContainer = document.getElementById('sidebarContainer');
+            const stickyBar = document.getElementById('stickyBar');
+            const mainContent = document.querySelector('.main-content');
+
+            // Toggle sidebar
+            function toggleSidebar() {
+                sidebarContainer.classList.toggle('sidebar-collapsed');
+                
+                // Stocker l'état dans localStorage
+                localStorage.setItem('sidebarCollapsed', sidebarContainer.classList.contains('sidebar-collapsed'));
+            }
+
+            // Gestion du clic sur la sticky bar
+            stickyBar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleSidebar();
+            });
+
+            // Fermer la sidebar si on clique à l'extérieur (version mobile)
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768 && !sidebarContainer.contains(e.target)) {
+                    sidebarContainer.classList.remove('open');
+                }
+            });
+
+            // Ripple effect for nav items
+            document.querySelectorAll('.nav-link, .logout-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Ne pas déclencher si c'est un lien
+                    if (e.target.tagName === 'A' || e.target.closest('a')) return;
+                    
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 300);
+                });
+            });
+
+            // Vérifier l'état stocké
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebarContainer.classList.add('sidebar-collapsed');
+            }
+
+            // Adapter pour mobile
+            function handleResize() {
+                if (window.innerWidth <= 768) {
+                    sidebarContainer.classList.add('sidebar-collapsed');
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Appeler au chargement
+        });
+    </script>

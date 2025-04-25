@@ -1,0 +1,558 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        position: relative;
+        flex-wrap: wrap;
+    }
+
+    .container-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-color: black;
+    }
+
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    
+    .container-header h1 {
+        font-size: 30px;
+        color: #008000;
+        margin: 0 0 15px 0;
+        padding-left: 0;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .users-table th, .users-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .users-table th {
+        background-color: green;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .users-table tr:first-child th:first-child {
+        border-top-left-radius: 10px;
+    }
+
+    .users-table tr:first-child th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    .users-table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+
+    .users-table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+
+    .users-table tr {
+        background-color: white;
+        font-weight: bold;
+    }
+
+    .users-table tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    .users-table td:last-child,
+    .users-table th:last-child {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .actions a img {
+        width: 22px;
+        height: 22px;
+        transition: transform 0.2s;
+    }
+
+    .actions a img:hover {
+        transform: scale(1.1);
+    }
+
+    .add-btn {
+        background-color: transparent;
+        color: #008000; /* Texte vert */
+        padding: 8px 16px;
+        border: 2px solid #008000; /* Bordure verte */
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    .add-btn:hover {
+        background-color: #008000; /* Fond vert au survol */
+        color: white; /* Texte blanc au survol */
+    }
+    
+    .add-btn .icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+
+    /* Styles de la modal */
+.modal {
+    display: none; /* Cacher la modal par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0); /* Fond noir avec transparence */
+    background-color: rgba(0, 0, 0, 0.4); /* Fond noir avec transparence */
+    border-radius: 10px; /* Ajout du rayon de bordure pour la modal */
+}
+
+/* Contenu de la modal */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px; /* Arrondir les coins du contenu de la modal */
+}
+
+/* Pied de la modal */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Bouton de fermeture */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Styles des boutons */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+
+
+.search-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 10px;
+}
+
+#searchInput {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 40px 10px 15px; /* Espace à droite pour l'icône */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-weight: bold; /* Texte en gras */
+    color: #000; /* Texte noir */
+    font-size: 15px;
+    background-color: #fff;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+    background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+}
+
+#searchInput::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+#searchInput:focus {
+    border-color: #008000;
+    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+}
+
+
+</style>
+
+
+<div class="container-header">
+    <h1>Mes zones de pâturages</h1>
+
+   <!-- Barre de recherche centrée -->
+   <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
+</div>
+
+<script>
+    function searchZone() {
+        let input = document.getElementById("searchInput").value.toLowerCase();  // Récupérer l'entrée de recherche
+        let rows = document.querySelectorAll(".users-table tbody tr");  // Sélectionner toutes les lignes de la table
+
+        rows.forEach(row => {
+            let zoneNom = row.cells[0].innerText.toLowerCase();  // Récupérer le nom de la zone (1ère colonne)
+            let utilisateur = row.cells[2].innerText.toLowerCase();  // Récupérer le nom de l'utilisateur (3ème colonne)
+
+            // Comparer la recherche avec les deux colonnes (nom de la zone et utilisateur)
+            if (zoneNom.includes(input) || utilisateur.includes(input)) {
+                row.style.display = "";  // Afficher la ligne si le nom de la zone ou l'utilisateur correspond
+            } else {
+                row.style.display = "none";  // Cacher la ligne si aucun nom de zone ou utilisateur ne correspond
+            }
+        });
+    }
+</script>
+
+
+    <a href="javascript:void(0);" class="add-btn" onclick="ouvrirModalZone(false)">
+        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter une zone" class="icon"> Ajouter une zone
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>Nom de la zone</th>
+                <th>Description</th>
+                <th>Utilisateur</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for zone in zones %}
+                <tr>
+                    <td>{{ zone.nom }}</td>
+                    <td>{{ zone.description }}</td>
+                    <td>{{ zone.user.username }}</td>
+                    <td>
+                        <div class="actions">
+                            <!-- Premier bouton : Passer l'ID de la zone et de l'utilisateur dans l'URL ou dans un callback -->
+                            <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
+                                <img src="{% static 'images/zone.png' %}" alt="Voir">
+                            </a>
+                            
+                            
+                            <!-- Modifier la zone -->
+                            <a href="javascript:void(0);" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
+                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
+                            </a>
+                            
+                            <!-- Supprimer la zone -->
+                            <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
+                                <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center;">Aucune zone enregistrée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<!-- ✅ Modal unique (Création / Modification) -->
+<div id="zoneModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fermerModalZone()">&times;</span>
+        <h2 id="zoneModalTitre">Créer une zone de pâturage</h2>
+        <form method="POST" id="formZone">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="zone_nom">Nom de la zone</label>
+                <input type="text" name="nom" id="zone_nom" required>
+            </div>
+            <div class="form-group">
+                <label for="zone_description">Description</label>
+                <textarea name="description" id="zone_description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="zone_utilisateur">Utilisateur</label>
+                <select name="utilisateur" id="zone_utilisateur" required>
+                    {% for utilisateur in utilisateurs %}
+                        <option value="{{ utilisateur.id }}">{{ utilisateur.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="zoneModalBouton">Créer</button>
+        </form>
+    </div>
+</div>
+<style>
+/* Arrière-plan du modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 80px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.3); /* fond sombre, pas vert */
+}
+
+/* Contenu du modal */
+.modal-content {
+    background-color: #fff;
+    margin: auto;
+    padding: 30px;
+    border-radius: 16px;
+    width: 40%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.4s ease-out;
+    border-top: 6px solid #2e7d32; /* bande verte en haut */
+}
+
+/* Animation douce */
+@keyframes slideDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Titre */
+#zoneModalTitre {
+    margin-top: 0;
+    color: #2e7d32;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Bouton fermeture */
+.close {
+    color: #2e7d32;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #1b5e20;
+}
+
+/* Champs */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #000;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #66bb6a;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Bouton principal */
+.btn.btn-primary {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn.btn-primary:hover {
+    background-color: #388e3c;
+}
+
+
+</style>
+
+<!-- ✅ Modal de suppression -->
+<div id="suppressionModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Confirmer la suppression</h2>
+        <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer cette zone ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">Supprimer</button>
+            <button type="button" class="btn" id="btnAnnulerSuppression">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Script JavaScript -->
+<script>
+    // Modal Création/Modification
+    function ouvrirModalZone(estModification = false, id = null, nom = '', description = '', userId = '') {
+        const modal = document.getElementById("zoneModal");
+        const titre = document.getElementById("zoneModalTitre");
+        const bouton = document.getElementById("zoneModalBouton");
+        const form = document.getElementById("formZone");
+
+        document.getElementById("zone_nom").value = nom;
+        document.getElementById("zone_description").value = description;
+        document.getElementById("zone_utilisateur").value = userId;
+
+        if (estModification) {
+            titre.innerText = "Modifier la zone de pâturage";
+            bouton.innerText = "Modifier";
+            form.action = `/zones/modifier_zone/${id}/`;
+        } else {
+            titre.innerText = "Créer une zone de pâturage";
+            bouton.innerText = "Créer";
+            form.action = `{% url 'creer_zone' %}`;
+        }
+
+        modal.style.display = "block";
+    }
+
+    function fermerModalZone() {
+        document.getElementById("zoneModal").style.display = "none";
+    }
+
+    // Modal Suppression
+    let zoneIdToDelete = null;
+
+    function ouvrirModalSuppression(zoneId) {
+        zoneIdToDelete = zoneId;
+        document.getElementById("suppressionModal").style.display = "block";
+    }
+
+    // Évènements de fermeture et suppression
+    document.addEventListener('DOMContentLoaded', function () {
+        const suppressionModal = document.getElementById("suppressionModal");
+        const closeSupp = suppressionModal.querySelector(".close");
+        const btnConfirmer = document.getElementById("btnConfirmerSuppression");
+        const btnAnnuler = document.getElementById("btnAnnulerSuppression");
+
+        closeSupp.onclick = () => suppressionModal.style.display = "none";
+        btnAnnuler.onclick = () => suppressionModal.style.display = "none";
+
+        btnConfirmer.onclick = function () {
+            if (zoneIdToDelete) {
+                window.location.href = "{% url 'supprimer_zone' 999 %}".replace('999', zoneIdToDelete);
+            }
+        };
+
+        // Clic en dehors des modals pour fermer
+        window.onclick = function (event) {
+            if (event.target === document.getElementById("suppressionModal")) {
+                suppressionModal.style.display = "none";
+            }
+            if (event.target === document.getElementById("zoneModal")) {
+                fermerModalZone();
+            }
+        }
+    });
+</script>
+
+
+{% endblock %}

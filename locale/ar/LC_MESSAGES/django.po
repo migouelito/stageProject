@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-13 23:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+#: stageProject/settings.py:251
+msgid "Français"
+msgstr ""
+
+#: stageProject/settings.py:252
+msgid "English"
+msgstr ""
+
+#: stageProject/settings.py:253
+msgid "العربية"
+msgstr ""
+
+#: stageProject/settings.py:254
+msgid "Español"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/ajouter_role.html:19
+msgid "Ajouter un rôle"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/ajouter_role.html:34
+msgid "Nom du rôle"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/ajouter_role.html:43
+#: utilisateurs/templates/utilisateurs/modifier_role.html:32
+msgid "Permissions"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/ajouter_role.html:57
+msgid "Ajouter le rôle"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/ajouter_role.html:60
+msgid "Annuler"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/detail_utilisateur.html:114
+msgid "Date d'inscription"
+msgstr ""
+
+#: utilisateurs/templates/utilisateurs/detail_utilisateur.html:115
+msgid "Dernière connexion"
+msgstr ""

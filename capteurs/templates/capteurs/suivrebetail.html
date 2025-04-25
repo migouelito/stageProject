@@ -1,0 +1,159 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<h1 class="titre">Suivez en temps réel votre bétail</h1>
+
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+    const userId = "{{ user_id }}";
+    console.log('user_id récupéré:', userId);
+
+    const map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    const trackerMarkers = {};
+    const trackerTimers = {};
+
+    function getGreenIcon() {
+        return new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+    }
+
+    const socket = new WebSocket(`wss://3282-102-180-209-249.ngrok-free.app/ws/positions/?user_id=${userId}`);
+
+    socket.onopen = function () {
+        console.log('WebSocket connecté !');
+    };
+
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        const trackerId = data.tracker_id || 'default';
+        const icon = getGreenIcon();
+
+        if (trackerTimers[trackerId]) {
+            clearTimeout(trackerTimers[trackerId]);
+        }
+
+        trackerTimers[trackerId] = setTimeout(() => {
+            if (trackerMarkers[trackerId]) {
+                map.removeLayer(trackerMarkers[trackerId]);
+                delete trackerMarkers[trackerId];
+            }
+        }, 5000);
+
+        if (trackerMarkers[trackerId]) {
+            trackerMarkers[trackerId].setLatLng([data.latitude, data.longitude]);
+            if (trackerMarkers[trackerId]._popup) {
+                trackerMarkers[trackerId]._popup.setContent(`🐄 Bœuf ${trackerId}`);
+            }
+        } else {
+            const marker = L.marker([data.latitude, data.longitude], {
+                icon: icon,
+                riseOnHover: true
+            }).addTo(map);
+
+            marker.bindPopup(`🐄 Bœuf ${trackerId}`, { autoPan: false });
+            trackerMarkers[trackerId] = marker;
+        }
+    };
+
+    socket.onerror = function (error) {
+        console.error('WebSocket Error:', error);
+    };
+
+    socket.onclose = function (event) {
+        console.warn('WebSocket fermé:', event.code);
+    };
+
+    // ----------------------------
+    // Affichage des zones de sécurité
+    // ----------------------------
+
+    const zonesData = JSON.parse(`{{ zones_data_json|escapejs }}`);
+
+    zonesData.forEach(zone => {
+        const forme = zone.forme;
+
+        if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
+            L.circle([zone.latitude, zone.longitude], {
+                radius: zone.rayon,
+                color: 'blue',
+                fillOpacity: 0.2
+            }).addTo(map).bindPopup(`Zone #${zone.id} (Cercle)`);
+        }
+
+        else if ((forme === 'rectangle' || forme === 'carre') && zone.coin1_lat) {
+            const latlngs = [
+                [zone.coin1_lat, zone.coin1_lon],
+                [zone.coin2_lat, zone.coin2_lon],
+                [zone.coin3_lat, zone.coin3_lon],
+                [zone.coin4_lat, zone.coin4_lon],
+                [zone.coin1_lat, zone.coin1_lon]
+            ];
+            L.polygon(latlngs, {
+                color: 'orange',
+                fillOpacity: 0.2
+            }).addTo(map).bindPopup(`Zone #${zone.id} (${forme})`);
+        }
+
+        else if (forme === 'triangle' && zone.coin1_lat) {
+            const latlngs = [
+                [zone.coin1_lat, zone.coin1_lon],
+                [zone.coin2_lat, zone.coin2_lon],
+                [zone.coin3_lat, zone.coin3_lon],
+                [zone.coin1_lat, zone.coin1_lon]
+            ];
+            L.polygon(latlngs, {
+                color: 'purple',
+                fillOpacity: 0.2
+            }).addTo(map).bindPopup(`Zone #${zone.id} (Triangle)`);
+        }
+
+        else if (forme === 'polygon' && zone.coins) {
+            try {
+                const coords = JSON.parse(zone.coins);
+                const latlngs = coords.map(pt => [pt.lat, pt.lon]);
+                if (latlngs.length > 2) {
+                    L.polygon(latlngs, {
+                        color: 'green',
+                        fillOpacity: 0.2
+                    }).addTo(map).bindPopup(`Zone #${zone.id} (Polygone)`);
+                }
+            } catch (e) {
+                console.error("Erreur de parsing polygon:", e);
+            }
+        }
+
+        else if (forme === 'marker' && zone.latitude && zone.longitude) {
+            L.marker([zone.latitude, zone.longitude])
+                .addTo(map)
+                .bindPopup(`Zone #${zone.id} (Point)`);
+        }
+    });
+</script>
+<style>
+    .titre h1 {
+        font-size: 30px;
+        color: #008000;
+    }
+    .titre {
+        font-size: 30px;
+        color: #008000;
+        margin: 0 0 15px 0;
+        padding-left: 0;
+    }
+   
+        
+</style>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+
+    <h3>{% trans "Permissions" %}</h3>
+
+    {% if permissions %}
+        <ul>
+            {% for permission in permissions %}
+                <li>{% trans permission.name %}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>{% trans "Aucune permission attribuée à ce rôle." %}</p>
+    {% endif %}
+
+</div>
+{% endblock %}

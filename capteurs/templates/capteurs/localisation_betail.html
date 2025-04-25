@@ -1,0 +1,256 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div id="map" style="height: 100vh;"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuration initiale
+    const map = L.map('map');
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Créer l'icône personnalisée pour la position
+    const positionIcon = L.icon({
+        iconUrl: '{% static "images/localisation.png" %}',  // Assurez-vous que ce fichier existe dans votre dossier static
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+
+    // Icône de repli si l'image n'est pas disponible
+    const fallbackIcon = L.divIcon({
+        className: 'custom-location-icon',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        html: '<div class="location-pin"></div>'
+    });
+
+    // Gestion des zones
+    {% if zones %}
+        const zonesData = [];
+        
+        {% for zone in zones %}
+            zonesData.push({
+                lat: {{ zone.latitude|default:"0" }},
+                lng: {{ zone.longitude|default:"0" }},
+                radius: {{ zone.rayon|default:"100" }},
+                name: '{{ zone.nom|default:"Zone sans nom"|escapejs }}'
+            });
+        {% endfor %}
+        
+        // Afficher les zones
+        const zoneLayers = [];
+        zonesData.forEach(zone => {
+            if(zone.lat && zone.lng) {
+                const circle = L.circle([zone.lat, zone.lng], {
+                    color: '#4CAF50',
+                    fillColor: '#8BC34A',
+                    fillOpacity: 0.3,
+                    radius: zone.radius
+                }).addTo(map);
+                
+                circle.bindPopup(`
+                    <div style="min-width: 150px">
+                        <h4>${zone.name}</h4>
+                        <p>Rayon: ${zone.radius}m</p>
+                        <small>Position: ${zone.lat.toFixed(4)}, ${zone.lng.toFixed(4)}</small>
+                    </div>
+                `);
+                zoneLayers.push(circle);
+            }
+        });
+        
+        // Centrer la carte sur les zones ou la position actuelle
+        if(zoneLayers.length > 0) {
+            const group = new L.featureGroup(zoneLayers);
+            map.fitBounds(group.getBounds().pad(0.2));
+            
+            // Ajouter quand même la position actuelle
+            locateUser(false);
+        } else {
+            // Si pas de zones valides, centrer sur position actuelle
+            locateUser(true);
+        }
+    {% else %}
+        // Si aucune zone, centrer sur position actuelle avec logo
+        locateUser(true);
+    {% endif %}
+    
+    // Fonction pour obtenir le nom du lieu à partir des coordonnées
+    function getLocationName(lat, lng, callback) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let locationName = "Lieu inconnu";
+                
+                if (data && data.display_name) {
+                    // Essayer d'extraire un nom de lieu plus court et significatif
+                    if (data.address) {
+                        const addressParts = [];
+                        
+                        // Construire une adresse plus lisible
+                        if (data.address.road || data.address.pedestrian) {
+                            addressParts.push(data.address.road || data.address.pedestrian);
+                        }
+                        
+                        if (data.address.house_number) {
+                            addressParts.unshift(data.address.house_number);
+                        }
+                        
+                        if (data.address.suburb || data.address.neighbourhood || data.address.residential) {
+                            addressParts.push(data.address.suburb || data.address.neighbourhood || data.address.residential);
+                        }
+                        
+                        if (data.address.city || data.address.town || data.address.village) {
+                            addressParts.push(data.address.city || data.address.town || data.address.village);
+                        }
+                        
+                        if (addressParts.length > 0) {
+                            locationName = addressParts.join(", ");
+                        } else {
+                            // Fallback sur le nom complet si on ne peut pas créer une version courte
+                            locationName = data.display_name;
+                        }
+                    } else {
+                        locationName = data.display_name;
+                    }
+                }
+                
+                callback(locationName);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération du nom du lieu:", error);
+                callback("Lieu non identifié");
+            });
+    }
+    
+    // Fonction pour géolocalisation
+    function locateUser(showDefault = false) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userPos = [position.coords.latitude, position.coords.longitude];
+                    const accuracy = position.coords.accuracy;
+                    
+                    // Log des coordonnées dans la console
+                    console.log("Position actuelle: Latitude = " + userPos[0] + ", Longitude = " + userPos[1]);
+                    
+                    // Créer un marqueur pour la position actuelle
+                    const userCircle = L.circle(userPos, {
+                        color: '#3388ff',
+                        fillColor: '#3388ff',
+                        fillOpacity: 0.2,
+                        radius: accuracy
+                    }).addTo(map);
+                    
+                    // Obtenir le nom du lieu actuel
+                    getLocationName(userPos[0], userPos[1], function(locationName) {
+                        // Ajouter un marqueur avec l'icône personnalisée
+                        try {
+                            const userMarker = L.marker(userPos, {
+                                icon: positionIcon
+                            }).addTo(map);
+                            
+                            userMarker.bindPopup(`
+                                <div style="min-width: 200px">
+                                    <h4>Votre position exacte</h4>
+                                    <p><strong>${locationName}</strong></p>
+                                    <p>Précision: ~${Math.round(accuracy)}m</p>
+                                    <small>Coordonnées: ${userPos[0].toFixed(6)}, ${userPos[1].toFixed(6)}</small>
+                                </div>
+                            `).openPopup();
+                        } catch (e) {
+                            // Si l'icône personnalisée ne fonctionne pas, utiliser l'icône de repli
+                            const userMarker = L.marker(userPos, {
+                                icon: fallbackIcon
+                            }).addTo(map);
+                            
+                            userMarker.bindPopup(`
+                                <div style="min-width: 200px">
+                                    <h4>Votre position exacte</h4>
+                                    <p><strong>${locationName}</strong></p>
+                                    <p>Précision: ~${Math.round(accuracy)}m</p>
+                                    <small>Coordonnées: ${userPos[0].toFixed(6)}, ${userPos[1].toFixed(6)}</small>
+                                </div>
+                            `).openPopup();
+                        }
+                        
+                        // Si showDefault ou pas de zones, centrer sur la position utilisateur
+                        if (showDefault || !zones || zones.length === 0) {
+                            map.setView(userPos, 15);
+                        }
+                    });
+                },
+                function(error) {
+                    console.error("Erreur de géolocalisation:", error);
+                    // Fallback sur Paris si géolocalisation échoue
+                    map.setView([48.8566, 2.3522], 12);
+                    L.marker([48.8566, 2.3522], {
+                        icon: fallbackIcon
+                    })
+                        .addTo(map)
+                        .bindPopup("Position par défaut: Paris<br>Géolocalisation non disponible")
+                        .openPopup();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            // Navigateur ne supporte pas la géolocalisation
+            map.setView([48.8566, 2.3522], 12);
+            L.marker([48.8566, 2.3522], {
+                icon: fallbackIcon
+            })
+                .addTo(map)
+                .bindPopup("Votre navigateur ne supporte pas la géolocalisation")
+                .openPopup();
+        }
+    }
+});
+</script>
+
+<style>
+#map {
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+}
+.leaflet-popup-content h4 {
+    margin: 5px 0;
+    color: #2c3e50;
+}
+.leaflet-popup-content p {
+    margin: 5px 0;
+}
+.leaflet-popup-content strong {
+    color: #2c3e50;
+}
+/* Style pour l'icône de position personnalisée */
+.custom-location-icon {
+    background: transparent;
+    border: none;
+}
+.location-pin {
+    width: 20px;
+    height: 20px;
+    background-color: #3388ff;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+</style>
+
+{% endblock %}

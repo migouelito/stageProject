@@ -1,0 +1,646 @@
+{% load static %}
+<
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sidebar Fermable</title>
+        <style>
+            :root {
+                --primary-color: #008000;
+                --secondary-color: #ffffff;
+                --dark-color: #008000;
+                --light-color: #f8f9fa;
+                --accent-color: #1b5e20;
+                --hover-color: rgba(56, 142, 60, 0.2);
+                --hover-text-color: #000000;
+                --logout-color: #e63946;
+                --logout-hover: #c1121f;
+                --transition-speed: 0.3s;
+                --sidebar-width: 250px;
+                --sidebar-collapsed: 80px;
+                --stickybar-width: 15px;
+            }
+    
+            body {
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: var(--light-color);
+                display: flex;
+                min-height: 100vh;
+                color: #333;
+                transition: margin-left var(--transition-speed) ease;
+            }
+    
+            /* Conteneur principal de la sidebar */
+            .sidebar-container {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                display: flex;
+                z-index: 100;
+            }
+    
+            /* Barre collante pour ouvrir/fermer */
+            .sticky-bar {
+                width: var(--stickybar-width);
+                background-color: var(--primary-color);
+                cursor: pointer;
+                transition: all var(--transition-speed) ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                z-index: 101;
+            }
+    
+            .sticky-bar:hover {
+                background-color: var(--dark-color);
+                width: calc(var(--stickybar-width) + 5px);
+            }
+    
+            .sticky-bar::after {
+                content: '›';
+                font-size: 1.2rem;
+                transition: transform var(--transition-speed) ease;
+            }
+    
+            /* Menu de navigation */
+            .navbar {
+                background: var(--secondary-color);
+                width: var(--sidebar-width);
+                height: 100vh;
+                padding: 20px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: all var(--transition-speed) ease;
+                position: relative;
+            }
+    
+            /* Style pour la sidebar réduite */
+            .sidebar-collapsed .navbar {
+                transform: translateX(calc(-100% + var(--stickybar-width)));
+            }
+    
+            .sidebar-collapsed .sticky-bar::after {
+                transform: rotate(180deg);
+            }
+    
+            .sidebar-collapsed .nav-text,
+            .sidebar-collapsed .user-name,
+            .sidebar-collapsed .user-role {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                margin: 0;
+                overflow: hidden;
+                transition: all calc(var(--transition-speed) * 0.8) ease;
+            }
+    
+            .sidebar-collapsed .user-avatar {
+                width: 40px;
+                height: 40px;
+                transition: all var(--transition-speed) ease;
+            }
+    
+            .sidebar-collapsed .logout-btn .nav-text {
+                display: none;
+            }
+    
+            .sidebar-collapsed .logout-btn {
+                justify-content: center;
+                padding: 12px 0;
+            }
+    
+            /* User info */
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 30px;
+                padding: 0 15px;
+                width: 100%;
+            }
+    
+            .user-avatar {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid var(--accent-color);
+                filter: grayscale(100%) brightness(0);
+                transition: all var(--transition-speed) ease;
+            }
+    
+            .user-name,
+            .user-role {
+                color: #000;
+                margin: 8px 0 0;
+                white-space: nowrap;
+                text-align: center;
+                width: 100%;
+                font-weight: 700;
+                transition: all calc(var(--transition-speed) * 0.8) ease;
+            }
+    
+            .user-role {
+                font-size: 0.8em;
+                color: #666;
+                font-weight: 500;
+            }
+    
+            /* Nav items */
+            .nav-items {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+                padding: 0 10px;
+            }
+    
+                /* ... (conservez les autres styles existants) ... */
+            
+                /* Styles améliorés pour les boutons de navigation */
+                .nav-link {
+                    display: flex;
+                    align-items: center;
+                    color: #000;
+                    text-decoration: none;
+                    padding: 12px 16px;
+                    margin: 4px 10px;
+                    border-radius: 6px;
+                    transition: all var(--transition-speed) cubic-bezier(0.25, 0.8, 0.25, 1);
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    white-space: nowrap;
+                    position: relative;
+                    overflow: hidden;
+                }
+            
+                .nav-link:hover {
+                    background-color: var(--hover-color);
+                    transform: translateX(3px);
+                }
+            
+                .nav-link.active {
+                    background: var(--primary-color);
+                    box-shadow: 0 2px 8px rgba(56, 142, 60, 0.2);
+                    color: white;
+                    transform: translateX(3px);
+                }
+            
+                .nav-link.active::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    height: 100%;
+                    width: 3px;
+                    background-color: var(--accent-color);
+                    border-radius: 0 3px 3px 0;
+                }
+            
+                
+            
+                /* Animation subtile au survol */
+                .nav-link:hover .icon-container {
+                    transform: scale(1.05);
+                }
+            
+                .nav-link.active .icon-container {
+                    transform: scale(1.1);
+                    animation: gentlePulse 1.5s infinite;
+                }
+            
+                @keyframes gentlePulse {
+                    0%, 100% { transform: scale(1.1); }
+                    50% { transform: scale(1.15); }
+                }
+            
+                /* Style des icônes */
+                .icon-container {
+                    width: 22px;
+                    height: 22px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform var(--transition-speed) ease;
+                }
+            
+                .nav-link img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    filter: brightness(0) saturate(100%);
+                    transition: filter var(--transition-speed) ease;
+                }
+            
+                .nav-link.active img {
+                    filter: brightness(0) invert(1);
+                }
+            
+                /* Texte des boutons */
+                .nav-text {
+                    margin-left: 14px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all var(--transition-speed) ease;
+                }
+        
+   
+                
+               
+       
+    
+            /* Main content */
+            .main-content {
+                flex-grow: 1;
+                margin-left: calc(var(--sidebar-width) + var(--stickybar-width));
+                padding: 30px;
+                transition: margin-left var(--transition-speed) ease;
+            }
+    
+            .sidebar-collapsed ~ .main-content {
+                margin-left: var(--stickybar-width);
+            }
+    
+            /* Container header */
+            .container-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                position: relative;
+                padding-bottom: 10px;
+            }
+    
+            .container-header::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
+                animation: loadBar 1s ease forwards;
+            }
+    
+            @keyframes loadBar {
+                0% {
+                    width: 0%;
+                    opacity: 0;
+                }
+                100% {
+                    width: 100%;
+                    opacity: 1;
+                }
+            }
+    
+            h2 {
+                color: var(--dark-color);
+                font-weight: 600;
+                margin: 0;
+                font-size: 28px;
+            }
+    
+            /* Ripple effect */
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.3);
+                transform: scale(0);
+                animation: ripple var(--transition-speed) linear;
+                pointer-events: none;
+            }
+    
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+    
+            /* Responsive */
+            @media (max-width: 768px) {
+                .sidebar-container {
+                    transform: translateX(calc(-100% + var(--stickybar-width)));
+                }
+    
+                .sidebar-container.open {
+                    transform: translateX(0);
+                }
+    
+                .main-content {
+                    margin-left: var(--stickybar-width);
+                }
+            }
+            .navbar {
+                overflow-x: auto; /* Permet le défilement horizontal si nécessaire */
+                white-space: nowrap; /* Empêche le retour à la ligne des éléments enfants */
+            }
+
+            
+        </style>
+        
+    </head>
+    <body>
+        <div class="sidebar-container" id="sidebarContainer">
+            <div class="sticky-bar" id="stickyBar"></div>
+            <div class="navbar">
+                <!-- User info -->
+                {% if user.is_authenticated %}
+                <div class="user-info">
+                    <img src="{% static 'images/utilisateur.png' %}" alt="Utilisateur" class="user-avatar">
+                    <p class="user-name">{{ user.username }}</p>
+                    <p class="user-role">{{ user.email }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Navigation items -->
+                <div class="nav-items">
+                    <!-- Accueil -->
+                    <a href="{% url 'Statistique' %}" class="nav-link {% if request.resolver_match.url_name == 'Statistique' %}active{% endif %}" id="home-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/accueil.png' %}" alt="Accueil">
+                        </div>
+                        <span class="nav-text">Accueiladmin</span>
+                    </a>
+                
+           
+               
+                        
+               
+             
+                    
+                    <div class="nav-dropdown {% if request.resolver_match.url_name == 'liste_des_roles' or request.resolver_match.url_name == 'liste_des_utilisateurs' %}open{% endif %}">
+                        <button class="nav-link dropdown-toggle" id="users-toggle">
+                            <div class="icon-container">
+                                <img src="{% static 'images/users.png' %}" alt="Utilisateurs">
+                            </div>
+                            <span class="nav-text">Utilisateurs</span>
+                            <span class="arrow">&#9654;</span>
+                        </button>
+                    
+                        <div class="dropdown-menu" id="users-menu">
+
+
+                            <a href="{% url 'liste_des_utilisateurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_utilisateurs' %}active{% endif %}">
+                                <div class="icon-container">
+                                    <img src="{% static 'images/liste.png' %}" alt="Liste d'Utilisateurs">
+                                </div>
+                                <span class="nav-text">Liste utilisateurs</span>
+                            </a>
+
+                            <a href="{% url 'liste_des_roles' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_roles' %}active{% endif %}">
+                                <div class="icon-container">
+                                    <img src="{% static 'images/roles.png' %}" alt="Permissions">
+                                </div>
+                                <span class="nav-text">Rôles utilisateurs</span>
+                            </a>
+                            
+                        </div>
+
+                        <a href="{% url 'parametre' %}" class="nav-link {% if request.resolver_match.url_name == 'parametre' %}active{% endif %}">
+                            <div class="icon-container">
+                                <img src="{% static 'images/parametre.png' %}" alt="parametre">
+                            </div>
+                            <span class="nav-text">Paramètres</span>
+                        </a>
+                    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('users-toggle');
+        const dropdown = toggle.closest('.nav-dropdown');
+    
+        toggle.addEventListener('click', function () {
+            dropdown.classList.toggle('open');
+        });
+    });
+    
+</script>                    
+
+
+                </div>
+                
+            
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% block content %}
+         
+            {% endblock %}
+        </div>
+
+   <!-- Bande blanche en haut -->
+   <div class="top-white-bar">
+    <div class="top-right-bar">
+
+
+        <!-- Profil (Icône Person) -->
+        <a href="" class="nav-link" id="profile-link">
+            <div class="icon-container" style="position: relative;">
+                <img src="{% static 'images/user.png' %}" alt="Profile">
+            </div>
+        </a>
+
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn" id="logout-btn">
+                <div class="icon-container">
+                    <img src="{% static 'images/logout.png' %}" alt="Déconnexion">
+                </div>
+                <span class="nav-text"></span>
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
+        <style>
+            .top-white-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 40px;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                padding: 0 20px;
+                z-index: 1000;
+            }
+            
+            .top-right-bar {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+         
+            .main-content {
+                margin-top: 30px; /* Assez pour libérer l'espace de la barre blanche */
+            }
+            
+            .navbar {
+                padding-top: 40px;
+            }
+
+            .logout-form {
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .logout-btn {
+                background: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+            
+            .logout-btn .icon-container {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .logout-btn img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                filter: none;
+            }
+            
+            
+        </style>
+   
+    </body>
+    </html>
+
+        
+    <style>
+        .nav-dropdown {
+            width: 100%;
+            position: relative; /* Ajouter cette propriété pour positionner correctement les éléments */
+        }
+    
+        .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+            border: none;
+            background: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            color: inherit;
+            text-align: left;
+        }
+    
+     
+        .arrow {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+    
+        .dropdown-menu {
+            display: none;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+            margin-left: 15px; /* Garder la marge pour les aligner correctement */
+        }
+    
+        .nav-dropdown.open .dropdown-menu {
+            display: flex;
+        }
+    
+        .nav-dropdown.open .arrow {
+            transform: rotate(90deg);
+        }
+    
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarContainer = document.getElementById('sidebarContainer');
+            const stickyBar = document.getElementById('stickyBar');
+            const mainContent = document.querySelector('.main-content');
+
+            // Toggle sidebar
+            function toggleSidebar() {
+                sidebarContainer.classList.toggle('sidebar-collapsed');
+                
+                // Stocker l'état dans localStorage
+                localStorage.setItem('sidebarCollapsed', sidebarContainer.classList.contains('sidebar-collapsed'));
+            }
+
+            // Gestion du clic sur la sticky bar
+            stickyBar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleSidebar();
+            });
+
+            // Fermer la sidebar si on clique à l'extérieur (version mobile)
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768 && !sidebarContainer.contains(e.target)) {
+                    sidebarContainer.classList.remove('open');
+                }
+            });
+
+            // Ripple effect for nav items
+            document.querySelectorAll('.nav-link, .logout-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Ne pas déclencher si c'est un lien
+                    if (e.target.tagName === 'A' || e.target.closest('a')) return;
+                    
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 300);
+                });
+            });
+
+            // Vérifier l'état stocké
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebarContainer.classList.add('sidebar-collapsed');
+            }
+
+            // Adapter pour mobile
+            function handleResize() {
+                if (window.innerWidth <= 768) {
+                    sidebarContainer.classList.add('sidebar-collapsed');
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Appeler au chargement
+        });
+    </script>

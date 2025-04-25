@@ -1,0 +1,288 @@
+{% extends 'base/baseadmin.html' %}
+{% load static %}
+{% load i18n %}  {# Charger i18n pour pouvoir utiliser {% trans %} #}
+
+{% block content %}
+
+<!-- Messages d’alerte -->
+{% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Conteneur principal -->
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title"><i class="fas fa-user-shield"></i> {% trans "Ajouter un rôle" %}</h2>
+
+        <form method="post" action="{% url 'ajouter_role' %}" class="user-form" id="ajouterRoleForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Nom du rôle -->
+            <p>
+                <label for="{{ form.name.id_for_label }}">{% trans "Nom du rôle" %} :</label>
+                {{ form.name }}
+                {% for error in form.name.errors %}
+                    <small class="text-danger">{{ error }}</small>
+                {% endfor %}
+            </p>
+
+            <!-- Permissions -->
+            <p>
+                <label>{% trans "Permissions" %} :</label>
+                <div class="permissions-list">
+                    {% for permission in permissions %}
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="permissions" value="{{ permission.id }}">
+                            <span class="custom-checkbox"></span> {% trans permission.name %}
+                        </label>
+                    {% endfor %}
+                </div>
+            </p>
+
+            <!-- Bouton de soumission -->
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> {% trans "Ajouter le rôle" %}
+                </button>
+                <a href="{% url 'liste_des_roles' %}" class="cancel-btn">
+                    <i class="fas fa-times"></i> {% trans "Annuler" %}
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<style>
+    :root {
+        --primary-color: #388e3c;
+        --primary-dark: #2e7d32;
+        --primary-light: #81c784;
+        --danger-color: #d32f2f;
+        --text-color: #333;
+        --border-color: #e0e0e0;
+        --light-gray: #f5f5f5;
+        --success-color: #43a047;
+    }
+
+    .form-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        background-color: #f1f8e9;
+    }
+
+    .form-card {
+        width: 100%;
+        max-width: 700px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 100, 0, 0.1);
+        padding: 2.5rem;
+        border-top: 4px solid var(--primary-color);
+    }
+
+    .form-title {
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+    }
+
+    .form-title i {
+        margin-right: 12px;
+    }
+
+    .user-form p {
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-form label {
+        font-weight: 600;
+        color: #2e7d32;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .user-form input[type="text"],
+    .user-form input[type="email"],
+    .user-form input[type="tel"],
+    .user-form input[type="password"],
+    .user-form select {
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        background-color: var(--light-gray);
+    }
+
+    .user-form input:focus,
+    .user-form select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.2);
+        outline: none;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .submit-btn {
+        flex: 1;
+        padding: 0.9rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .submit-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+    }
+
+    .cancel-btn {
+        flex: 1;
+        padding: 0.9rem;
+        background: white;
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cancel-btn:hover {
+        background: #ffebee;
+    }
+
+    .form-actions i {
+        margin-right: 8px;
+    }
+
+    .text-danger {
+        color: var(--danger-color);
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+    }
+
+    .alert-danger {
+        background-color: #fbe9e7;
+        border: 1px solid var(--danger-color);
+        color: var(--danger-color);
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+
+    .permissions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+        background: var(--light-gray);
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .checkbox-label input {
+        opacity: 0;
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    .custom-checkbox {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--primary-color);
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 10px;
+        transition: 0.2s;
+        position: relative;
+    }
+
+    .checkbox-label input:checked + .custom-checkbox {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .checkbox-label input:checked + .custom-checkbox::after {
+        content: "✔";
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        position: absolute;
+        left: 3px;
+        top: -1px;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstInput = document.querySelector('input:not([type="hidden"]), select');
+        if (firstInput) firstInput.focus();
+    });
+</script>
+
+{% endblock %}

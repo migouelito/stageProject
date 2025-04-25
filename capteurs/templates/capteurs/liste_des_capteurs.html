@@ -1,0 +1,689 @@
+
+<style>
+ 
+    * {
+        box-sizing: border-box; /* S'assurer que tout est inclus dans la largeur de l'élément */
+    }
+    
+/* ---- Modal global ---- */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto; /* Permet le scroll global si le modal est trop grand */
+    padding: 40px 0;
+}
+
+/* ---- Contenu du Modal ---- */
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;        /* Hauteur max visible */
+    overflow-y: auto;        /* Scroll interne si le contenu dépasse */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ---- Bouton de fermeture ---- */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* ---- Corps du Modal ---- */
+.modal-body {
+    margin: 20px 0;
+    text-align: left;
+}
+
+/* ---- Pied du Modal ---- */
+.modal-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+/* ---- Boutons ---- */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #c82333;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+}
+
+.btn-secondary:hover {
+    background-color: #f8f9fa;
+}
+
+/* ---- Formulaires et Champs ---- */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+select[multiple] {
+    height: 120px;
+}
+
+/* ---- Animation d'apparition ---- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+</style>
+
+<style>
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .container-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 6px;
+        background-color: black;
+        animation: loadBar 1s forwards;
+    }
+    .container-header h1 {
+        font-size: 30px;
+        color: #008000;
+        margin: 0 0 15px 0;
+        padding-left: 0;
+    }
+    
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .users-table th, .users-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .users-table th {
+        background-color: green;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+
+    
+    /* Coins arrondis */
+    .users-table tr:first-child th:first-child {
+        border-top-left-radius: 10px;
+    }
+    
+    .users-table tr:first-child th:last-child {
+        border-top-right-radius: 10px;
+    }
+    
+    .users-table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+    
+    .users-table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+    
+    .users-table tr:hover {
+        background-color: #f9f9f9;
+    }
+ 
+    
+    /* Lignes en bleu */
+    .users-table tr {
+        background-color:white;
+        font-weight: bold;
+    }
+    
+    .users-table tr:hover {
+        background-color: white;
+    }
+    
+    /* Colonne Actions totalement collée à droite */
+    .users-table td:last-child {
+        text-align: right;
+        width: 1%; /* Force la colonne à ne prendre que l'espace des boutons */
+        white-space: nowrap; /* Évite le retour à la ligne */
+    }
+    
+    /* Ajustement des boutons d'actions */
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+    
+    .actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .actions img {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .add-btn {
+        background-color: transparent;
+        color: #008000; /* Texte vert */
+        padding: 8px 16px;
+        border: 2px solid #008000; /* Bordure verte */
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    .add-btn:hover {
+        background-color: #008000; /* Fond vert au survol */
+        color: white; /* Texte blanc au survol */
+    }
+    
+    .add-btn .icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+
+    
+
+    .search-container {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: 10px;
+    }
+    
+    #searchInput {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px 40px 10px 15px; /* Espace à droite pour l'icône */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-weight: bold; /* Texte en gras */
+        color: #000; /* Texte noir */
+        font-size: 15px;
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    
+        background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+    }
+    
+    #searchInput::placeholder {
+        color: #aaa;
+        font-style: italic;
+    }
+    
+    #searchInput:focus {
+        border-color: #008000;
+        box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+    }
+    
+</style>
+
+
+<style>
+ /* Conteneur des messages */
+.container {
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+/* Style général des alertes */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: left;
+    font-weight: bold;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.6s ease-in-out;
+    transition: opacity 0.4s ease-out;
+    color: #fff; /* Texte blanc */
+}
+
+/* Animation d'apparition */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+
+
+
+</style>
+
+   
+
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-header">
+    <h1>Liste des animaux</h1>
+
+     <!-- Barre de recherche centrée -->
+     <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Rechercher un capteur..." onkeyup="searchCapteurs()">
+    </div>
+
+    <script>
+        function searchCapteurs() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll(".users-table tbody tr");
+    
+            rows.forEach(row => {
+                let numeroCapteur = row.cells[0].innerText.toLowerCase();
+                let typeAnimal = row.cells[1].innerText.toLowerCase();
+                let zoneSecurite = row.cells[2].innerText.toLowerCase();
+                
+                // Comparer la recherche avec les 3 colonnes
+                if (numeroCapteur.includes(input) || typeAnimal.includes(input) || zoneSecurite.includes(input)) {
+                    row.style.display = ""; // Afficher la ligne
+                } else {
+                    row.style.display = "none"; // Cacher la ligne
+                }
+            });
+        }
+    </script>
+    
+
+    <a href="#" id="addCapteurBtn" class="add-btn">
+        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un capteur" class="icon"> Ajouter un animal
+    </a>
+    
+    
+</div>
+
+{% if messages %}
+<div class="container mt-3">
+ 
+</div>
+
+{% endif %}
+
+<table class="users-table">
+    <thead>
+        <tr>
+            <th>NUMERO DU DISPOSITIF</th>
+            <th>TYPE D'ANIMAL</th>
+            <th>ZONE DE SECURITE</th>  <!-- Nouvelle colonne pour la zone -->
+            <th>ACTIONS</th> 
+        </tr>
+    </thead>
+    <tbody>
+        {% for capteur in capteurs %}
+            <tr>
+                <td>{{ capteur.identifiant }}</td>
+                <td>{{ capteur.type_animal }}</td>
+                <td>
+                    {% if capteur.zone_securite %}
+                        {{ capteur.zone_securite.nom }}  <!-- Affiche le nom de la zone -->
+                    {% else %}
+                        Pas de zone attribuée
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="javascript:void(0);" class="detail-capteur-btn" data-capteur-id="{{ capteur.id }}">
+                            <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Voir les détails">
+                        </a>
+                        
+                        <a href="#" class="modify-capteur-btn" data-capteur-id="{{ capteur.id }}">
+                            <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
+                        </a>
+                        
+                        <a href="javascript:void(0);" class="delete-btn" data-id="{{ capteur.id}}">
+                            <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">Aucun capteur trouvé.</td>  <!-- La colonne "Actions" compte maintenant 4 colonnes -->
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<!-- Modal unique pour toutes les actions -->
+<div id="actionModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Titre du Modal</h2>
+        <div id="modalBody" class="modal-body">
+            <!-- Contenu dynamique -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
+            <button type="button" class="btn" id="modalCancelBtn">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function init() {
+            const modal = document.getElementById("actionModal");
+            const modalTitle = document.getElementById("modalTitle");
+            const modalBody = document.getElementById("modalBody");
+            const modalActionBtn = document.getElementById("modalActionBtn");
+            const modalCancelBtn = document.getElementById("modalCancelBtn");
+            const closeBtn = document.querySelector(".close");
+    
+            function openModal(title, content, actionText, actionCallback, hideActionBtn = false) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = content;
+                modalActionBtn.textContent = actionText;
+    
+                // Rendre le bouton d'action (comme "Mettre à jour", "Supprimer", etc.) invisible si nécessaire
+                if (hideActionBtn) {
+                    modalActionBtn.style.display = "none";  // Cacher le bouton d'action
+                } else {
+                    modalActionBtn.style.display = "inline";  // Afficher le bouton d'action
+                }
+    
+                modalActionBtn.onclick = function() {
+                    if (actionCallback) actionCallback();
+                    closeModal();
+                };
+    
+                modal.style.display = "flex";
+            }
+    
+            function closeModal() {
+                modal.style.display = "none";
+            }
+    
+            closeBtn.addEventListener("click", closeModal);
+            modalCancelBtn.addEventListener("click", closeModal);
+            window.addEventListener("click", function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+    
+
+            function setupAddCapteurFormHandler() {
+                const form = document.getElementById("addCapteurForm");
+                if (!form) return;
+            
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    
+                    const url = form.action;
+                    const formData = new FormData(form);
+                    
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // Si la réponse indique une erreur, réinjecter le formulaire avec les erreurs
+                            return response.text().then(html => {
+                                document.getElementById("modalBody").innerHTML = html;
+                                setupAddCapteurFormHandler();
+                            });
+                        } else {
+                            // Si tout va bien, fermer le modal et recharger la page
+                            closeModal();
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de l'envoi du formulaire :", error);
+                    });
+                });
+            }
+            document.querySelectorAll(".modify-capteur-btn").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+            
+                    const capteurId = this.getAttribute("data-capteur-id");
+            
+                    fetch(`/capteurs/modifier_capteur/${capteurId}/`)
+                        .then(response => response.text())
+                        .then(html => {
+                            openModal(
+                                "Modifier le capteur",
+                                html,
+                                "Mettre à jour",
+                                null,
+                                true
+                            );
+            
+                            const form = document.querySelector('.form-style');
+                            if (form) {
+                                form.setAttribute('action', `/capteurs/modifier_capteur/${capteurId}/`);
+                                setupUpdateCapteurFormHandler(form);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Erreur lors du chargement du formulaire de modification du capteur :", error);
+                        });
+                });
+            });
+            
+            function setupUpdateCapteurFormHandler(form) {
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+            
+                    const url = form.action;
+                    const formData = new FormData(form);
+            
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(html => {
+                                document.getElementById("modalBody").innerHTML = html;
+                                const newForm = document.querySelector('.form-style');
+                                if (newForm) {
+                                    setupUpdateCapteurFormHandler(newForm);
+                                }
+                            });
+                        } else {
+                            closeModal();
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la soumission du formulaire de modification du capteur :", error);
+                    });
+                });
+            }
+            
+
+            // Fonction pour ajouter un capteur
+            document.getElementById("addCapteurBtn").addEventListener("click", function(e) {
+                e.preventDefault();
+    
+                fetch("{% url 'ajouter_capteur' %}")
+                    .then(response => response.text())
+                    .then(html => {
+                        openModal(
+                            "Ajouter un capteur",
+                            html,
+                            "",
+                            null,
+                            true  // Cacher le bouton d'action pour cette fenêtre
+                        );
+    
+                        setupAddCapteurFormHandler();
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors du chargement du formulaire :", error);
+                        openModal("Erreur", `
+                            <div class="alert alert-danger">
+                                Impossible de charger le formulaire : ${error.message}
+                            </div>
+                        `, "Fermer", closeModal, true); // Cacher le bouton d'action pour cette fenêtre
+                    });
+            });
+    
+            // Fonction pour afficher les détails du capteur
+            document.querySelectorAll(".detail-capteur-btn").forEach(btn => {
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+    
+                    const capteurId = this.getAttribute("data-capteur-id");
+    
+                    fetch(`/capteurs/detail_capteur/${capteurId}/`)
+                        .then(response => response.text())
+                        .then(html => {
+                            openModal(
+                                "Détails du capteur",
+                                html,
+                                "",
+                                null,
+                                true  // Cacher le bouton d'action pour cette fenêtre
+                            );
+                          
+                        })
+                        .catch(error => {
+                            console.error("Erreur lors du chargement des détails du capteur :", error);
+                        });
+                });
+            });
+    
+            // Gestion des boutons de suppression
+            document.addEventListener("click", function(event) {
+                if (event.target.closest(".delete-btn")) {
+                    event.preventDefault();
+    
+                    const btn = event.target.closest(".delete-btn");
+                    const capteurId = btn.getAttribute("data-id");
+    
+                    openModal(
+                        "Confirmation de suppression", 
+                        "Êtes-vous sûr de vouloir supprimer ce capteur ?", 
+                        "Supprimer", 
+                        function() {
+                            fetch(`/supprimer-capteur/${capteurId}/`, {
+                                method: "POST",
+                                headers: {
+                                    "X-CSRFToken": getCSRFToken(),
+                                    "Content-Type": "application/json"
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    btn.closest("tr").remove();
+                                    closeModal();
+                                } else {
+                                    alert("Erreur lors de la suppression.");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors de la suppression :", error);
+                                alert("Impossible de supprimer le capteur.");
+                            });
+                        },
+                        false  // Ne pas cacher le bouton d'action ici (le garder visible)
+                    );
+                }
+            });
+    
+            function getCSRFToken() {
+                return document.querySelector('[name=csrfmiddlewaretoken]').value;
+            }
+        }
+    
+        init();
+    });
+    
+</script>
+
+
+{% endblock %}

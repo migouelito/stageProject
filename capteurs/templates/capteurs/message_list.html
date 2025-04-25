@@ -1,0 +1,550 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+        
+    /* Variables de couleurs spécifiques au système d'alerte zone */
+    #alert-zone-system {
+        --az-primary-color: #008000;
+        --az-primary-light: #e6f2ff;
+        --az-secondary-color: #f2f2f2;
+        --az-text-color: #333;
+        --az-light-text: #666;
+        --az-border-color: #e6e6e6;
+        --az-unread-bg: #f0f8ff;
+        --az-success-color: #34c759;
+        --az-danger-color: #ff3b30;
+        --az-shadow-color: rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--az-text-color);
+    }
+    
+    /* Tous les styles sont préfixés avec #alert-zone-system pour limiter leur portée */
+    #alert-zone-system .az-container-header {
+        background-color: white;
+        padding: 10px 20px; /* Réduction de l'espace horizontal */
+        box-shadow: 0 2px 5px var(--az-shadow-color);
+        border-bottom: 1px solid var(--az-border-color);
+        border-radius: 15px; /* Arrondi des coins */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    
+    #alert-zone-system .az-container-header h1 {
+        font-size: 24px;
+        margin: 0;
+        color: var(--az-primary-color);
+    }
+
+    
+    /* Liste de messages */
+    #alert-zone-system .az-message-container {
+        padding: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    #alert-zone-system .az-message-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    #alert-zone-system .az-message-item {
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+    
+    #alert-zone-system .az-message-card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px var(--az-shadow-color);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    #alert-zone-system .az-message-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px var(--az-shadow-color);
+    }
+    
+    #alert-zone-system .az-message-item.az-unread .az-message-card {
+        border-left: 4px solid var(--az-primary-color);
+        background-color: var(--az-unread-bg);
+    }
+    
+    #alert-zone-system .az-message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--az-border-color);
+    }
+    
+    #alert-zone-system .az-message-sender {
+        display: flex;
+        align-items: center;
+    }
+    
+    #alert-zone-system .az-zone-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    /* Styles pour les types d'alerte */
+    #alert-zone-system .az-zone-badge.az-danger {
+        background-color: var(--az-danger-color);
+        box-shadow: 0 2px 10px rgba(255, 59, 48, 0.3);
+    }
+    
+    #alert-zone-system .az-zone-badge.az-safe {
+        background-color: var(--az-success-color);
+        box-shadow: 0 2px 10px rgba(52, 199, 89, 0.3);
+    }
+    
+    #alert-zone-system .az-zone-badge i {
+        color: white;
+        font-size: 16px;
+    }
+    
+    #alert-zone-system .az-zone-name {
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    #alert-zone-system .az-message-time {
+        color: var(--az-light-text);
+        font-size: 14px;
+    }
+    
+    #alert-zone-system .az-message-content {
+        padding: 20px;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+    
+    #alert-zone-system .az-message-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px 20px;
+        background-color: #fafafa;
+        border-top: 1px solid var(--az-border-color);
+    }
+    
+    #alert-zone-system .az-action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin-left: 10px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+    #alert-zone-system .az-read-button {
+        color: var(--az-primary-color);
+        background-color: var(--az-primary-light);
+        font-weight: bold; /* Texte en gras */
+        border-radius: 25px; /* Bordures arrondies */
+        padding: 8px 16px; /* Un peu de padding pour donner de l'espace */
+    }
+    
+    #alert-zone-system .az-read-button:hover {
+        background-color: rgba(0, 132, 255, 0.2);
+    }
+    
+
+    /* Bouton de sécurité - Vert */
+    #alert-zone-system .az-safe-button {
+        color: white; /* Texte en blanc */
+        background-color: var(--az-success-color); /* Fond vert */
+        font-weight: bold; /* Texte en gras */
+        border-radius: 25px; /* Bordures arrondies */
+        padding: 8px 16px; /* Un peu de padding pour donner de l'espace */
+    }
+    
+    #alert-zone-system .az-safe-button:hover {
+        background-color: rgba(52, 199, 89, 0.8); /* Fond vert plus intense */
+    }
+    
+    
+    #alert-zone-system .az-read-status {
+        display: inline-flex;
+        align-items: center;
+        color: var(--az-success-color);
+        font-size: 14px;
+    }
+    
+    #alert-zone-system .az-read-status i {
+        margin-right: 5px;
+    }
+    
+    #alert-zone-system .az-action-button i {
+        margin-right: 6px;
+    }
+    
+    /* État vide */
+    #alert-zone-system .az-no-messages {
+        padding: 50px 0;
+        text-align: center;
+    }
+    
+    #alert-zone-system .az-empty-state {
+        background-color: white;
+        border-radius: 15px;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 4px 10px var(--az-shadow-color);
+    }
+    
+    #alert-zone-system .az-empty-state i {
+        font-size: 50px;
+        color: #bbb;
+        margin-bottom: 20px;
+    }
+    
+    #alert-zone-system .az-empty-state p {
+        color: var(--az-light-text);
+        font-size: 16px;
+        margin: 0;
+    }
+    
+    /* Modal */
+    #alert-zone-system .az-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+    
+    #alert-zone-system .az-modal-content {
+        background-color: white;
+        margin: 15% auto;
+        max-width: 450px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        animation: az-modalIn 0.3s ease;
+    }
+    
+    @keyframes az-modalIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    #alert-zone-system .az-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid var(--az-border-color);
+    }
+    
+    #alert-zone-system .az-modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+    }
+    
+    #alert-zone-system .az-close {
+        font-size: 24px;
+        color: var(--az-light-text);
+        cursor: pointer;
+    }
+    
+    #alert-zone-system .az-modal-body {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    #alert-zone-system .az-modal-footer {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid var(--az-border-color);
+    }
+    
+    #alert-zone-system .az-btn {
+        padding: 10px 20px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    #alert-zone-system .az-btn-secondary {
+        background-color: #f2f2f2;
+        color: var(--az-text-color);
+    }
+    
+    #alert-zone-system .az-btn-secondary:hover {
+        background-color: #e0e0e0;
+    }
+    
+    #alert-zone-system .az-btn-danger {
+        background-color: var(--az-danger-color);
+        color: white;
+    }
+    
+    #alert-zone-system .az-btn-danger:hover {
+        background-color: #ff1a1a;
+    }
+    
+    /* Adaptations pour mobiles */
+    @media (max-width: 768px) {
+        #alert-zone-system .az-container-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        #alert-zone-system .az-search-container {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        #alert-zone-system .az-message-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        #alert-zone-system .az-message-time {
+            margin-top: 10px;
+            margin-left: 48px;
+        }
+        
+        #alert-zone-system .az-message-footer {
+            flex-direction: column;
+        }
+        
+        #alert-zone-system .az-action-button {
+            margin-left: 0;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        #alert-zone-system .az-action-button:first-child {
+            margin-top: 0;
+        }
+    }
+    .search-container {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: 10px;
+    }
+    
+    #searchInput {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px 40px 10px 15px; /* Espace à droite pour l'icône */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-weight: bold; /* Texte en gras */
+        color: #000; /* Texte noir */
+        font-size: 15px;
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    
+        background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+    }
+    
+    #searchInput::placeholder {
+        color: #aaa;
+        font-style: italic;
+    }
+    
+    #searchInput:focus {
+        border-color: #008000;
+        box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+    }
+    </style>
+
+<div id="alert-zone-system">
+    <div class="az-container-header">
+        <h1>Alerte des zone de pâturage</h1>
+    
+         <!-- Barre de recherche centrée -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
+        </div>
+    </div>
+    
+    <div class="az-message-container">
+        {% if notifications %}
+            <ul class="az-message-list" id="messageList">
+                {% for notification in notifications %}
+                    <li class="az-message-item {% if notification.is_read %}az-read{% else %}az-unread{% endif %}">
+                        <div class="az-message-card">
+                            <div class="az-message-header">
+                                <div class="az-message-sender">
+                                   <!-- Changement de couleur selon le type d'alerte -->
+                                {% if "plus" in notification.corps_message.lower %}
+                                <div class="az-zone-badge az-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                {% else %}
+                                <div class="az-zone-badge az-safe">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                {% endif %}
+
+                                    <span class="az-zone-name">{{ notification.zone.nom }}</span>
+                                </div>
+                                <span class="az-message-time">{{ notification.date_heure|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="az-message-content">
+                                {{ notification.corps_message }}
+                            </div>
+                            <div class="az-message-footer">
+                                {% if notification.is_read %}
+                                    <span class="az-read-status">
+                                        <i class="fas fa-check-double"></i> Lu
+                                    </span>
+                                {% else %}
+                                    <a href="{% url 'marquer_comme_lu' notification.id %}" class="az-action-button az-read-button">
+                                        <i class="fas fa-eye"></i> Marquer comme lu
+                                    </a>
+                                {% endif %}
+                                <a href="javascript:void(0);" class="az-action-button az-delete-button actions" data-id="{{ notification.id }}">
+                                    <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer" class="delete-icon" />
+                                </a>
+                                
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="az-no-messages">
+                <div class="az-empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>Aucune notification reçue pour le moment</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Modal de confirmation -->
+    <div id="actionModal" class="az-modal">
+        <div class="az-modal-content">
+            <div class="az-modal-header">
+                <h2 id="modalTitle">Confirmation de suppression</h2>
+                <span class="az-close">&times;</span>
+            </div>
+            <div id="modalBody" class="az-modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette notification ?</p>
+            </div>
+            <div class="az-modal-footer">
+                <button type="button" class="az-btn az-btn-secondary" id="modalCancelBtn">Annuler</button>
+                <button type="button" class="az-btn az-btn-danger" id="modalActionBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+    
+</div>
+<!-- JS pour la recherche -->
+<script>
+function searchMessages() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const messages = document.querySelectorAll("#alert-zone-system .az-message-item");
+
+    messages.forEach(msg => {
+        const zone = msg.querySelector(".az-zone-name").innerText.toLowerCase();
+        const time = msg.querySelector(".az-message-time").innerText.toLowerCase();
+        const content = msg.querySelector(".az-message-content").innerText.toLowerCase();
+        const match = zone.includes(input) || time.includes(input) || content.includes(input);
+        msg.style.display = match ? "" : "none";
+    });
+}
+
+// Pour l'animation de la recherche
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('active');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('active');
+        });
+    }
+});
+</script>
+
+<!-- JS pour la modale -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButtons = document.querySelectorAll('#alert-zone-system .az-delete-button');
+    const closeButton = document.querySelector('#alert-zone-system .az-close');
+    const cancelButton = document.getElementById('modalCancelBtn');
+    const modal = document.getElementById('actionModal');
+    
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const notificationId = this.getAttribute('data-id');
+            document.getElementById('modalBody').innerHTML = `<p>Êtes-vous sûr de vouloir supprimer cette notification ?</p>`;
+            modal.style.display = 'block';
+            document.getElementById('modalActionBtn').onclick = function() {
+                window.location.href = `/capteurs/delete_message/${notificationId}/`;
+            };
+        });
+    });
+    
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+});
+
+
+</script>
+
+
+{% endblock %}        

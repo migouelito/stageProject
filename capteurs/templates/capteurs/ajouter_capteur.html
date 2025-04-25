@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulaire avec Upload</title>
+    <style>
+        /* Animation de la barre de progression */
+        /* Style pour la section d'upload CSV */
+        .upload-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .upload-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+      
+        
+        /* Styles généraux pour le formulaire */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* Styles pour les champs de saisie */
+        form input, form select, form textarea {
+            padding: 8px 12px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease;
+            width: 100%;
+        }
+        
+        form input:focus, form select:focus, form textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        /* Style pour le bouton de soumission */
+        .btn-success {
+            padding: 10px 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        
+        .file-label {
+            background: none;
+            color: #007bff;
+            font-size: 16px;
+            text-decoration: underline;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            display: inline-block; /* Assure que le label est cliquable */
+        }
+        
+        .file-label:hover {
+            color: #0056b3;
+        }
+        
+        /* Nouveaux styles pour l'affichage du nom de fichier */
+        .file-name {
+            display: block;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #495057;
+            border: 1px dashed #dee2e6;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        
+        .file-name.has-file {
+            background-color: #e8f4ff;
+            border-color: #86b7fe;
+            color: #0a58ca;
+            font-weight: 500;
+            border-style: solid;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    <form method="post" action="{% url 'ajouter_capteur' %}" id="addCapteurForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.management_form }}
+        
+        <div class="capteurs-container">
+            {% for field in form %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button type="submit" class="btn-success">
+            <i class="fas fa-save"></i> Valider
+        </button>
+        
+        <!-- Section pour l'upload de fichier CSV -->
+        <div class="upload-section">
+            <div class="upload-block">
+                <label for="file" class="file-label">
+                    <i class="fas fa-upload"></i> Charger un fichier CSV pour plusieurs données
+                </label>
+                <input type="file" id="file" name="csv_file" class="input-file" accept=".csv">
+             
+            </div>
+        </div>
+    </form>
+    {% endblock %}
+    
+   
+</body>
+</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM chargé");
+        const fileInput = document.getElementById('file');
+        const fileNameDisplay = document.getElementById('file-name');
+        
+        if (fileInput && fileNameDisplay) {
+            console.log("Éléments trouvés");
+            fileInput.addEventListener('change', function() {
+                console.log("Changement détecté");
+                if (this.files && this.files.length > 0) {
+                    console.log("Fichier sélectionné:", this.files[0].name);
+                    fileNameDisplay.textContent = this.files[0].name;
+                    fileNameDisplay.classList.add('has-file');
+                } else {
+                    console.log("Aucun fichier sélectionné");
+                    fileNameDisplay.textContent = 'Aucun fichier sélectionné';
+                    fileNameDisplay.classList.remove('has-file');
+                }
+            });
+        } else {
+            console.error("Éléments non trouvés");
+        }
+    });
+</script>

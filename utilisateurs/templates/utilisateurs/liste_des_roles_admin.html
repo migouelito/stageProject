@@ -1,0 +1,560 @@
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f8f9fa;
+    }
+    
+    /* Header */
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .container-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 6px;
+        background-color: black;
+        animation: loadBar 1s forwards;
+    }
+
+    .container-header h1 {
+        font-size: 30px;
+        color: #008000;
+        margin: 0 0 15px 0;
+        padding-left: 0;
+    }
+    
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    
+    /* Table wrapper pour arrondis */
+    .table-wrapper {
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: white;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    /* Table */
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .users-table th, .users-table td {
+        padding: 14px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+    
+    .users-table th {
+        background-color: #008000;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        
+    }
+    
+    /* Coins arrondis */
+    .users-table tr:first-child th:first-child {
+        border-top-left-radius: 10px;
+        
+    }
+    
+    .users-table tr:first-child th:last-child {
+        border-top-right-radius: 10px;
+    }
+    
+    .users-table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+    
+    .users-table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+    
+    .users-table tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .users-table th:last-child,
+    .users-table td:last-child {
+        text-align: right;
+        padding-right: 20px;
+        
+    }
+    
+    /* Actions */
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .actions a {
+        display: inline-flex;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    
+    .actions a:hover {
+        transform: scale(1.2);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .actions img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+    
+    .add-btn {
+        background-color: transparent;
+        color: #008000; /* Texte vert */
+        padding: 8px 16px;
+        border: 2px solid #008000; /* Bordure verte */
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    .add-btn:hover {
+        background-color: #008000; /* Fond vert au survol */
+        color: white; /* Texte blanc au survol */
+    }
+    
+    .add-btn .icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+    }
+    
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 25px;
+        border-radius: 8px;
+        width: 50%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    
+    .modal-body {
+        margin: 20px 0;
+        text-align: left;
+    }
+    
+    .modal-footer {
+        text-align: right;
+        margin-top: 20px;
+    }
+    
+    /* Boutons */
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn-primary {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #c82333;
+    }
+    
+    .btn-secondary {
+        background-color: white;
+        color: black;
+        border: 1px solid #ccc;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Formulaire */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    select[multiple] {
+        height: 120px;
+    }
+    
+    /* Anim fade in */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+</style>
+
+
+<style>
+   /* Styles du modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contenu du modal */
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+    max-height: 80vh; /* Limite la hauteur du modal */
+    overflow-y: auto; /* Rend le contenu défilable si nécessaire */
+}
+
+/* Bouton de fermeture */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Corps du modal */
+.modal-body {
+    margin: 20px 0;
+    text-align: left;
+    max-height: calc(80vh - 50px); /* Limite la hauteur du corps du modal (en fonction de la hauteur du modal) */
+    overflow-y: auto; /* Rend le contenu défilable */
+}
+
+/* Pied du modal */
+.modal-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+/* Boutons */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Bouton "Confirmer" (Rouge) */
+.btn-primary {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #c82333;
+}
+
+/* Bouton "Annuler" (Blanc avec bordure grise) */
+.btn-secondary {
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+}
+
+.btn-secondary:hover {
+    background-color: #f8f9fa;
+}
+
+/* Formulaires et champs */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+select[multiple] {
+    height: 120px;
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+</style>
+    
+
+{% extends 'base/baseadmin.html' %}
+{% load static %}
+
+{% block content %}
+
+
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
+
+<div class="container-header">
+    <h1>Liste des rôles</h1>
+   
+    <a href="{% url 'ajouter_role' %}" class="add-btn">
+        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un rôle" class="icon"> Ajouter un rôle
+    </a>
+    
+</div>
+
+
+<table class="users-table">
+    <thead>
+        <tr>
+            <th>NOM DU ROLE</th>
+            <th>ACTIONS</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for role in roles %}
+            <tr>
+                <td>{{ role.name }}</td>
+                <td class="actions">
+                    <a href="#" class="detail-btn" data-role-id="{{ role.id }}" data-role-name="{{ role.name }}">
+                        <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Détails">
+                    </a>
+                    
+                    
+                    <a href="{% url 'modifier_role' role.id %}" class="modify-btn" data-role-id="{{ role.id }}" data-role-name="{{ role.name }}">
+                        <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier le rôle">
+                    </a>
+                    
+                    
+                    
+                    <a href="#" class="delete-btn" data-role-id="{{ role.id }}" data-role-name="{{ role.name }}">
+                        <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
+                    </a>
+                    
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">Aucun rôle trouvé.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+<!-- Modal unique pour toutes les actions -->
+<div id="actionModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">Titre du Modal</h2>
+        <div id="modalBody" class="modal-body">
+            <!-- Contenu dynamique -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
+            <button type="button" class="btn" id="modalCancelBtn">Annuler</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Éléments du modal
+        const modal = document.getElementById("actionModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalBody = document.getElementById("modalBody");
+        const modalActionBtn = document.getElementById("modalActionBtn");
+        const modalCancelBtn = document.getElementById("modalCancelBtn");
+        const closeBtn = document.querySelector(".close");
+    
+        // Fonction pour ouvrir le modal
+        function openModal(title, content, actionText, actionCallback) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = content;
+            modalActionBtn.textContent = actionText;
+            
+            // Ne pas fermer automatiquement - la fermeture sera gérée par le callback si besoin
+            modalActionBtn.onclick = function() {
+                if (actionCallback) {
+                    const shouldClose = actionCallback();
+                    // Ne fermer que si le callback retourne explicitement true
+                    if (shouldClose === true) {
+                        closeModal();
+                    }
+                }
+            };
+            
+            modal.style.display = "flex";
+        }
+    
+        // Fonction pour fermer le modal
+        function closeModal() {
+            modal.style.display = "none";
+        }
+    
+// Gestion de l'affichage des détails du rôle
+document.querySelectorAll(".detail-btn").forEach(btn => {
+    btn.addEventListener("click", function(e) {
+        e.preventDefault();
+
+        // Récupère l'ID et le nom du rôle depuis les attributs data
+        const roleId = this.getAttribute("data-role-id");
+        const roleName = this.getAttribute("data-role-name");
+
+        // Charger dynamiquement les détails du rôle
+        fetch(`/roles/detail_role/${roleId}/`)
+            .then(response => response.text())
+            .then(html => {
+                // Ouvrir le modal avec les détails du rôle
+                openModal(
+                    `Détails du rôle : ${roleName}`, // Titre dynamique avec nom du rôle
+                    html,
+                    "Fermer",
+                    closeModal
+                );
+            })
+            .catch(error => {
+                console.error("Erreur lors du chargement des détails du rôle :", error);
+                openModal("Erreur", `
+                    <div class="alert alert-danger">
+                        Impossible de charger les détails : ${error.message}
+                    </div>
+                `, "Fermer", closeModal);
+            });
+    });
+});
+
+
+        // Boutons Supprimer (logique inchangée)
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                e.preventDefault();
+                const roleId = this.getAttribute("data-role-id");
+                const roleName = this.getAttribute("data-role-name");
+    
+                const content = `
+                    <div class="delete-confirmation">
+                        <p>Êtes-vous sûr de vouloir supprimer le rôle <strong>${roleName}</strong> ?</p>
+                        <form id="deleteRoleForm" method="POST">
+                            {% csrf_token %}
+                        </form>
+                    </div>
+                `;
+    
+                openModal(
+                    `Confirmation de suppression `,
+                    content,
+                    "Confirmer",
+                    function() {
+                        document.getElementById("deleteRoleForm").action = `/roles/supprimer_role/${roleId}/`;
+                        document.getElementById("deleteRoleForm").submit();
+                        return true; // Autorise la fermeture après soumission
+                    }
+                );
+            });
+        });
+    
+        // Gestion de la fermeture du modal (pour les boutons de fermeture manuelle)
+        closeBtn?.addEventListener("click", closeModal);
+        modalCancelBtn?.addEventListener("click", closeModal);
+        window.addEventListener("click", function(e) {
+            if (e.target === modal) closeModal();
+        });
+    
+        // Disparition des messages après 3 secondes
+        setTimeout(function() {
+            document.querySelectorAll('.messages .alert').forEach(msg => {
+                msg.style.display = 'none';
+            });
+        }, 3000);
+    });
+    
+</script>
+
+{% endblock %}
+
+
+    

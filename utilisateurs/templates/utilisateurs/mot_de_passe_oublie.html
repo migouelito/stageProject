@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récupération de Mot de Passe</title>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <style>
+       /* Style général */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("{% static 'utilisateurs/images/vache.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Conteneur du formulaire */
+.recovery-container {
+    background-color: rgba(255, 255, 255, 0.95); /* Meilleure lisibilité */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    position: relative;
+    animation: fadeInZoom 0.8s ease-out forwards;
+}
+
+/* Animation d'apparition */
+@keyframes fadeInZoom {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Titre */
+.recovery-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Icône clé */
+.password-icon {
+    font-size: 60px;
+    color: #4CAF50;
+    margin-bottom: 15px;
+}
+
+/* Formulaire */
+.recovery-container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Champs du formulaire */
+.recovery-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* Bouton de soumission */
+.recovery-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Effet au survol du bouton */
+.recovery-container button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+/* Lien de retour */
+.recovery-container .back-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.recovery-container .back-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Message d'erreur */
+.error {
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: fadeInError 0.6s ease-out forwards;
+}
+
+/* Animation des erreurs */
+@keyframes fadeInError {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .recovery-container {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+        
+    </style>
+</head>
+<body>
+    <div class="recovery-container">
+        <div class="password-icon">🔑</div>
+        <h2>Récupérer votre mot de passe</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="error">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                        <p>{{ form.non_field_errors }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div style="width: 100%; text-align: left; margin-bottom: 10px;">
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <button type="submit">Envoyer le lien de réinitialisation</button>
+        </form>
+        
+        <a href="{% url 'login' %}" class="back-link">Retour à la page de connexion</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<style>
+  /* ---- Styles généraux ---- */
+/* ---- Styles généraux ---- */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- Conteneur principal (détails du capteur) ---- */
+.capteur-details {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+  position: relative;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ---- Image correspondant au type d'animal ---- */
+.animal-image {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.animal-image img {
+  width: 100px;
+  height: 100px;
+}
+
+/* ---- Titres ---- */
+.capteur-details h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #007bff;
+}
+
+/* ---- Statuts (Actif/Inactif) ---- */
+.capteur-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.capteur-status.active {
+  background: #28a745;
+  color: white;
+}
+
+.capteur-status.inactive {
+  background: #dc3545;
+  color: white;
+}
+
+/* ---- Animation d'apparition ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Bouton Localiser ---- */
+.btn-localiser {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 25px;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* ---- Image dans le bouton ---- */
+.btn-localiser img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  filter: brightness(0) invert(1); /* Cette ligne rend l'image blanche */
+}
+
+.btn-localiser:hover {
+  background-color: #0056b3;
+  transform: scale(1.05); /* Agrandir légèrement au survol */
+}
+
+.btn-localiser img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+</style>
+
+
+{% load static %}
+{% block content %}
+ 
+  <div class="capteur-details">
+
+    <!-- Image correspondant au type d'animal -->
+    <div class="animal-image">
+      {% if capteur.type_animal == 'boeuf' %}
+          <img src="{% static 'utilisateurs/images/bouef.jpg' %}" alt="Boeuf">
+      {% elif capteur.type_animal == 'Mouton' %}
+          <img src="{% static 'images/mouton.png' %}" alt="Mouton">
+      {% elif capteur.type_animal == 'Âne' %}
+          <img src="{% static 'images/ane.png' %}" alt="Âne">
+      {% else %}
+          <img src="{% static 'images/animal_inconnu.png' %}" alt="Animal Inconnu">
+      {% endif %}
+    </div>
+
+    <table style="margin: 0 auto;">
+      <tr>
+        <th>Identifiant</th>
+        <td>{{ capteur.identifiant }}</td>
+      </tr>
+      <tr>
+        <th>Type d'animal</th>
+        <td>{{ capteur.type_animal }}</td>
+      </tr>
+      <tr>
+        <th>Latitude</th>
+        <td>{{ capteur.latitude }}</td>
+      </tr>
+      <tr>
+        <th>Longitude</th>
+        <td>{{ capteur.longitude }}</td>
+      </tr>
+      <tr>
+        <th>Actif</th>
+        <td>
+          {% if capteur.actif %}
+            <span class="capteur-status active">Oui</span>
+          {% else %}
+            <span class="capteur-status inactive">Non</span>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+    <br>
+
+    <!-- Bouton pour localiser l'animal -->
+    <a href="https://www.google.com/maps?q={{ capteur.latitude }},{{ capteur.longitude }}" 
+       target="_blank" 
+       class="btn-localiser">
+       <img src="{% static 'images/localisation.png' %}" alt="Localiser">
+       Localiser cet animal
+    </a>
+  </div>
+
+{% endblock %}

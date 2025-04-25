@@ -1,0 +1,124 @@
+{% extends 'base/baseadmin.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .container-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background-color: #f4f4f4;
+        border-radius: 8px;
+    }
+
+    .container-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0%;
+        height: 6px;
+        background-color: #000000;
+        animation: loadBar 1s forwards;
+    }
+
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+
+    .chart-container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert {
+        color: red;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="container-header">
+    <h2>Mes statistiques</h2>
+</div>
+
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="chart-container">
+    <canvas id="animalChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Filtrer les animaux avec un nombre de capteurs > 0
+    const labels = [];
+    const data = [];
+
+    {% for animal, count in capteurs_par_animal.items %}
+        {% if count > 0 %}
+            labels.push("{{ animal }}");
+            data.push({{ count }});
+        {% endif %}
+    {% endfor %}
+
+    const ctx = document.getElementById('animalChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nombre de capteurs par animal',
+                data: data,
+                backgroundColor: '#28a745',  // Barres en vert
+                borderColor: '#28a745',  // Bordures en vert
+                borderWidth: 1,
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // Disparition automatique des messages flash
+    const messages = document.querySelectorAll('.messages .alert');
+    messages.forEach(function(message) {
+        setTimeout(function() {
+            message.style.transition = 'opacity 1s';
+            message.style.opacity = 0;
+            setTimeout(() => message.remove(), 1000);
+        }, 2000);
+    });
+});
+</script>
+
+{% endblock %}
