@@ -643,7 +643,7 @@
         <!-- Profil (Icône Person) -->
         <a href="#" class="nav-link" id="profile-link" data-user-id="{{ user.id }}">
             <div class="icon-container" style="position: relative;">
-                <img src="{% static 'images/usr.png' %}" alt="Profile">
+                <img src="{% static 'images/userr.png' %}" alt="Profile">
             </div>
         </a>
         
@@ -788,12 +788,12 @@
                             title: 'Déconnexion ? 😢',
                             text: "Voulez-vous vous déconnecter ?",
                             icon: 'question',
-                            iconColor: isDark ? '#f1c40f' : '#e74c3c',
-                            background: isDark ? '#2c3e50' : '#ffffff',
+                            iconColor: isDark ? '#f1c40f' : '#ff0000',
+                            confirmButtonColor: isDark ? '#3498db' : '#ff0000',
                             color: isDark ? '#ecf0f1' : '#333',
                             showCancelButton: true,
                             confirmButtonColor: isDark ? '#3498db' : '#e74c3c',
-                            cancelButtonColor: '#28a745', // ✅ Vert (Bootstrap "success")
+                            cancelButtonColor: '#008000', 
                             confirmButtonText: 'Oui, déconnecte-moi',
                             cancelButtonText: 'Rester connecté',
                             customClass: {

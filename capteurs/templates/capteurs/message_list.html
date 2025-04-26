@@ -398,88 +398,89 @@
     
          <!-- Barre de recherche centrée -->
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
+            <input type="text" id="searchInput" onkeyup="searchMessages()" placeholder="Rechercher...">
         </div>
     </div>
-    
-    <div class="az-message-container">
-        {% if notifications %}
-            <ul class="az-message-list" id="messageList">
-                {% for notification in notifications %}
-                    <li class="az-message-item {% if notification.is_read %}az-read{% else %}az-unread{% endif %}">
-                        <div class="az-message-card">
-                            <div class="az-message-header">
-                                <div class="az-message-sender">
-                                   <!-- Changement de couleur selon le type d'alerte -->
-                                {% if "plus" in notification.corps_message.lower %}
-                                <div class="az-zone-badge az-danger">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                {% else %}
-                                <div class="az-zone-badge az-safe">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                {% endif %}
 
-                                    <span class="az-zone-name">{{ notification.zone.nom }}</span>
-                                </div>
-                                <span class="az-message-time">{{ notification.date_heure|date:"d/m/Y H:i" }}</span>
+
+<!-- Conteneur des messages -->
+<div class="az-message-container">
+    {% if notifications %}
+        <ul class="az-message-list" id="messageList">
+            {% for notification in notifications %}
+                <li class="az-message-item {% if notification.is_read %}az-read{% else %}az-unread{% endif %}">
+                    <div class="az-message-card">
+                        <div class="az-message-header">
+                            <div class="az-message-sender">
+                               <!-- Changement de couleur selon le type d'alerte -->
+                            {% if "plus" in notification.corps_message.lower %}
+                            <div class="az-zone-badge az-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
                             </div>
-                            <div class="az-message-content">
-                                {{ notification.corps_message }}
+                            {% else %}
+                            <div class="az-zone-badge az-safe">
+                                <i class="fas fa-check"></i>
                             </div>
-                            <div class="az-message-footer">
-                                {% if notification.is_read %}
-                                    <span class="az-read-status">
-                                        <i class="fas fa-check-double"></i> Lu
-                                    </span>
-                                {% else %}
-                                    <a href="{% url 'marquer_comme_lu' notification.id %}" class="az-action-button az-read-button">
-                                        <i class="fas fa-eye"></i> Marquer comme lu
-                                    </a>
-                                {% endif %}
-                                <a href="javascript:void(0);" class="az-action-button az-delete-button actions" data-id="{{ notification.id }}">
-                                    <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer" class="delete-icon" />
-                                </a>
-                                
+                            {% endif %}
+
+                                <span class="az-zone-name">{{ notification.zone.nom }}</span>
                             </div>
+                            <span class="az-message-time">{{ notification.date_heure|date:"d/m/Y H:i" }}</span>
                         </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <div class="az-no-messages">
-                <div class="az-empty-state">
-                    <i class="fas fa-bell-slash"></i>
-                    <p>Aucune notification reçue pour le moment</p>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-    
-    <!-- Modal de confirmation -->
-    <div id="actionModal" class="az-modal">
-        <div class="az-modal-content">
-            <div class="az-modal-header">
-                <h2 id="modalTitle">Confirmation de suppression</h2>
-                <span class="az-close">&times;</span>
-            </div>
-            <div id="modalBody" class="az-modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cette notification ?</p>
-            </div>
-            <div class="az-modal-footer">
-                <button type="button" class="az-btn az-btn-secondary" id="modalCancelBtn">Annuler</button>
-                <button type="button" class="az-btn az-btn-danger" id="modalActionBtn">Supprimer</button>
+                        <div class="az-message-content">
+                            {{ notification.corps_message }}
+                        </div>
+                        <div class="az-message-footer">
+                            {% if notification.is_read %}
+                                <span class="az-read-status">
+                                    <i class="fas fa-check-double"></i> Lu
+                                </span>
+                            {% else %}
+                                <a href="{% url 'marquer_comme_lu' notification.id %}" class="az-action-button az-read-button">
+                                    <i class="fas fa-eye"></i> Marquer comme lu
+                                </a>
+                            {% endif %}
+                            <a href="javascript:void(0);" class="az-action-button az-delete-button actions" data-id="{{ notification.id }}">
+                                <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer" class="delete-icon" />
+                            </a>
+                            
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="az-no-messages">
+            <div class="az-empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <p>Aucune notification reçue pour le moment</p>
             </div>
         </div>
-    </div>
-    
+    {% endif %}
 </div>
-<!-- JS pour la recherche -->
+
+<!-- Modal de confirmation -->
+<div id="actionModal" class="az-modal">
+    <div class="az-modal-content">
+        <div class="az-modal-header">
+            <h2 id="modalTitle">Confirmation de suppression</h2>
+            <span class="az-close">&times;</span>
+        </div>
+        <div id="modalBody" class="az-modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer cette notification ?</p>
+        </div>
+        <div class="az-modal-footer">
+            <button type="button" class="az-btn az-btn-secondary" id="modalCancelBtn">Annuler</button>
+            <button type="button" class="az-btn az-btn-danger" id="modalActionBtn">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Script de recherche -->
 <script>
 function searchMessages() {
     const input = document.getElementById("searchInput").value.toLowerCase();
-    const messages = document.querySelectorAll("#alert-zone-system .az-message-item");
+    const messages = document.querySelectorAll(".az-message-item"); // Correction : sélectionner tous les messages
 
     messages.forEach(msg => {
         const zone = msg.querySelector(".az-zone-name").innerText.toLowerCase();
@@ -489,6 +490,7 @@ function searchMessages() {
         msg.style.display = match ? "" : "none";
     });
 }
+
 
 // Pour l'animation de la recherche
 document.addEventListener('DOMContentLoaded', function() {

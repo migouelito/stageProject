@@ -413,25 +413,6 @@ class ListeDesZones(PermissionRequiredMixin, ListView):
 
 
 
-from django.shortcuts import render, redirect
-from .models import ZoneSecurite
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-def creer_zone(request):
-    if request.method == 'POST':
-        nom = request.POST.get('nom')
-        description = request.POST.get('description')
-        utilisateur_id = request.POST.get('utilisateur')
-        user = User.objects.get(id=utilisateur_id)
-
-        ZoneSecurite.objects.create(nom=nom, description=description, user=user)
-        return redirect('liste_des_zones')
-
-    utilisateurs = User.objects.all()
-    return render(request, 'capteurs/creer_zone.html', {'utilisateurs': utilisateurs})
-
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import ZoneSecurite
@@ -462,6 +443,104 @@ def modifier_zone(request, pk):
         'utilisateurs': utilisateurs
     })
 
+
+from django.shortcuts import render, redirect
+from .models import ZoneSecurite
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+import json
+import json
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import ZoneSecurite, User
+
+@login_required
+def creer_zone(request):
+    # Récupération des utilisateurs liés à l'utilisateur connecté
+    utilisateurs = request.user.get_all_related_users()
+    
+    if request.method == 'POST':
+        try:
+            # Validation des données obligatoires
+            nom = request.POST.get('nom')
+            description = request.POST.get('description')
+            forme = request.POST.get('forme')
+            utilisateur_id = request.POST.get('utilisateur')
+            
+            if not all([nom, description, forme, utilisateur_id]):
+                return JsonResponse({'error': 'Tous les champs obligatoires doivent être remplis'}, status=400)
+            
+            # Vérification que l'utilisateur cible fait bien partie des relations autorisées
+            user = User.objects.get(id=utilisateur_id)
+            if user not in utilisateurs:
+                return JsonResponse({'error': 'Utilisateur non autorisé'}, status=403)
+            
+            zone = ZoneSecurite(
+                nom=nom,
+                description=description,
+                forme=forme,
+                user=user,
+            )
+
+            # Gestion des différentes formes
+            if forme == 'cercle':
+                zone.latitude = request.POST.get('latitude')
+                zone.longitude = request.POST.get('longitude')
+                zone.rayon = request.POST.get('rayon')
+                
+                if None in [zone.latitude, zone.longitude, zone.rayon]:
+                    return JsonResponse({'error': 'Données manquantes pour le cercle'}, status=400)
+
+            elif forme == 'triangle':
+                required_fields = ['coin1_lat', 'coin1_lon', 'coin2_lat', 'coin2_lon', 'coin3_lat', 'coin3_lon']
+                for field in required_fields:
+                    setattr(zone, field, request.POST.get(field))
+                
+                if None in [getattr(zone, f) for f in required_fields]:
+                    return JsonResponse({'error': 'Données manquantes pour le triangle'}, status=400)
+
+            elif forme == 'rectangle':
+                required_fields = ['coin1_lat', 'coin1_lon', 'coin2_lat', 'coin2_lon', 
+                                 'coin3_lat', 'coin3_lon', 'coin4_lat', 'coin4_lon']
+                for field in required_fields:
+                    setattr(zone, field, request.POST.get(field))
+                
+                if None in [getattr(zone, f) for f in required_fields]:
+                    return JsonResponse({'error': 'Données manquantes pour le rectangle'}, status=400)
+
+            elif forme == 'polygon':
+                coins = request.POST.get('coins')
+                if not coins:
+                    return JsonResponse({'error': 'Coordonnées du polygone manquantes'}, status=400)
+                
+                try:
+                    coins_list = json.loads(coins)
+                    if not isinstance(coins_list, list):
+                        return JsonResponse({'error': 'Format des coordonnées invalide'}, status=400)
+                    zone.coins = coins
+                except json.JSONDecodeError:
+                    return JsonResponse({'error': 'Erreur de décodage JSON'}, status=400)
+
+            elif forme == 'marker':
+                zone.latitude = request.POST.get('latitude')
+                zone.longitude = request.POST.get('longitude')
+                if None in [zone.latitude, zone.longitude]:
+                    return JsonResponse({'error': 'Coordonnées du marqueur manquantes'}, status=400)
+
+            else:
+                return JsonResponse({'error': 'Type de forme non supporté'}, status=400)
+
+            zone.save()
+            return redirect('liste_des_zones')
+
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Utilisateur introuvable'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return render(request, 'capteurs/creer_zone.html', {'utilisateurs': utilisateurs})
 
 
 from django.views.decorators.csrf import csrf_exempt

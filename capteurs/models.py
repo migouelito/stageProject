@@ -44,6 +44,11 @@ class ZoneSecurite(models.Model):
     coin4_lat = models.FloatField(null=True, blank=True)  # ✅ Pour rectangle
     coin4_lon = models.FloatField(null=True, blank=True)  # ✅ Pour rectangle
 
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'nom'], name='unique_nom_par_utilisateur')
+        ]
     # Pour les polygones génériques
     coins = models.JSONField(null=True, blank=True)  # Liste [(lat, lon), ...]
     def __str__(self):

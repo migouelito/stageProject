@@ -255,7 +255,7 @@
     }
 
     // Connexion WebSocket pour afficher les positions des capteurs
-    const socket = new WebSocket(`wss://3282-102-180-209-249.ngrok-free.app/ws/positions/?user_id=${userId}`);
+    const socket = new WebSocket(`wss://already-relay-fare-keys.trycloudflare.com/ws/positions/?user_id=${userId}`);
 
     socket.onopen = () => {
         console.log("WebSocket connecté !");

@@ -12,13 +12,16 @@
 <script>
     const userId = "{{ user_id }}";
     console.log('user_id récupéré:', userId);
+    
+    // Déclarer la variable trackerMarkers
+    const trackerMarkers = {};
 
-    const map = L.map('map').setView([0, 0], 2);
+    const map = L.map('map').setView([0, 0], 2); // Position par défaut
+
+    // Définir les tuiles de la carte
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    const trackerMarkers = {};
-    const trackerTimers = {};
-
+    // Fonction pour obtenir l'icône verte
     function getGreenIcon() {
         return new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -30,7 +33,9 @@
         });
     }
 
-    const socket = new WebSocket(`wss://3282-102-180-209-249.ngrok-free.app/ws/positions/?user_id=${userId}`);
+    // Connexion au WebSocket pour récupérer les positions des capteurs
+    // Assurez-vous que cette URL est à jour et correspond à votre serveur actuel
+    const socket = new WebSocket(`wss://already-relay-fare-keys.trycloudflare.com/ws/positions/?user_id=${userId}`);
 
     socket.onopen = function () {
         console.log('WebSocket connecté !');
@@ -40,17 +45,6 @@
         const data = JSON.parse(e.data);
         const trackerId = data.tracker_id || 'default';
         const icon = getGreenIcon();
-
-        if (trackerTimers[trackerId]) {
-            clearTimeout(trackerTimers[trackerId]);
-        }
-
-        trackerTimers[trackerId] = setTimeout(() => {
-            if (trackerMarkers[trackerId]) {
-                map.removeLayer(trackerMarkers[trackerId]);
-                delete trackerMarkers[trackerId];
-            }
-        }, 5000);
 
         if (trackerMarkers[trackerId]) {
             trackerMarkers[trackerId].setLatLng([data.latitude, data.longitude]);
@@ -66,6 +60,9 @@
             marker.bindPopup(`🐄 Bœuf ${trackerId}`, { autoPan: false });
             trackerMarkers[trackerId] = marker;
         }
+
+        // Déplacer la carte vers la position du tracker
+        map.setView([data.latitude, data.longitude], 14); // Zoom amélioré pour plus de détails
     };
 
     socket.onerror = function (error) {
@@ -92,7 +89,6 @@
                 fillOpacity: 0.2
             }).addTo(map).bindPopup(`Zone #${zone.id} (Cercle)`);
         }
-
         else if ((forme === 'rectangle' || forme === 'carre') && zone.coin1_lat) {
             const latlngs = [
                 [zone.coin1_lat, zone.coin1_lon],
@@ -106,7 +102,6 @@
                 fillOpacity: 0.2
             }).addTo(map).bindPopup(`Zone #${zone.id} (${forme})`);
         }
-
         else if (forme === 'triangle' && zone.coin1_lat) {
             const latlngs = [
                 [zone.coin1_lat, zone.coin1_lon],
@@ -119,7 +114,6 @@
                 fillOpacity: 0.2
             }).addTo(map).bindPopup(`Zone #${zone.id} (Triangle)`);
         }
-
         else if (forme === 'polygon' && zone.coins) {
             try {
                 const coords = JSON.parse(zone.coins);
@@ -134,14 +128,81 @@
                 console.error("Erreur de parsing polygon:", e);
             }
         }
-
         else if (forme === 'marker' && zone.latitude && zone.longitude) {
             L.marker([zone.latitude, zone.longitude])
                 .addTo(map)
                 .bindPopup(`Zone #${zone.id} (Point)`);
         }
     });
+
+    // Récupérer la position géographique de l'utilisateur avec une meilleure précision
+    if (navigator.geolocation) {
+        // Options améliorées pour la géolocalisation
+        const options = {
+            enableHighAccuracy: true,  // Utiliser GPS de haute précision si disponible
+            timeout: 10000,            // Attendre jusqu'à 10 secondes
+            maximumAge: 0              // Toujours obtenir une position fraîche
+        };
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            console.log(`Position de l'utilisateur : ${userLat}, ${userLon}`);
+            console.log(`Précision: ${accuracy} mètres`);
+            
+            // Centrer la carte sur la position avec un niveau de zoom approprié
+            map.setView([userLat, userLon], 15);
+            
+            // Ajouter un marqueur pour la position
+            L.marker([userLat, userLon])
+                .addTo(map)
+                .bindPopup("Votre position actuelle");
+                
+            // Ajouter un cercle indiquant la précision
+            L.circle([userLat, userLon], {
+                radius: accuracy,
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2
+            }).addTo(map).bindPopup(`Précision: ±${accuracy}m`);
+            
+        }, function(error) {
+            let errorMessage = "Erreur de géolocalisation: ";
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += "Permission de géolocalisation refusée. Veuillez autoriser l'accès à votre position.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += "La position géographique est indisponible. Vérifiez votre GPS ou connexion réseau.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += "La demande de géolocalisation a expiré. Essayez à nouveau.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage += "Une erreur inconnue est survenue.";
+                    break;
+            }
+            
+            console.error(errorMessage);
+            alert(errorMessage);
+            
+            // Afficher un message sur la carte en cas d'erreur
+            L.popup()
+                .setLatLng(map.getCenter())
+                .setContent(errorMessage)
+                .openOn(map);
+                
+        }, options);
+    } else {
+        const message = "La géolocalisation n'est pas supportée par ce navigateur. Utilisez un navigateur plus récent.";
+        alert(message);
+        console.error(message);
+    }
 </script>
+
 <style>
     .titre h1 {
         font-size: 30px;
@@ -153,7 +214,12 @@
         margin: 0 0 15px 0;
         padding-left: 0;
     }
-   
-        
+    #map {
+        width: 100%;
+        height: 80vh; /* Ajusté pour une meilleure visibilité */
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
 </style>
 {% endblock %}

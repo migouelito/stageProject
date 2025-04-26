@@ -12060,3 +12060,29 @@ Traceback (most recent call last):
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: type object 'Statistiques' has no attribute 'nombre_capteurs_par_animal'
 "GET /statistique/ HTTP/1.1" 500 72343
+Internal Server Error: /zone/creer_zone
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 525, in creer_zone
+    return render(request, 'capteurs/creer_zone.html', {'utilisateurs': utilisateurs})
+                                                                        ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'utilisateurs' where it is not associated with a value
+Internal Server Error: /zone/creer_zone

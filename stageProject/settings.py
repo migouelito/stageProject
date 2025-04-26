@@ -90,8 +90,7 @@ MIDDLEWARE = [
 
 CSRF_TRUSTED_ORIGINS = [
 
-    "https://3282-102-180-209-249.ngrok-free.app"
-    
+ "https://already-relay-fare-keys.trycloudflare.com",  # Ajoute cette URL si tu utilises Cloudflare Tunnel    
 
 ]
 

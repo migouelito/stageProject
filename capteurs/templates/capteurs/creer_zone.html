@@ -1,0 +1,606 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+    <title>Définir la zone de pâturage</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-draw/dist/leaflet.draw.css" />
+    
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .container-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .container-header::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0%; /* Débute à 0% */
+            height: 6px;
+            background-color: black; /* Change la couleur en noir */
+            animation: loadBar 0.5s ease-out forwards; /* Animation plus rapide */
+            border-radius: 4px;
+        }
+        
+        .container-header h1 {
+            font-size: 32px;
+            color: #008000;
+            margin: 0;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes loadBar {
+            0% { width: 0%; }
+            100% { width: 100%; } /* Atteint 100% à la fin */
+        }
+        
+        .btn-valider-header {
+            background: linear-gradient(145deg, #4CAF50, #3d8b40);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-valider-header:hover {
+            background: linear-gradient(145deg, #43a047, #388e3c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        .btn-valider-header:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #map-container {
+            position: relative;
+            height: 550px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            margin: 30px 0;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        #info-forme {
+            font-weight: 600;
+            margin: 15px 0;
+            color: #333;
+            padding: 12px 15px;
+            background-color: #f1f8e9;
+            border-left: 4px solid #8BC34A;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+        
+        .messages {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            border-left: 6px solid #ef5350;
+            color: #b71c1c;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            border-left: 6px solid #66bb6a;
+            color: #1b5e20;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        form label {
+            font-weight: 600;
+            color: #424242;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 15px;
+        }
+        
+        form input[type="text"], form textarea, form select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        form input[type="text"]:focus, form textarea:focus, form select:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .map-controls button {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .map-controls button:hover {
+            background-color: #f5f5f5;
+            border-color: #bbb;
+        }
+        
+        .loading-indicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .leaflet-control-attribution {
+            font-size: 10px;
+        }
+        
+        /* Adaptation pour mobile */
+        @media (max-width: 768px) {
+            .container-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .btn-valider-header {
+                width: 100%;
+                text-align: center;
+            }
+            
+            #map-container {
+                height: 400px;
+            }
+            
+            .form-container {
+                padding: 15px;
+            }
+        }
+        
+    </style>
+
+<div class="page-container">
+    <div class="loading-indicator" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container-header" id="header-bar">
+        <h1>Définissez la zone de pâturage</h1>
+        <button type="submit" form="zoneForm" class="btn-valider-header" id="btnValider">Valider</button>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="form-container">
+        <form method="POST" id="zoneForm">
+            {% csrf_token %}
+            
+            <div class="input-group">
+                <label>Nom :</label>
+                <input type="text" name="nom" required placeholder="Nom de la zone">
+            </div>
+
+            <div class="input-group">
+                <label>Description :</label>
+                <textarea name="description" rows="4" required placeholder="Décrivez cette zone de pâturage"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>Utilisateur :</label>
+                <select name="utilisateur" required>
+                    {% for utilisateur in utilisateurs %}
+                        <option value="{{ utilisateur.id }}">{{ utilisateur.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div id="info-forme">Veuillez dessiner une forme sur la carte.</div>
+
+            <!-- Champs cachés -->
+            <input type="hidden" name="forme" id="forme">
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+            <input type="hidden" name="rayon" id="rayon">
+            <input type="hidden" name="coin1_lat" id="coin1_lat">
+            <input type="hidden" name="coin1_lon" id="coin1_lon">
+            <input type="hidden" name="coin2_lat" id="coin2_lat">
+            <input type="hidden" name="coin2_lon" id="coin2_lon">
+            <input type="hidden" name="coin3_lat" id="coin3_lat">
+            <input type="hidden" name="coin3_lon" id="coin3_lon">
+            <input type="hidden" name="coin4_lat" id="coin4_lat">
+            <input type="hidden" name="coin4_lon" id="coin4_lon">
+            <input type="hidden" name="coins" id="coins">
+        </form>
+    </div>
+
+    <div id="map-container">
+        <div id="map"></div>
+        <div class="map-controls">
+            <button id="btnLocate">Ma position</button>
+            <button id="btnReset">Réinitialiser</button>
+        </div>
+    </div>
+</div>
+
+<!-- Ajout de la police Montserrat -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-draw/dist/leaflet.draw.js"></script>
+
+<script>
+    // Configuration initiale
+    const defaultCoords = [14.6937, -17.4441]; // Dakar, Sénégal par défaut
+    const defaultZoom = 13;
+    
+    // Initialisation de la carte
+    var map = L.map('map').setView(defaultCoords, defaultZoom);
+
+    // Couche de carte principale
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Groupe pour les formes dessinées
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    // Configuration des outils de dessin
+    var drawControl = new L.Control.Draw({
+        edit: { featureGroup: drawnItems },
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                shapeOptions: {
+                    color: '#4CAF50',
+                    fillOpacity: 0.2
+                }
+            },
+            rectangle: {
+                shapeOptions: {
+                    color: '#4CAF50',
+                    fillOpacity: 0.2
+                }
+            },
+            circle: {
+                shapeOptions: {
+                    color: '#4CAF50',
+                    fillOpacity: 0.2
+                }
+            },
+            marker: false,
+            polyline: false,
+            circlemarker: false
+        }
+    });
+    map.addControl(drawControl);
+
+    // Fonction d'initialisation avec géolocalisation
+    function initMap() {
+        // Afficher l'indicateur de chargement
+        document.getElementById('loading').style.display = 'flex';
+        
+        // Vérifier la géolocalisation
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Succès de géolocalisation
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    
+                    // Zoomer sur la position de l'utilisateur
+                    map.setView([userLat, userLng], 13);
+                    
+                    // Rechercher le pays
+                    lookupCountry(userLat, userLng);
+                    
+                    // Cacher l'indicateur de chargement
+                    document.getElementById('loading').style.display = 'none';
+                },
+                function(error) {
+                    // Erreur de géolocalisation, utiliser les coordonnées par défaut
+                    console.log("Erreur de géolocalisation: ", error);
+                    document.getElementById('loading').style.display = 'none';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            console.log("La géolocalisation n'est pas prise en charge par ce navigateur.");
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    // Fonction pour obtenir le pays à partir des coordonnées
+    function lookupCountry(lat, lng) {
+        // Utiliser l'API Nominatim pour la recherche inversée
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.address && data.address.country) {
+                    // Afficher le pays dans le titre de la page
+                    const countryName = data.address.country;
+                    const city = data.address.city || data.address.town || data.address.village || '';
+                    
+                    // Mettre à jour le titre avec le nom du pays/ville
+                    document.getElementById('header-bar').querySelector('h1').innerText = 
+                        `Définissez la zone de pâturage - ${city}, ${countryName}`;
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de la recherche du pays:", error);
+            });
+    }
+    
+    // Bouton pour localiser l'utilisateur
+    document.getElementById('btnLocate').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 15);
+                },
+                function(error) {
+                    alert("Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de confidentialité.");
+                }
+            );
+        } else {
+            alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
+        }
+    });
+    
+    // Bouton pour réinitialiser la vue de la carte
+    document.getElementById('btnReset').addEventListener('click', function() {
+        drawnItems.clearLayers();
+        resetFields();
+        document.getElementById('info-forme').innerText = "Veuillez dessiner une forme sur la carte.";
+    });
+
+    // Gestion des formes dessinées
+    map.on(L.Draw.Event.CREATED, function (event) {
+        drawnItems.clearLayers();
+        var layer = event.layer;
+        drawnItems.addLayer(layer);
+        
+        resetFields();
+        var infoForme = document.getElementById('info-forme');
+        
+        if (layer instanceof L.Circle) {
+            var center = layer.getLatLng();
+            var radius = layer.getRadius();
+            document.getElementById('forme').value = 'cercle';
+            document.getElementById('latitude').value = center.lat;
+            document.getElementById('longitude').value = center.lng;
+            document.getElementById('rayon').value = radius;
+            
+            // Calculer la superficie approximative (en km²)
+            const areaKm = Math.PI * Math.pow(radius/1000, 2);
+            infoForme.innerText = `Forme dessinée : Cercle (Superficie: ${areaKm.toFixed(2)} km²)`;
+        }
+        else if (layer instanceof L.Rectangle) {
+            var bounds = layer.getBounds();
+            var corners = [
+                bounds.getNorthWest(),
+                bounds.getNorthEast(),
+                bounds.getSouthEast(),
+                bounds.getSouthWest()
+            ];
+            document.getElementById('forme').value = 'rectangle';
+            for (var i = 0; i < 4; i++) {
+                document.getElementById('coin' + (i+1) + '_lat').value = corners[i].lat;
+                document.getElementById('coin' + (i+1) + '_lon').value = corners[i].lng;
+            }
+            
+            // Calculer la superficie approximative
+            const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000; // km
+            const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000; // km
+            const areaKm = width * height;
+            
+            infoForme.innerText = `Forme dessinée : Rectangle (Superficie: ${areaKm.toFixed(2)} km²)`;
+        }
+        else if (layer instanceof L.Polygon) {
+            var latlngs = layer.getLatLngs()[0];
+            if (latlngs.length === 4 && isRectangle(latlngs)) {
+                document.getElementById('forme').value = 'rectangle';
+                for (var i = 0; i < 4; i++) {
+                    document.getElementById('coin' + (i+1) + '_lat').value = latlngs[i].lat;
+                    document.getElementById('coin' + (i+1) + '_lon').value = latlngs[i].lng;
+                }
+                
+                // Calculer une superficie approximative pour ce rectangle
+                const bounds = L.latLngBounds(latlngs);
+                const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000; // km
+                const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000; // km
+                const areaKm = width * height;
+                
+                infoForme.innerText = `Forme dessinée : Rectangle (Superficie: ${areaKm.toFixed(2)} km²)`;
+            } else {
+                document.getElementById('forme').value = 'polygon';
+                var coords = [];
+                for (var i = 0; i < latlngs.length; i++) {
+                    coords.push([latlngs[i].lat, latlngs[i].lng]);
+                }
+                document.getElementById('coins').value = JSON.stringify(coords);
+                
+                // Calculer l'aire approximative du polygone
+                const areaKm = calculatePolygonArea(latlngs) / 1000000; // conversion m² en km²
+                
+                infoForme.innerText = `Forme dessinée : Polygone à ${latlngs.length} côtés (Superficie: ${areaKm.toFixed(2)} km²)`;
+            }
+        }
+    });
+
+    // Fonction pour calculer l'aire d'un polygone en mètres carrés
+    function calculatePolygonArea(latlngs) {
+        // Utiliser la formule de l'aire de Gauss (méthode du lacet)
+        let area = 0;
+        const numPoints = latlngs.length;
+        
+        // Convertir les coordonnées en mercator pour un calcul plus précis
+        const projectedPoints = latlngs.map(point => {
+            const y = point.lat * Math.PI / 180;
+            const x = point.lng * Math.PI / 180;
+            return {
+                x: 6378137 * x, // Rayon terrestre * longitude en radians
+                y: 6378137 * Math.log(Math.tan(Math.PI/4 + y/2))
+            };
+        });
+        
+        for (let i = 0; i < numPoints; i++) {
+            const j = (i + 1) % numPoints;
+            area += projectedPoints[i].x * projectedPoints[j].y;
+            area -= projectedPoints[j].x * projectedPoints[i].y;
+        }
+        
+        return Math.abs(area) / 2;
+    }
+
+    function isRectangle(latlngs) {
+        if (latlngs.length !== 4) return false;
+        var lat1 = latlngs[0].lat.toFixed(6);
+        var lat2 = latlngs[1].lat.toFixed(6);
+        var lat3 = latlngs[2].lat.toFixed(6);
+        var lat4 = latlngs[3].lat.toFixed(6);
+        var lng1 = latlngs[0].lng.toFixed(6);
+        var lng2 = latlngs[1].lng.toFixed(6);
+        var lng3 = latlngs[2].lng.toFixed(6);
+        var lng4 = latlngs[3].lng.toFixed(6);
+        return ((lat1 === lat2 && lat3 === lat4 && lng1 === lng4 && lng2 === lng3) ||
+                (lat1 === lat4 && lat2 === lat3 && lng1 === lng2 && lng3 === lng4));
+    }
+
+    function resetFields() {
+        document.getElementById('forme').value = '';
+        document.getElementById('latitude').value = '';
+        document.getElementById('longitude').value = '';
+        document.getElementById('rayon').value = '';
+        document.getElementById('coin1_lat').value = '';
+        document.getElementById('coin1_lon').value = '';
+        document.getElementById('coin2_lat').value = '';
+        document.getElementById('coin2_lon').value = '';
+        document.getElementById('coin3_lat').value = '';
+        document.getElementById('coin3_lon').value = '';
+        document.getElementById('coin4_lat').value = '';
+        document.getElementById('coin4_lon').value = '';
+        document.getElementById('coins').value = '';
+    }
+
+    document.getElementById('zoneForm').addEventListener('submit', function(e) {
+        if (document.getElementById('forme').value === '') {
+            e.preventDefault();
+            alert('Veuillez dessiner une forme sur la carte avant de soumettre le formulaire.');
+        } else {
+            // Afficher l'indicateur de chargement pendant la soumission
+            document.getElementById('loading').style.display = 'flex';
+        }
+    });
+
+    // Initialiser la carte avec géolocalisation au chargement
+    window.addEventListener('load', initMap);
+</script>
+
+{% endblock %}
