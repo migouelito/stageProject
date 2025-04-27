@@ -29,6 +29,7 @@ class ZoneSecurite(models.Model):
     forme = models.CharField(max_length=10, choices=FORMES_CHOICES, default='cercle')
     is_pred = models.BooleanField(default=True)  # ✅ nouvelle colonne ajoutée
     is_zone = models.BooleanField(default=True)
+    active_securite=models.BooleanField(default=False)
     # Pour le cercle
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -130,7 +131,8 @@ class Capteur(models.Model):
     last_seen = models.DateTimeField(null=True, blank=True)  # ⏱️ champ ajouté ici
     is_zone = models.BooleanField(default=True)
     actif = models.BooleanField(default=True)
-    zone_securite = models.ForeignKey(ZoneSecurite, on_delete=models.CASCADE, null=True, blank=True)
+    zone_securite = models.ForeignKey(ZoneSecurite, on_delete=models.SET_NULL, null=True, blank=True)
+
 
     class Meta:
         unique_together = ('user', 'identifiant')

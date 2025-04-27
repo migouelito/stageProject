@@ -87,11 +87,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# settings.py
+MY_GLOBAL_VARIABLE = "mia-julia-pilot-israeli.trycloudflare.com"
 
 CSRF_TRUSTED_ORIGINS = [
-
- "https://already-relay-fare-keys.trycloudflare.com",  # Ajoute cette URL si tu utilises Cloudflare Tunnel    
-
+    f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct
 ]
 
 
@@ -128,6 +128,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                               # Ajoute ton context processor personnalisé ici
+                'capteurs.variables.global_variables',  # Remplace 'capteur' par le nom exact de ton app
             ],
         },
     },

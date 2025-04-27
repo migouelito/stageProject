@@ -35,7 +35,7 @@
 
     // Connexion au WebSocket pour récupérer les positions des capteurs
     // Assurez-vous que cette URL est à jour et correspond à votre serveur actuel
-    const socket = new WebSocket(`wss://already-relay-fare-keys.trycloudflare.com/ws/positions/?user_id=${userId}`);
+    const socket = new WebSocket(`wss://{{ MY_GLOBAL_VARIABLE }}/ws/positions/?user_id=${userId}`);
 
     socket.onopen = function () {
         console.log('WebSocket connecté !');

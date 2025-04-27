@@ -310,45 +310,6 @@ class MarquerCommeLuView(View):
 
 #Zonne de securite
 
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
-from .models import ZoneSecurite
-
-class ZoneSecuriteView(ListView):
-    model = ZoneSecurite
-    template_name = 'capteurs/zonesecurite_list.html'
-    context_object_name = 'zones'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user_id'] = self.kwargs['user_id']
-        context['zone_id'] = self.kwargs['zone_id']
-        
-        zone = get_object_or_404(ZoneSecurite, pk=context['zone_id'])
-        context['zone'] = zone
-
-        # Sérialisation des données de la zone
-        zone_data = {
-            'forme': zone.forme,
-            'latitude': float(zone.latitude) if zone.latitude else None,
-            'longitude': float(zone.longitude) if zone.longitude else None,
-            'rayon': float(zone.rayon) if zone.rayon else None,
-            'coin1_lat': float(zone.coin1_lat) if zone.coin1_lat else None,
-            'coin1_lon': float(zone.coin1_lon) if zone.coin1_lon else None,
-            'coin2_lat': float(zone.coin2_lat) if zone.coin2_lat else None,
-            'coin2_lon': float(zone.coin2_lon) if zone.coin2_lon else None,
-            'coin3_lat': float(zone.coin3_lat) if zone.coin3_lat else None,
-            'coin3_lon': float(zone.coin3_lon) if zone.coin3_lon else None,
-            'coin4_lat': float(zone.coin4_lat) if zone.coin4_lat else None,
-            'coin4_lon': float(zone.coin4_lon) if zone.coin4_lon else None,
-            'coins': zone.coins if isinstance(zone.coins, (list, dict)) else json.loads(zone.coins) if zone.coins else []
-        }
-
-        # Convertir en JSON pour l'utiliser dans le template
-        context['zone_data_json'] = json.dumps(zone_data)
-
-        return context
-
 
 
 from django.shortcuts import render
@@ -442,6 +403,64 @@ def modifier_zone(request, pk):
         'zone': zone,
         'utilisateurs': utilisateurs
     })
+
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
+from .models import ZoneSecurite
+
+class ZoneSecuriteView(ListView):
+    model = ZoneSecurite
+    template_name = 'capteurs/modifier_zone.html'
+    context_object_name = 'zones'
+
+
+
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
+from .models import ZoneSecurite, User
+import json
+
+class ZoneSecuriteView(ListView):
+    model = ZoneSecurite
+    template_name = 'capteurs/modifier_zone.html'
+    context_object_name = 'zones'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_id'] = self.kwargs['user_id']
+        context['zone_id'] = self.kwargs['zone_id']
+        
+        # Récupération de la zone spécifique
+        zone = get_object_or_404(ZoneSecurite, pk=context['zone_id'])
+        context['zone'] = zone
+
+        # Sérialisation des données de la zone
+        zone_data = {
+            'forme': zone.forme,
+            'latitude': float(zone.latitude) if zone.latitude else None,
+            'longitude': float(zone.longitude) if zone.longitude else None,
+            'rayon': float(zone.rayon) if zone.rayon else None,
+            'coin1_lat': float(zone.coin1_lat) if zone.coin1_lat else None,
+            'coin1_lon': float(zone.coin1_lon) if zone.coin1_lon else None,
+            'coin2_lat': float(zone.coin2_lat) if zone.coin2_lat else None,
+            'coin2_lon': float(zone.coin2_lon) if zone.coin2_lon else None,
+            'coin3_lat': float(zone.coin3_lat) if zone.coin3_lat else None,
+            'coin3_lon': float(zone.coin3_lon) if zone.coin3_lon else None,
+            'coin4_lat': float(zone.coin4_lat) if zone.coin4_lat else None,
+            'coin4_lon': float(zone.coin4_lon) if zone.coin4_lon else None,
+            'coins': zone.coins if isinstance(zone.coins, (list, dict)) else json.loads(zone.coins) if zone.coins else []
+        }
+
+        # Convertir en JSON pour l'utiliser dans le template
+        context['zone_data_json'] = json.dumps(zone_data)
+
+        # Récupérer la liste des utilisateurs liés à la zone (ajuster selon ton modèle)
+        utilisateurs = self.request.user.get_all_related_users()
+        context['utilisateurs'] = utilisateurs
+
+        return context
+
+
 
 
 from django.shortcuts import render, redirect
@@ -558,12 +577,28 @@ def update_position(request, zone_id):
             
             # Déboguer les données reçues
             print("Données reçues:", data)
-            
+
+            # Validation des champs du formulaire
+            nom = data.get('nom')
+            description = data.get('description')
+            user_id = data.get('user')
             forme = data.get('forme')
-            if not forme:
-                return JsonResponse({'error': 'Forme manquante'}, status=400)
-            
-            # Réinitialiser les anciennes coordonnées et données de dimensions
+
+            if not nom or not description or not user_id or not forme:
+                return JsonResponse({'error': 'Champs manquants'}, status=400)
+
+            # Mettre à jour les informations générales de la zone
+            zone.nom = nom
+            zone.description = description
+            zone.user_id = user_id
+            zone.forme = forme
+
+            # Nouveau : Mise à jour du statut sécurité
+            active_securite = data.get('active_securite')
+            if active_securite is not None:
+                zone.active_securite = active_securite in ['True', True, 'true', 1]
+
+            # Réinitialiser les anciennes coordonnées
             zone.latitude = None
             zone.longitude = None
             zone.rayon = None
@@ -575,11 +610,9 @@ def update_position(request, zone_id):
             zone.coin3_lon = None
             zone.coin4_lat = None
             zone.coin4_lon = None
-            zone.coins = None  # Si vous avez des données en JSON pour les polygones
+            zone.coins = None
 
             # Mise à jour en fonction de la forme
-            zone.forme = forme
-            
             if forme == 'cercle':
                 zone.latitude = data.get('latitude')
                 zone.longitude = data.get('longitude')
@@ -591,17 +624,7 @@ def update_position(request, zone_id):
                 zone.coin2_lon = data.get('coin2_lon')
                 zone.coin3_lat = data.get('coin3_lat')
                 zone.coin3_lon = data.get('coin3_lon')
-            elif forme == 'carre':
-                # Le carré est traité comme un rectangle avec 4 coins
-                zone.coin1_lat = data.get('coin1_lat')
-                zone.coin1_lon = data.get('coin1_lon')
-                zone.coin2_lat = data.get('coin2_lat')
-                zone.coin2_lon = data.get('coin2_lon')
-                zone.coin3_lat = data.get('coin3_lat')
-                zone.coin3_lon = data.get('coin3_lon')
-                zone.coin4_lat = data.get('coin4_lat')
-                zone.coin4_lon = data.get('coin4_lon')
-            elif forme == 'rectangle':
+            elif forme == 'carre' or forme == 'rectangle':
                 zone.coin1_lat = data.get('coin1_lat')
                 zone.coin1_lon = data.get('coin1_lon')
                 zone.coin2_lat = data.get('coin2_lat')
@@ -611,7 +634,6 @@ def update_position(request, zone_id):
                 zone.coin4_lat = data.get('coin4_lat')
                 zone.coin4_lon = data.get('coin4_lon')
             elif forme == 'polygon' or forme == 'polyline':
-                # Assurez-vous que le champ 'coins' est un champ JSON ou TextField dans votre modèle
                 zone.coins = json.dumps(data.get('coins'))
             elif forme == 'marker':
                 zone.latitude = data.get('latitude')
@@ -624,7 +646,6 @@ def update_position(request, zone_id):
         except Exception as e:
             return JsonResponse({'error': f'Erreur: {str(e)}'}, status=500)
     return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
-
 
 
 @login_required

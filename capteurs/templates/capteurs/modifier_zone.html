@@ -1,6 +1,6 @@
-
 <style>
     * { box-sizing: border-box; }
+    
     .container-header {
         display: flex;
         justify-content: space-between;
@@ -8,6 +8,7 @@
         margin-bottom: 20px;
         position: relative;
     }
+
     .container-header::before {
         content: '';
         position: absolute;
@@ -25,26 +26,67 @@
         margin: 0 0 15px 0;
         padding-left: 0;
     }
+
     @keyframes loadBar {
         0% { width: 0%; }
         100% { width: 100%; }
     }
 
-    #map {
-        width: 100%;
-        height: 100vh;
-        z-index: 1;
+    .form-container {
+        background-color: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
     }
 
-    .leaflet-popup-content h4 { margin: 5px 0; color: #2c3e50; }
-    .leaflet-popup-content p { margin: 5px 0; }
-    .leaflet-popup-content strong { color: #2c3e50; }
+    .form-container h2 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    form label {
+        font-weight: 600;
+        color: #424242;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 15px;
+    }
+
+    form input[type="text"], form textarea, form select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+
+    form input[type="text"]:focus, form textarea:focus, form select:focus {
+        border-color: #4CAF50;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+
+    form textarea {
+        min-height: 100px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+    }
 
     .btn-action {
         background-color: #4CAF50;
         color: white;
         padding: 10px 20px;
-        margin-left: 10px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
@@ -64,20 +106,63 @@
     .btn-secondary:hover {
         background-color: #c0392b;
     }
+    #map {
+        height: 100%;
+        width: 100%;
+    }
+    
 </style>
-
 
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block content %}
-<div class="container-header" id="header-bar">
-    <h1>Définissez la zone de pâturage</h1>
+{% block content %}<div class="container-header" id="header-bar">
+    
+    <h1>Modifier la zone forme de pâturage</h1>
     <div>
-        <button class="btn-action">Enregistrer position</button>
-        <button class="btn-action btn-secondary">Supprimer position</button>
+        <button class="btn-action">Valider</button>
     </div>
 </div>
+
+<!-- Formulaire de saisie -->
+<div class="form-container">
+    <form method="POST" id="zone-form">
+        {% csrf_token %}
+        
+        <div class="input-group">
+            <label for="zone-nom">Nom de la zone</label>
+            <input type="text" id="zone-nom" name="nom" value="{{ zone.nom }}" placeholder="Entrez le nom de la zone">
+        </div>
+    
+        <div class="input-group">
+            <label for="zone-utilisateur">Utilisateur</label>
+            <select id="zone-utilisateur" name="user">
+                {% for utilisateur in utilisateurs %}
+                    <option value="{{ utilisateur.id }}" {% if utilisateur.id == zone.user.id %}selected{% endif %}>{{ utilisateur.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <div class="input-group">
+            <label for="zone-description">Description de la zone</label>
+            <textarea id="zone-description" name="description" placeholder="Décrivez la zone de pâturage">{{ zone.description }}</textarea>
+        </div>
+    
+        <div class="input-group">
+            <label for="zone-active-securite">Statut de sécurité</label>
+            <select id="zone-active-securite" name="active_securite">
+                <option value="True" {% if zone.active_securite %}selected{% endif %}>Activée</option>
+                <option value="False" {% if not zone.active_securite %}selected{% endif %}>Désactivée</option>
+            </select>
+        </div>
+        
+    </form>
+    
+</div>
+
+<div id="map"></div>
+
+
 
 <div id="map"></div>
 
@@ -94,7 +179,7 @@
     // Données de la zone (JSON) passées par Django
     const zoneData = JSON.parse("{{ zone_data_json|escapejs }}");
 
-    const map = L.map('map').setView([0, 0], 2);
+    const map = L.map('map').setView([0, 0], 2);  // Centrage initial de la carte
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     const drawnItems = new L.FeatureGroup();
@@ -123,26 +208,42 @@
     });
     map.addControl(drawControl);
 
-    // Dessiner la zone existante si des données sont disponibles
-    if (zoneData) {
-        if (zoneData.forme === 'cercle') {
-            const circle = L.circle([zoneData.latitude, zoneData.longitude], {
-                color: 'blue',
-                radius: zoneData.rayon
-            }).addTo(drawnItems);
-        } else if (zoneData.forme === 'rectangle' || zoneData.forme === 'carre') {
-            const latlngs = [
-                [zoneData.coin1_lat, zoneData.coin1_lon],
-                [zoneData.coin2_lat, zoneData.coin2_lon],
-                [zoneData.coin3_lat, zoneData.coin3_lon],
-                [zoneData.coin4_lat, zoneData.coin4_lon]
-            ];
-            const rectangle = L.polygon(latlngs, { color: 'green' }).addTo(drawnItems);
-        } else if (zoneData.forme === 'polygon' || zoneData.forme === 'polyline') {
-            const latlngs = zoneData.coins;
-            const polygon = L.polygon(latlngs, { color: 'red' }).addTo(drawnItems);
-        }
+// Dessiner la zone existante si des données sont disponibles
+if (zoneData) {
+    if (zoneData.forme === 'cercle') {
+        const circle = L.circle([zoneData.latitude, zoneData.longitude], {
+            color: 'blue',
+            radius: zoneData.rayon
+        }).addTo(drawnItems);
+
+        // Utiliser fitBounds pour ajuster la vue en fonction du rayon du cercle
+        map.fitBounds(circle.getBounds());  // Ajuster la vue pour le cercle
+    } else if (zoneData.forme === 'rectangle' || zoneData.forme === 'carre') {
+        const latlngs = [
+            [zoneData.coin1_lat, zoneData.coin1_lon],
+            [zoneData.coin2_lat, zoneData.coin2_lon],
+            [zoneData.coin3_lat, zoneData.coin3_lon],
+            [zoneData.coin4_lat, zoneData.coin4_lon]
+        ];
+        const rectangle = L.polygon(latlngs, { color: 'green' }).addTo(drawnItems);
+        map.fitBounds(rectangle.getBounds());  // Ajuster la vue pour la zone
+    } else if (zoneData.forme === 'polygon' || zoneData.forme === 'polyline') {
+        const latlngs = zoneData.coins;
+        const polygon = L.polygon(latlngs, { color: 'red' }).addTo(drawnItems);
+        map.fitBounds(polygon.getBounds());  // Ajuster la vue pour la zone
     }
+} else {
+    // Si aucune zone n'est définie, centrer sur le pays de l'utilisateur
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const userLatitude = position.coords.latitude;
+        const userLongitude = position.coords.longitude;
+        map.setView([userLatitude, userLongitude], 6);  // Zoom sur la localisation de l'utilisateur
+    }, function(error) {
+        // Si la géolocalisation échoue, centrer sur une position par défaut
+        map.setView([48.8566, 2.3522], 5);  // Par défaut, centrer sur Paris
+    });
+}
+
 
     // Fonction pour détecter si un rectangle est un carré
     function isSquare(latlngs) {
@@ -211,22 +312,37 @@
 
         return drawingData;
     }
-
     document.querySelector('.btn-action').addEventListener('click', () => {
         const drawingData = getDrawingData();
-
+    
         if (!drawingData) {
             alert("Aucune zone dessinée !");
             return;
         }
-
+    
+        // Collecte des données du formulaire
+        const nom = document.getElementById('zone-nom').value;
+        const description = document.getElementById('zone-description').value;
+        const user = document.getElementById('zone-utilisateur').value;
+        const active_securite = document.getElementById('zone-active-securite').value; // ✅ Nouveau !
+    
+        // Fusionner les données géométriques et du formulaire
+        const formData = {
+            nom: nom,
+            description: description,
+            user: user,
+            active_securite: active_securite, // ✅ Ajouter le statut ici
+            forme: drawingData.forme,
+            ...drawingData  // Ajouter les données de la forme géométrique
+        };
+    
         fetch(`/zones/updateposition/${zoneId}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}',
             },
-            body: JSON.stringify(drawingData)
+            body: JSON.stringify(formData)
         })
         .then(response => response.json())
         .then(data => {
@@ -241,6 +357,8 @@
             alert("Erreur de communication avec le serveur.");
         });
     });
+    
+    
 
     // Icône verte pour les capteurs
     function getGreenIcon() {
@@ -255,7 +373,7 @@
     }
 
     // Connexion WebSocket pour afficher les positions des capteurs
-    const socket = new WebSocket(`wss://already-relay-fare-keys.trycloudflare.com/ws/positions/?user_id=${userId}`);
+    const socket = new WebSocket(`wss://{{ MY_GLOBAL_VARIABLE }}/ws/positions/?user_id=${userId}`);
 
     socket.onopen = () => {
         console.log("WebSocket connecté !");

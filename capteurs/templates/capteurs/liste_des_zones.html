@@ -285,6 +285,7 @@
                 <th>Nom de la zone</th>
                 <th>Description</th>
                 <th>Utilisateur</th>
+                <th>Etat de la secuité</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -294,6 +295,20 @@
                     <td>{{ zone.nom }}</td>
                     <td>{{ zone.description }}</td>
                     <td>{{ zone.user.username }}</td>
+                    <td>
+                        {% if zone.active_securite %}
+                            <span style="display: flex; align-items: center;">
+                                <span style="width: 30px; height: 30px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+                                Activée
+                            </span>
+                        {% else %}
+                            <span style="display: flex; align-items: center;">
+                                <span style="width:30px; height: 30px; background-color: #e74c3c; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+                                Désactivée
+                            </span>
+                        {% endif %}
+                    </td>
+                    
                     <td>
                         <div class="actions">
                             <!-- Premier bouton : Passer l'ID de la zone et de l'utilisateur dans l'URL ou dans un callback -->
