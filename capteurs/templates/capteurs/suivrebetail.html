@@ -1,7 +1,56 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<h1 class="titre">Suivez en temps réel votre bétail</h1>
+<style>
+  
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        position: relative;
+        flex-wrap: wrap;
+    }
+
+    .container-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-color: black;
+        animation: loadBar 1s forwards;
+
+    }
+
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    
+    .container-header h1 {
+        font-size: 30px;
+        color: #008000;
+        margin: 0 0 15px 0;
+        padding-left: 0;
+    }
+
+    /* Carte Leaflet */
+    #map {
+        height: calc(100vh - 100px);  /* Enlève la hauteur de l'en-tête */
+        width: 100%;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container-header">
+    <h1>Suivez en temps réel votre bétail</h1>
+    <!-- Barre de chargement juste en dessous du titre -->
+</div>
 
 <div id="map" style="width: 100%; height: 500px;"></div>
 
@@ -12,16 +61,13 @@
 <script>
     const userId = "{{ user_id }}";
     console.log('user_id récupéré:', userId);
-    
-    // Déclarer la variable trackerMarkers
-    const trackerMarkers = {};
 
+    const trackerMarkers = {};
     const map = L.map('map').setView([0, 0], 2); // Position par défaut
 
     // Définir les tuiles de la carte
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Fonction pour obtenir l'icône verte
     function getGreenIcon() {
         return new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -33,12 +79,12 @@
         });
     }
 
-    // Connexion au WebSocket pour récupérer les positions des capteurs
-    // Assurez-vous que cette URL est à jour et correspond à votre serveur actuel
     const socket = new WebSocket(`wss://{{ MY_GLOBAL_VARIABLE }}/ws/positions/?user_id=${userId}`);
 
     socket.onopen = function () {
         console.log('WebSocket connecté !');
+        // Augmenter la barre de chargement à 100% dès que WebSocket est connecté
+        document.querySelector('.load-bar').style.width = '100%'; 
     };
 
     socket.onmessage = function (e) {
@@ -61,8 +107,8 @@
             trackerMarkers[trackerId] = marker;
         }
 
-        // Déplacer la carte vers la position du tracker
-        map.setView([data.latitude, data.longitude], 14); // Zoom amélioré pour plus de détails
+        // Commenté pour éviter de forcer le zoom
+        // map.setView([data.latitude, data.longitude], 14); 
     };
 
     socket.onerror = function (error) {
@@ -76,150 +122,53 @@
     // ----------------------------
     // Affichage des zones de sécurité
     // ----------------------------
-
-    const zonesData = JSON.parse(`{{ zones_data_json|escapejs }}`);
+    const zonesData = JSON.parse('{{ zones_data_json|escapejs }}');
 
     zonesData.forEach(zone => {
         const forme = zone.forme;
+        console.log('Traitement de la zone #', zone.id, zone);  // Debug log pour vérifier les données
 
-        if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
-            L.circle([zone.latitude, zone.longitude], {
-                radius: zone.rayon,
-                color: 'blue',
-                fillOpacity: 0.2
-            }).addTo(map).bindPopup(`Zone #${zone.id} (Cercle)`);
-        }
-        else if ((forme === 'rectangle' || forme === 'carre') && zone.coin1_lat) {
-            const latlngs = [
-                [zone.coin1_lat, zone.coin1_lon],
-                [zone.coin2_lat, zone.coin2_lon],
-                [zone.coin3_lat, zone.coin3_lon],
-                [zone.coin4_lat, zone.coin4_lon],
-                [zone.coin1_lat, zone.coin1_lon]
-            ];
-            L.polygon(latlngs, {
-                color: 'orange',
-                fillOpacity: 0.2
-            }).addTo(map).bindPopup(`Zone #${zone.id} (${forme})`);
-        }
-        else if (forme === 'triangle' && zone.coin1_lat) {
-            const latlngs = [
-                [zone.coin1_lat, zone.coin1_lon],
-                [zone.coin2_lat, zone.coin2_lon],
-                [zone.coin3_lat, zone.coin3_lon],
-                [zone.coin1_lat, zone.coin1_lon]
-            ];
-            L.polygon(latlngs, {
-                color: 'purple',
-                fillOpacity: 0.2
-            }).addTo(map).bindPopup(`Zone #${zone.id} (Triangle)`);
-        }
-        else if (forme === 'polygon' && zone.coins) {
-            try {
-                const coords = JSON.parse(zone.coins);
-                const latlngs = coords.map(pt => [pt.lat, pt.lon]);
-                if (latlngs.length > 2) {
+        try {
+            if (forme === 'polygon' && zone.coins) {
+                const coords = zone.coins;
+                if (coords && coords.length > 2) {
+                    const latlngs = coords.map(pt => [pt[0], pt[1]]);
                     L.polygon(latlngs, {
                         color: 'green',
+                        weight: 3,
                         fillOpacity: 0.2
                     }).addTo(map).bindPopup(`Zone #${zone.id} (Polygone)`);
                 }
-            } catch (e) {
-                console.error("Erreur de parsing polygon:", e);
+            } else if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
+                L.circle([zone.latitude, zone.longitude], {
+                    radius: zone.rayon,
+                    color: 'blue',
+                    weight: 3,
+                    fillColor: 'blue',
+                    fillOpacity: 0.1
+                }).addTo(map).bindPopup(`Zone #${zone.id} (Cercle)`);
+            } else if (forme === 'rectangle' && zone.coin1_lat) {
+                const latlngs = [
+                    [zone.coin1_lat, zone.coin1_lon],
+                    [zone.coin2_lat, zone.coin2_lon],
+                    [zone.coin3_lat, zone.coin3_lon],
+                    [zone.coin4_lat, zone.coin4_lon],
+                    [zone.coin1_lat, zone.coin1_lon]
+                ];
+                L.polygon(latlngs, {
+                    color: 'orange',
+                    weight: 3,
+                    fillOpacity: 0.2
+                }).addTo(map).bindPopup(`Zone #${zone.id} (Rectangle)`);
+            } else {
+                console.warn(`Zone #${zone.id} avec forme non traitée: ${forme}`);
             }
-        }
-        else if (forme === 'marker' && zone.latitude && zone.longitude) {
-            L.marker([zone.latitude, zone.longitude])
-                .addTo(map)
-                .bindPopup(`Zone #${zone.id} (Point)`);
+        } catch (e) {
+            console.error(`Erreur lors du traitement de la zone #${zone.id}:`, e);
         }
     });
-
-    // Récupérer la position géographique de l'utilisateur avec une meilleure précision
-    if (navigator.geolocation) {
-        // Options améliorées pour la géolocalisation
-        const options = {
-            enableHighAccuracy: true,  // Utiliser GPS de haute précision si disponible
-            timeout: 10000,            // Attendre jusqu'à 10 secondes
-            maximumAge: 0              // Toujours obtenir une position fraîche
-        };
-        
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const userLat = position.coords.latitude;
-            const userLon = position.coords.longitude;
-            const accuracy = position.coords.accuracy;
-            
-            console.log(`Position de l'utilisateur : ${userLat}, ${userLon}`);
-            console.log(`Précision: ${accuracy} mètres`);
-            
-            // Centrer la carte sur la position avec un niveau de zoom approprié
-            map.setView([userLat, userLon], 15);
-            
-            // Ajouter un marqueur pour la position
-            L.marker([userLat, userLon])
-                .addTo(map)
-                .bindPopup("Votre position actuelle");
-                
-            // Ajouter un cercle indiquant la précision
-            L.circle([userLat, userLon], {
-                radius: accuracy,
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.2
-            }).addTo(map).bindPopup(`Précision: ±${accuracy}m`);
-            
-        }, function(error) {
-            let errorMessage = "Erreur de géolocalisation: ";
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage += "Permission de géolocalisation refusée. Veuillez autoriser l'accès à votre position.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage += "La position géographique est indisponible. Vérifiez votre GPS ou connexion réseau.";
-                    break;
-                case error.TIMEOUT:
-                    errorMessage += "La demande de géolocalisation a expiré. Essayez à nouveau.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    errorMessage += "Une erreur inconnue est survenue.";
-                    break;
-            }
-            
-            console.error(errorMessage);
-            alert(errorMessage);
-            
-            // Afficher un message sur la carte en cas d'erreur
-            L.popup()
-                .setLatLng(map.getCenter())
-                .setContent(errorMessage)
-                .openOn(map);
-                
-        }, options);
-    } else {
-        const message = "La géolocalisation n'est pas supportée par ce navigateur. Utilisez un navigateur plus récent.";
-        alert(message);
-        console.error(message);
-    }
 </script>
 
-<style>
-    .titre h1 {
-        font-size: 30px;
-        color: #008000;
-    }
-    .titre {
-        font-size: 30px;
-        color: #008000;
-        margin: 0 0 15px 0;
-        padding-left: 0;
-    }
-    #map {
-        width: 100%;
-        height: 80vh; /* Ajusté pour une meilleure visibilité */
-        border: 2px solid #ddd;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-</style>
+
+
 {% endblock %}

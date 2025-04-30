@@ -177,7 +177,7 @@ class UserRoleForm(forms.ModelForm):
         model = Group
         fields = ['name', 'permissions']
         labels = {
-            'name': 'Nom du rôle',
+            'name' 'Nom du rôle',
         }
 
 

@@ -494,86 +494,134 @@
     </div>
 </div>
 
-
 <style>
-    .alert {
-        font-size: 14px;
-        border-radius: 0.75rem;
-        padding: 1rem 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%; /* Prendre toute la largeur disponible */
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-left: 4px solid;
+/* Style général de l'alerte */
+.alert {
+    font-size: 14px;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 840px; /* Taille ajustée */
+    height: 50px;
+    overflow: hidden;
+
+    transition: all 0.3s ease;
+    border-left: 3px solid;
+    opacity: 0;
+
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: alertEnter 0.4s forwards;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    z-index: 1100;
+}
+
+/* Animation d'apparition */
+@keyframes alertEnter {
+    from {
         opacity: 0;
-        transform: translateY(20px);
-        animation: alertEnter 0.4s forwards;
+        transform: translateX(-50%) translateY(20px);
     }
-
-    @keyframes alertEnter {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .alert.alert-exit {
-        animation: alertExit 0.4s forwards;
-    }
-
-    @keyframes alertExit {
-        to {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-    }
-
-    .alert-success {
-        background-color: #008000; /* Vert foncé */
-        color: white;
-        font-weight: bold;
-        border-left-color: #008000; /* Bordure vert plus clair */
-    }
-
-    .alert-danger {
-        background-color: #ef4444; /* Rouge foncé */
-        color: white;
-        font-weight: bold;
-        border-left-color: #ef4444; /* Bordure rouge plus clair */
-    }
-
-    .alert-info {
-        background-color: #eff6ff;
-        color: #1e40af;
-        font-weight: bold;
-        border-left-color: #3b82f6;
-    }
-
-    .alert-warning {
-        background-color: #ef4444; /* Rouge foncé */
-        color: white;
-        font-weight: bold;
-        /*border-left-color: #facc15;*/
-    }
-
-    .alert-close {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        margin-left: 1rem;
-        color: inherit;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-    }
-
-    .alert-close:hover {
+    to {
         opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
+}
+
+/* Animation de sortie */
+@keyframes alertExit {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.alert.alert-exit {
+    animation: alertExit 0.4s forwards;
+}
+
+/* Couleurs selon le type */
+.alert-success {
+    background-color: #008000; /* Vert foncé */
+    color: white;
+    font-weight: bold;
+    border-left-color: #008000;
+}
+
+.alert-danger {
+    background-color: #FF0000; /* Rouge vif */
+    color: white;
+    font-weight: bold;
+    border-left-color: #FF0000; /* Rouge vif */
+}
+
+.alert-info {
+    background-color: #eff6ff;
+    color: #1e40af;
+    font-weight: bold;
+    border-left-color: #3b82f6;
+}
+
+.alert-warning {
+    background-color: #ff0000; /* Jaune orangé */
+    color: white;
+    font-weight: bold;
+    border-left-color: #ff0000;
+}
+
+/* Bouton pour fermer l'alerte */
+.alert-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 1rem;
+    color: white !important;
+    font-size: 18px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+
 </style>
+<script>
+    function dismissAlert(id) {
+        const alert = document.getElementById(id);
+        if (alert) {
+            alert.classList.add('alert-exit');
+            setTimeout(() => alert.remove(), 400);
+        }
+    }
+    
+    // Attendre que le DOM soit complètement chargé
+    document.addEventListener('DOMContentLoaded', function() {
+        // Délai légèrement augmenté pour s'assurer que les messages sont rendus
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach((alert, index) => {
+                // Délai progressif pour chaque message (3s + 0.5s par message)
+                setTimeout(() => {
+                    dismissAlert(alert.id);
+                }, 3000 + (index * 500));
+            });
+        }, 100);
+    });
+    
+</script>
 
 {% if messages %}
     <div class="alerts-container" style="position: fixed; top: 20px; right: 20px; z-index: 1100; width: 100%; max-width: 90%;">
@@ -608,19 +656,14 @@
         {% endfor %}
     </div>
 {% endif %}
-<script>
-    function dismissAlert(id) {
-        const alert = document.getElementById(id);
-        alert.classList.add('alert-exit');
-        setTimeout(() => alert.remove(), 400);
-    }
-</script>
+
         
         <div class="main-content">
        
-        
+
         
             {% block content %}
+            
             
             {% endblock %}
         </div>

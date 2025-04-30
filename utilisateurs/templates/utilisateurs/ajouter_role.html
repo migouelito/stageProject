@@ -4,15 +4,6 @@
 
 {% block content %}
 
-<!-- Messages d’alerte -->
-{% if messages %}
-    <div class="alert alert-info">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    </div>
-{% endif %}
-
 <!-- Conteneur principal -->
 <div class="form-container">
     <div class="form-card">
@@ -31,7 +22,7 @@
 
             <!-- Nom du rôle -->
             <p>
-                <label for="{{ form.name.id_for_label }}">{% trans "Nom du rôle" %} :</label>
+                <label for="{{ form.name.id_for_label }}">{% trans "Nom du rôle" %} <span style="color: red;"; class="required">*</span>:</label>
                 {{ form.name }}
                 {% for error in form.name.errors %}
                     <small class="text-danger">{{ error }}</small>
@@ -194,20 +185,7 @@
         margin-right: 8px;
     }
 
-    .text-danger {
-        color: var(--danger-color);
-        font-size: 0.85rem;
-        margin-top: 0.3rem;
-    }
-
-    .alert-danger {
-        background-color: #fbe9e7;
-        border: 1px solid var(--danger-color);
-        color: var(--danger-color);
-        padding: 1rem;
-        border-radius: 6px;
-        margin-bottom: 1.5rem;
-    }
+   
 
     .permissions-list {
         display: flex;

@@ -41,50 +41,69 @@ class EmailTokenObtainPairSerializer(serializers.Serializer):
         return attrs
 
 
-from rest_framework import serializers
-from django.db.models import Count, Q
-from capteurs.models import Capteur
-
-class AnimalCountSerializer(serializers.Serializer):
-    type_animal = serializers.CharField()
-    total = serializers.IntegerField()
-    actifs = serializers.IntegerField()
-    inactifs = serializers.IntegerField()
-
-    @staticmethod
-    def get_animal_count():
-        animal_counts = (
-            Capteur.objects
-            .values('type_animal')
-            .annotate(
-                total=Count('id'),
-                actifs=Count('id', filter=Q(actif=True)),
-                inactifs=Count('id', filter=Q(actif=False))
-            )
-            .order_by('type_animal')
-        )
-        return animal_counts
-
-
-
 
 from rest_framework import serializers
-from capteurs.models import Capteur
+from capteurs.models import ZoneSecurite, Capteur, Animal
+
+class ZoneSecuriteStatistiquesSerializer(serializers.ModelSerializer):
+    capteurs_actifs = serializers.SerializerMethodField()
+    capteurs_inactifs = serializers.SerializerMethodField()
+    repartition_animaux = serializers.SerializerMethodField()
+    total_capteurs = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ZoneSecurite
+        fields = ['id', 'nom', 'capteurs_actifs', 'capteurs_inactifs', 'repartition_animaux', 'total_capteurs']
+
+    def get_capteurs_actifs(self, obj):
+        return Capteur.objects.filter(zone_securite=obj, actif=True).count()
+
+    def get_capteurs_inactifs(self, obj):
+        return Capteur.objects.filter(zone_securite=obj, actif=False).count()
+
+    def get_repartition_animaux(self, obj):
+        repartition = []
+        for animal in Animal.objects.all():  # Récupérer les types d'animaux via la base de données
+            type_count = Capteur.objects.filter(zone_securite=obj, type_animal=animal).count()
+            if type_count > 0:  # Ne prendre que les types avec au moins 1 capteur
+                repartition.append({
+                    'type_animal': animal.type_animal,
+                    'nombre': type_count
+                })
+        return repartition
+
+    def get_total_capteurs(self, obj):
+        return Capteur.objects.filter(zone_securite=obj).count()
+
+    @classmethod
+    def from_user(cls, user):
+        # Récupérer les zones de sécurité associées à l'utilisateur
+        zones = ZoneSecurite.objects.filter(user=user)
+        # Sérialiser les zones de sécurité
+        return cls(zones, many=True).data
+
+
+
+
+from rest_framework import serializers
+from capteurs.models import Capteur, Animal
 
 class CapteurSerializer(serializers.ModelSerializer):
+    # Renvoyer le nom de l'animal (pas son ID)
+    type_animal = serializers.CharField(source='type_animal.type_animal', read_only=True)
+
     class Meta:
         model = Capteur
-        fields = ['id','identifiant', 'type_animal', 'actif']  # Inclut l'identifiant et le type d'animal
+        fields = ['id', 'identifiant', 'type_animal', 'actif']
+# Inclut l'identifiant, le type d'animal (nom), et l'actif
 
-
-# serializers.py
 from rest_framework import serializers
 from capteurs.models import Message
 
 class MessageSerializer(serializers.ModelSerializer):
+    # Ajouter un champ qui récupère seulement le nom de la zone
+    zone_name = serializers.CharField(source='zone.nom', read_only=True)
+
     class Meta:
         model = Message
-        fields = ['id','identifiant_capteur', 'corps_message', 'is_read', 'date_heure']
-
-
-
+        fields = ['id', 'user', 'zone_name', 'corps_message', 'is_read', 'date_heure']

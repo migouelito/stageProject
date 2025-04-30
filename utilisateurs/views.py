@@ -106,7 +106,7 @@ class UserRolesListView(PermissionRequiredMixin, ListView):
         if not self.request.user.is_authenticated:
             messages.error(self.request, "Vous devez être connecté pour accéder à cette page.")
             return redirect('login')
-        messages.warning(self.request, "Vous n'avez pas la permission d'accéder à cette page.")
+        messages.error(self.request, "Vous n'avez pas la permission d'accéder à cette page.")
         return redirect('homePage')
 
 
@@ -316,7 +316,7 @@ class CreateUtilisateurView(PermissionRequiredMixin, CreateView):
         if not self.request.user.is_authenticated:
             messages.error(self.request, "Vous devez être connecté pour accéder à cette page.")
             return redirect('login')  # Redirige vers la page de connexion
-        messages.warning(self.request, "Vous n'avez pas la permission d'accéder à cette page.")
+        messages.error(self.request, "Vous n'avez pas la permission d'accéder à cette page.")
         return redirect('homePage')  # Redirige vers le tableau de bord ou une autre page
 
 
@@ -334,7 +334,7 @@ class ModifierUtilisateurView(UpdateView):
 
     def form_invalid(self, form):
         # Si le formulaire est invalide, on affiche un message d'erreur
-        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger. ⚠️")
+        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger.")
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):

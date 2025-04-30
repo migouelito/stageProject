@@ -16,6 +16,10 @@ def verifier_zones_en_boucle():
         zones = ZoneSecurite.objects.all()
 
         for zone in zones:
+               # ➔ Si la zone n'est pas activée, on la saute immédiatement
+            if not zone.active_securite:
+                print(f"⏭️ Zone {zone.nom} : sécurité désactivée, ignorée.")
+                continue
             capteurs = zone.capteur_set.all()
 
             # Marquer inactifs les capteurs trop vieux

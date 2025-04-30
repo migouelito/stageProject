@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "mia-julia-pilot-israeli.trycloudflare.com"
+MY_GLOBAL_VARIABLE = "textile-decorative-till-hoping.trycloudflare.com"
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct
@@ -101,21 +101,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 ROOT_URLCONF = 'stageProject.urls'
 
-#TEMPLATES = [
-#    {
-#        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-#        'DIRS': [BASE_DIR / 'templates'],
-#        'APP_DIRS': True,
-#        'OPTIONS': {
-#            'context_processors': [
-#                'django.template.context_processors.debug',
-#                'django.template.context_processors.request',
-#                'django.contrib.auth.context_processors.auth',
-#                'django.contrib.messages.context_processors.messages',
-#            ],
-#        },
-#    },
-#]
+import os
+
+# Chemin absolu vers le répertoire où les fichiers sont stockés
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# URL de base pour accéder aux fichiers médias
+MEDIA_URL = '/media/'
+
 
 TEMPLATES = [
     {

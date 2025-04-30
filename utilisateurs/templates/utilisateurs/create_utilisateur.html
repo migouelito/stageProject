@@ -13,32 +13,32 @@
             {% csrf_token %}
 
             <p>
-                <label for="{{ form.username.id_for_label }}">Nom d'utilisateur</label>
+                <label for="{{ form.username.id_for_label }}">Nom d'utilisateur<span class="required">*</span></label>
                 {{ form.username }}
             </p>
 
             <p>
-                <label for="{{ form.first_name.id_for_label }}">Prénom</label>
+                <label for="{{ form.first_name.id_for_label }}">Prénom<span class="required">*</span></label>
                 {{ form.first_name }}
             </p>
 
             <p>
-                <label for="{{ form.last_name.id_for_label }}">Nom</label>
+                <label for="{{ form.last_name.id_for_label }}">Nom<span class="required">*</span></label>
                 {{ form.last_name }}
             </p>
 
             <p>
-                <label for="{{ form.email.id_for_label }}">Email</label>
+                <label for="{{ form.email.id_for_label }}">Email<span class="required">*</span></label>
                 {{ form.email }}
             </p>
 
             <p>
-                <label for="{{ form.telephone.id_for_label }}">Téléphone</label>
+                <label for="{{ form.telephone.id_for_label }}">Téléphone<span class="required">*</span></label>
                 {{ form.telephone }}
             </p>
 
             <p>
-                <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                <label for="{{ form.password.id_for_label }}">Mot de passe<span class="required">*</span></label>
                 {{ form.password }}
             </p>
 
@@ -47,7 +47,11 @@
                     {{ form.is_active }} Actif
                 </label>
             </p>
-
+            <style>
+            .required {
+                color: red;
+            }
+        </style>
             <p>
                 <label for="{{ form.groups.id_for_label }}">Groupes</label>
                 {{ form.groups }}

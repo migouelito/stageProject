@@ -682,6 +682,11 @@ def recevoir_position(request):
         return JsonResponse({'status': 'error', 'message': 'Méthode HTTP non autorisée'}, status=405)
 
 
+import json
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import ZoneSecurite
+
 @login_required
 def suivreBetail(request):
     user = request.user
@@ -698,6 +703,12 @@ def suivreBetail(request):
 
     zones_data = []
     for zone in zones:
+        # Conversion du champ 'coins' si nécessaire
+        try:
+            coins = json.loads(zone.coins) if zone.coins else None
+        except json.JSONDecodeError:
+            coins = None
+
         zones_data.append({
             'id': zone.id,
             'forme': zone.forme,
@@ -712,7 +723,7 @@ def suivreBetail(request):
             'coin3_lon': zone.coin3_lon,
             'coin4_lat': zone.coin4_lat,
             'coin4_lon': zone.coin4_lon,
-            'coins': zone.coins,
+            'coins': coins,  # Données de coins converties
         })
 
     zones_data_json = json.dumps(zones_data)
@@ -721,4 +732,128 @@ def suivreBetail(request):
         'user_id': user.id,  # ✅ toujours transmettre l'ID du user connecté
         'zones_data_json': zones_data_json
     })
+
+#gestion des animaux partie enregistrement des animaux par l'admin
+from .models import Animal
+
+class AnimalListView(ListView):
+    model = Animal  # Le modèle que nous voulons afficher
+    template_name = 'capteurs/liste_des_animaux.html'  # Le template à utiliser pour afficher la liste
+    context_object_name = 'animaux'  # Le nom de la variable dans le template contenant la liste des animaux
+
+from django.shortcuts import render, redirect
+from django.core.exceptions import ValidationError
+from .models import Animal
+from django.core.files.storage import FileSystemStorage
+
+
+from django.db import IntegrityError
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.core.exceptions import ValidationError
+from .models import Animal
+
+def ajouter_animal(request):
+    if request.method == 'POST':
+        type_animal = request.POST.get('type_animal')
+        image = request.FILES.get('image')
+
+        try:
+            if not type_animal:
+                raise ValidationError("Le type d'animal est requis.")
+
+            # Créer l'animal et essayer de le sauvegarder
+            animal = Animal(type_animal=type_animal, image=image)
+            animal.save()
+
+            # Ajouter un message de succès après l'ajout de l'animal
+            messages.success(request, "Animal ajouté avec succès !")
+
+        except IntegrityError:
+            # Si un doublon existe (violant la contrainte d'unicité), afficher un message d'erreur
+            messages.error(request, f"Un animal du type '{type_animal}' existe déjà.")
+            return redirect('liste_des_animaux')
+
+        except ValidationError:
+            # Si la validation échoue, afficher un message d'erreur
+            messages.error(request, "Le type d'animal est requis.")
+            return redirect('liste_des_animaux')
+
+        # Rediriger vers la liste des animaux après l'ajout avec un message de succès
+        return redirect('liste_des_animaux')
+
+    return render(request, 'animaux/ajouter_animal.html')
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Animal
+
+def modifier_animal(request, animal_id):
+    # Récupérer l'animal à modifier
+    animal = get_object_or_404(Animal, id=animal_id)
+
+    # Vérifier si la requête est en méthode POST (lors de la soumission du formulaire)
+    if request.method == 'POST':
+        # Mettre à jour le type d'animal uniquement si le type a changé
+        type_animal = request.POST.get('type_animal', animal.type_animal)
+
+        # Vérifier si un autre animal avec le même type existe déjà
+        if Animal.objects.filter(type_animal=type_animal).exclude(id=animal.id).exists():
+            # Ajouter un message d'erreur avec Django messages
+            messages.error(request, f"Un animal du type '{type_animal}' existe déjà.")
+            return redirect('modifier_animal', animal_id=animal.id)  # Rediriger vers la page de modification de l'animal
+
+        # Si le type d'animal a changé, on l'actualise
+        if type_animal != animal.type_animal:
+            animal.type_animal = type_animal
+
+        # Gérer l'image (si une nouvelle image est téléchargée)
+        if 'image' in request.FILES:
+            animal.image = request.FILES['image']
+
+        # Sauvegarder les changements dans la base de données
+        try:
+            animal.save()
+
+            # Ajouter un message de succès avec Django messages
+            messages.success(request, "Animal mis à jour avec succès !")
+
+        except Exception as e:
+            # Ajouter un message d'erreur avec Django messages
+            messages.error(request, f"Erreur lors de la mise à jour de l'animal : {str(e)}")
+
+        # Rediriger vers la page de liste des animaux
+        return redirect('liste_des_animaux')  # Remplace 'liste_des_animaux' par le nom de ta vue
+
+    # Si la requête n'est pas en POST, retourner les informations actuelles de l'animal en JSON (seulement ici)
+    image_url = request.build_absolute_uri(animal.image.url) if animal.image else None
+    image_name = animal.image.name.split('/')[-1] if animal.image else None
+
+    response_data = {
+        'id': animal.id,
+        'type_animal': animal.type_animal,
+        'image_url': image_url,
+        'image_name': image_name,
+    }
+
+    return JsonResponse(response_data)
+
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Animal
+
+def supprimer_animal(request, animal_id):
+    animal = get_object_or_404(Animal, id=animal_id)
+
+    if request.method == 'POST':
+        try:
+            animal.delete()
+            messages.success(request, "Animal supprimé avec succès !")
+            return redirect('liste_des_animaux')  # Remplace 'liste_des_animaux' par le nom de ta vue
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la suppression de l'animal : {str(e)}")
+            return redirect('liste_des_animaux')
 

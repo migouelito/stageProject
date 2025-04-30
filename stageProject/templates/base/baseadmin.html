@@ -369,14 +369,17 @@
                         <div class="icon-container">
                             <img src="{% static 'images/accueil.png' %}" alt="Accueil">
                         </div>
-                        <span class="nav-text">Accueiladmin</span>
+                        <span class="nav-text">Accueil</span>
                     </a>
                 
-           
-               
-                        
-               
-             
+                    <a href="{% url 'liste_des_animaux' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_animaux' %}active{% endif %}" id="home-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/betail.png' %}" alt="Accueil">
+                        </div>
+                        <span class="nav-text">Animaux</span>
+                    </a>
+                
+            
                     
                     <div class="nav-dropdown {% if request.resolver_match.url_name == 'liste_des_roles' or request.resolver_match.url_name == 'liste_des_utilisateurs' %}open{% endif %}">
                         <button class="nav-link dropdown-toggle" id="users-toggle">
@@ -431,6 +434,169 @@
             
             </div>
         </div>
+
+<style>
+    /* Style général de l'alerte */
+    .alert {
+        font-size: 14px;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    
+        width: 840px; /* Taille ajustée */
+        height: 50px;
+        overflow: hidden;
+    
+        transition: all 0.3s ease;
+        border-left: 3px solid;
+        opacity: 0;
+    
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: alertEnter 0.4s forwards;
+    
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    
+        z-index: 1100;
+    }
+    
+    /* Animation d'apparition */
+    @keyframes alertEnter {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+    
+    /* Animation de sortie */
+    @keyframes alertExit {
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+    
+    .alert.alert-exit {
+        animation: alertExit 0.4s forwards;
+    }
+    
+    /* Couleurs selon le type */
+    .alert-success {
+        background-color: #008000; /* Vert foncé */
+        color: white;
+        font-weight: bold;
+        border-left-color: #008000;
+    }
+    
+    .alert-danger {
+        background-color: #FF0000; /* Rouge vif */
+        color: white;
+        font-weight: bold;
+        border-left-color: #FF0000; /* Rouge vif */
+    }
+    
+    .alert-info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        font-weight: bold;
+        border-left-color: #3b82f6;
+    }
+    
+    .alert-warning {
+        background-color: #ff0000; /* Jaune orangé */
+        color: white;
+        font-weight: bold;
+        border-left-color: #ff0000;
+    }
+    
+    /* Bouton pour fermer l'alerte */
+    .alert-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 1rem;
+        color: white !important;
+        font-size: 18px;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    
+    .alert-close:hover {
+        opacity: 1;
+    }
+    
+    
+    </style>
+    <script>
+        function dismissAlert(id) {
+            const alert = document.getElementById(id);
+            if (alert) {
+                alert.classList.add('alert-exit');
+                setTimeout(() => alert.remove(), 400);
+            }
+        }
+        
+        // Attendre que le DOM soit complètement chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            // Délai légèrement augmenté pour s'assurer que les messages sont rendus
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach((alert, index) => {
+                    // Délai progressif pour chaque message (3s + 0.5s par message)
+                    setTimeout(() => {
+                        dismissAlert(alert.id);
+                    }, 3000 + (index * 500));
+                });
+            }, 100);
+        });
+        
+    </script>
+    
+    {% if messages %}
+        <div class="alerts-container" style="position: fixed; top: 20px; right: 20px; z-index: 1100; width: 100%; max-width: 90%;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+                    <div>
+                        {% if 'success' in message.tags %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        {% elif 'error' in message.tags or 'danger' in message.tags %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        {% elif 'info' in message.tags %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                            </svg>
+                        {% elif 'warning' in message.tags %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor" style="width: 1.25rem; height: 1.25rem; vertical-align: middle;">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                    <button type="button" class="alert-close" onclick="dismissAlert('alert-{{ forloop.counter }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1rem; height: 1rem;">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
         
         <div class="main-content">
             {% block content %}
@@ -443,24 +609,181 @@
     <div class="top-right-bar">
 
 
-        <!-- Profil (Icône Person) -->
-        <a href="" class="nav-link" id="profile-link">
-            <div class="icon-container" style="position: relative;">
-                <img src="{% static 'images/user.png' %}" alt="Profile">
-            </div>
-        </a>
+      <!-- Profil (Icône Person) -->
+      <a href="#" class="nav-link" id="profile-link" data-user-id="{{ user.id }}">
+        <div class="icon-container" style="position: relative;">
+            <img src="{% static 'images/userr.png' %}" alt="Profile">
+        </div>
+    </a>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const initUserProfileModal = () => {
+            const profileLink = document.getElementById('profile-link');
+            if (!profileLink) return;
+    
+            const config = {
+                apiUrl: '/utilisateurs/profil_utilisateur/',
+                modalStyling: {
+                    zIndex: 999999,
+                    backdropOpacity: 0.4,
+                    background: '#ffffff',
+                    accentColor: '#008000'
+                }
+            };
+    
+            const fetchUserProfile = async (userId) => {
+                try {
+                    const response = await fetch(`${config.apiUrl}${userId}/`);
+                    if (!response.ok) throw new Error('Erreur réseau');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erreur fetch:', error);
+                    throw error;
+                }
+            };
+    
+            const renderProfileModal = (userData) => {
+                return Swal.fire({
+                    title: `<span style="color: black; font-weight: bold;">${userData.username} <span class="user-badge">👤</span></span>`,
+                    html: `
+                        <div style="text-align: left; color: black;">
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: bold; color: black;">Nom complet</div>
+                                <div>${userData.first_name || '-'} ${userData.last_name || '-'}</div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: bold; color: black;">Nom d'utilisateur</div>
+                                <div>${userData.username}</div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: bold; color: black;">Email</div>
+                                <div>${userData.email || 'Non renseigné'}</div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <div style="font-weight: bold; color: black;">Téléphone</div>
+                                <div>${userData.telephone || 'Non renseigné'}</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: bold; color: black;">Rôle</div>
+                                <div>${userData.role || 'Utilisateur'}</div>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'info',
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    background: config.modalStyling.background,
+                    width: '500px',
+                    padding: '2rem',
+                    backdrop: `rgba(0, 0, 0, ${config.modalStyling.backdropOpacity})`,
+                    customClass: {
+                        container: 'swal2-custom-container',
+                        popup: 'swal2-custom-popup'
+                    },
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        popup.style.zIndex = `${config.modalStyling.zIndex}`;
+                        popup.animate([{ opacity: 0 }, { opacity: 1 }], {
+                            duration: 300,
+                            easing: 'ease-out'
+                        });
+                    }
+                });
+            };
+            
+            profileLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+    
+                Swal.fire({
+                    title: 'Chargement...',
+                    allowOutsideClick: false,
+                    background: config.modalStyling.background,
+                    didOpen: () => Swal.showLoading()
+                });
+    
+                try {
+                    const userData = await fetchUserProfile(profileLink.dataset.userId);
+                    Swal.close();
+                    await renderProfileModal(userData);
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Erreur',
+                        text: 'Impossible de charger les informations',
+                        icon: 'error',
+                        background: config.modalStyling.background
+                    });
+                }
+            });
+        };
+    
+        if (typeof Swal !== 'undefined') {
+            initUserProfileModal();
+        } else {
+            console.error('SweetAlert2 non chargé');
+        }
+    });
+    </script>
+    
+        
+    
+    
+    
 
-        <!-- Logout -->
-        <form method="post" action="{% url 'logout' %}" class="logout-form">
-            {% csrf_token %}
-            <button type="submit" class="logout-btn" id="logout-btn">
-                <div class="icon-container">
-                    <img src="{% static 'images/logout.png' %}" alt="Déconnexion">
-                </div>
-                <span class="nav-text"></span>
-            </button>
-        </form>
-    </div>
+    <!-- Logout -->
+    <form method="post" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn" id="logout-btn">
+            <div class="icon-container">
+                <img src="{% static 'images/shutdown.png' %}" alt="Déconnexion">
+            </div>
+            <span class="nav-text"></span>
+        </button>
+    </form>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutForm = document.querySelector('.logout-form');
+        
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+        
+                    const bodyClass = document.body.className;
+                    const isDark = bodyClass.includes('dark-theme');
+        
+                    Swal.fire({
+                        title: 'Déconnexion ? 😢',
+                        text: "Voulez-vous vous déconnecter ?",
+                        icon: 'question',
+                        iconColor: isDark ? '#f1c40f' : '#ff0000',
+                        confirmButtonColor: isDark ? '#3498db' : '#ff0000',
+                        color: isDark ? '#ecf0f1' : '#333',
+                        showCancelButton: true,
+                        confirmButtonColor: isDark ? '#3498db' : '#e74c3c',
+                        cancelButtonColor: '#008000', 
+                        confirmButtonText: 'Oui, déconnecte-moi',
+                        cancelButtonText: 'Rester connecté',
+                        customClass: {
+                            popup: 'rounded-xl shadow-lg'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
+
+        
+                
+</div>
+</div>
+
 </div>
 
 

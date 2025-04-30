@@ -23,6 +23,25 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 
 # views.py
 
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializers import UserSerializer
+
+class UserInfoView(APIView):
+    permission_classes = [IsAuthenticated]  # Seules les requêtes authentifiées peuvent accéder à cette vue
+
+    def get(self, request):
+        # Récupérer l'utilisateur actuellement authentifié
+        user = request.user
+        
+        # Sérialiser les informations de l'utilisateur
+        serializer = UserSerializer(user)
+        
+        # Retourner les données sérialisées
+        return Response(serializer.data)
+
 from rest_framework.permissions import AllowAny  # Importer AllowAny
 from utilisateurs.models import User
 from rest_framework.views import APIView
@@ -52,23 +71,20 @@ class UserProfileView(APIView):
             # Si une exception est levée, renvoyer une erreur générique
             return Response({"detail": f"Une erreur est survenue: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
+from rest_framework import generics, permissions
+from capteurs.models import ZoneSecurite
+from .serializers import ZoneSecuriteStatistiquesSerializer
 
-# views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import AnimalCountSerializer
+class ZoneSecuriteStatistiquesView(generics.ListAPIView):
+    serializer_class = ZoneSecuriteStatistiquesSerializer
+    permission_classes = [permissions.IsAuthenticated]  # ✅ S'assurer que l'utilisateur est connecté
 
-class AnimalCountView(APIView):
-    def get(self, request):
-        # Obtenir le comptage des capteurs par type d'animal
-        count_by_animal = AnimalCountSerializer.get_animal_count()
-
-        # Sérialiser la réponse
-        serializer = AnimalCountSerializer(count_by_animal, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
+    def get_queryset(self):
+        """
+        Récupère les zones de sécurité de l'utilisateur connecté
+        """
+        user = self.request.user  # ✅ Prendre l'utilisateur connecté
+        return ZoneSecurite.objects.filter(user=user)
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -78,34 +94,32 @@ from .serializers import CapteurSerializer
 
 class CapteurListAPIView(APIView):
     def get(self, request):
-        # Récupérer tous les capteurs de la base de données
-        capteurs = Capteur.objects.all()
+        user = request.user  # utilisateur connecté
         
-        # Sérialiser les capteurs
+        # Récupérer les capteurs associés aux zones de cet utilisateur
+        capteurs = Capteur.objects.filter(zone_securite__user=user)
+        
         serialized_capteurs = CapteurSerializer(capteurs, many=True).data
         
-        # Retourner les capteurs sous forme de réponse JSON
         return Response(serialized_capteurs, status=status.HTTP_200_OK)
 
 
-# views.py
+
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from capteurs.models import Message
 from .serializers import MessageSerializer
 
 class MessageListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]  # Assurez-vous que l'utilisateur est authentifié
 
     def get_queryset(self):
         """
-        Optionnellement filtrer les messages par un capteur spécifique
+        Récupère uniquement les messages liés à l'utilisateur authentifié.
         """
-        queryset = Message.objects.all()
-        capteur_id = self.request.query_params.get('capteur_id', None)
-        if capteur_id is not None:
-            queryset = queryset.filter(identifiant_capteur__identifiant=capteur_id)
-        return queryset
+        user = self.request.user  # Récupère l'utilisateur authentifié à partir du token
+        return Message.objects.filter(user=user).order_by('-date_heure')  # Trier les messages du plus récent au plus ancien
 
 
 # views.py
@@ -185,3 +199,59 @@ def mettre_a_jour_position(request):
         return Response({'message': 'Coordonnées mises à jour avec succès.'})
     except Capteur.DoesNotExist:
         return Response({'error': 'Capteur non trouvé.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from capteurs.models import ZoneSecurite
+import json
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from capteurs.models import ZoneSecurite
+from rest_framework.permissions import IsAuthenticated
+import json
+
+@api_view(['GET'])
+def suivre_betail_api(request):
+    user = request.user  # Récupère l'utilisateur authentifié via le token
+
+    if not user.is_authenticated:
+        return Response({'error': 'Authentication required'}, status=401)
+
+    # Par défaut : ses propres zones
+    related_users = [user]
+
+    # Si l'utilisateur est un parent (donc sans owner)
+    if not user.owner:
+        related_users += list(user.sub_users.all())
+
+    # On filtre les zones selon l'utilisateur ou ses sub-users (si c’est un parent)
+    zones = ZoneSecurite.objects.filter(user__in=related_users)
+
+    zones_data = []
+    for zone in zones:
+        # Conversion du champ 'coins' si nécessaire
+        try:
+            coins = json.loads(zone.coins) if zone.coins else None
+        except json.JSONDecodeError:
+            coins = None
+
+        zones_data.append({
+            'id': zone.id,
+            'forme': zone.forme,
+            'latitude': zone.latitude,
+            'longitude': zone.longitude,
+            'rayon': zone.rayon,
+            'coin1_lat': zone.coin1_lat,
+            'coin1_lon': zone.coin1_lon,
+            'coin2_lat': zone.coin2_lat,
+            'coin2_lon': zone.coin2_lon,
+            'coin3_lat': zone.coin3_lat,
+            'coin3_lon': zone.coin3_lon,
+            'coin4_lat': zone.coin4_lat,
+            'coin4_lon': zone.coin4_lon,
+            'coins': coins,  # Données de coins converties
+        })
+
+    return Response({'zones_data': zones_data})

@@ -10,7 +10,7 @@ from django.utils import timezone
    #Methode pour les calculs
 from shapely.geometry import Point, Polygon
 from geopy.distance import geodesic  # ✅ Pour le calcul réel de distance
-
+import json
 
 
 
@@ -110,35 +110,29 @@ class ZoneSecurite(models.Model):
         except Exception:
             return False
 
-   
+class Animal(models.Model):
+    type_animal = models.CharField(max_length=20, unique=True)  # Si vous avez besoin d'un champ de texte pour le type d'animal
+    image = models.ImageField(upload_to='capteurs/', null=True, blank=True)
+
+    def __str__(self):
+        return self.type_animal  # Affiche le nom de l'animal
+
 
 class Capteur(models.Model):
-    ANIMAUX_CHOICES = [
-        ('boeuf', '● Boeuf'),
-        ('ane', '● Âne'),
-        ('mouton', '● Mouton'),
-        ('cheval', '● Cheval'),
-        ('chevre', '● Chèvre'),
-    ]
-
-    
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='capteurs')
     identifiant = models.IntegerField()
-    type_animal = models.CharField(max_length=20, choices=ANIMAUX_CHOICES)
+    type_animal = models.ForeignKey(Animal, on_delete=models.CASCADE)  # 🔁 Clé étrangère renommée
     latitude = models.FloatField()
     longitude = models.FloatField()
-    last_seen = models.DateTimeField(null=True, blank=True)  # ⏱️ champ ajouté ici
+    last_seen = models.DateTimeField(null=True, blank=True)
     is_zone = models.BooleanField(default=True)
     actif = models.BooleanField(default=True)
     zone_securite = models.ForeignKey(ZoneSecurite, on_delete=models.SET_NULL, null=True, blank=True)
 
-
-    class Meta:
-        unique_together = ('user', 'identifiant')
+  
 
     def __str__(self):
-        return f"Capteur {self.identifiant} - {self.get_type_animal_display()} - Utilisateur: {self.user.username}"
+        return f"Capteur {self.identifiant} - {self.type_animal} - Utilisateur: {self.user.username}"
 
     @classmethod
     def get_capteurs_for_user(cls, user: User):
@@ -162,6 +156,8 @@ class Capteur(models.Model):
 
  
 
+
+
     @classmethod
     def is_capteur_in_zone(cls, identifiant, lat_capteur, lon_capteur):
         try:
@@ -174,8 +170,13 @@ class Capteur(models.Model):
                 print("❗ Ce capteur n'a pas de zone de sécurité assignée.")
                 return False
 
+            if not zone.active_securite:
+                print("❗ La zone de sécurité n'est pas activée.")
+                return False
+        
             print(f"📌 Zone de sécurité '{zone.nom}' - Forme : {zone.forme}")
 
+            # Si la forme de la zone est 'cercle'
             if zone.forme == 'cercle':
                 print(f" ➤ Centre : ({zone.latitude}, {zone.longitude}), Rayon : {zone.rayon}m")
                 centre_coords = (zone.latitude, zone.longitude)
@@ -183,29 +184,34 @@ class Capteur(models.Model):
                 distance = geodesic(centre_coords, point_coords).meters  # ✅ Précis
                 in_zone = distance <= zone.rayon
 
+            # Si la forme est un rectangle, carré ou triangle
             elif zone.forme in ['triangle', 'carre', 'rectangle']:
                 print(" ➤ Coins :")
                 coords = [
-                    (zone.coin1_lon, zone.coin1_lat),
-                    (zone.coin2_lon, zone.coin2_lat),
-                    (zone.coin3_lon, zone.coin3_lat)
+                    (zone.coin1_lat, zone.coin1_lon),
+                    (zone.coin2_lat, zone.coin2_lon),
+                    (zone.coin3_lat, zone.coin3_lon)
                 ]
                 if zone.forme in ['carre', 'rectangle']:
-                    coords.append((zone.coin4_lon, zone.coin4_lat))
-                coords.append(coords[0])
-                for coord in coords:
-                    print(f"    - ({coord[1]}, {coord[0]})")
+                    coords.append((zone.coin4_lat, zone.coin4_lon))
+                coords.append(coords[0])  # Fermeture du polygone pour le calcul
+                print(f" ➤ Coordonnées des coins : {coords}")
                 polygon = Polygon(coords)
                 point = Point(lon_capteur, lat_capteur)
                 in_zone = polygon.contains(point)
 
+            # Si la forme est un polygone
             elif zone.forme == 'polygon':
                 print(" ➤ Points du polygone :")
-                for lat, lon in zone.coins:
-                    print(f"    - ({lat}, {lon})")
-                coords = [(lon, lat) for lat, lon in zone.coins]
+                # Conversion de la chaîne JSON en une liste Python
+                coins = json.loads(zone.coins)  # Transformation de la chaîne en liste de coordonnées
+                print(f" ➤ Coins après conversion : {coins}")
+                
+                # Transformer les coordonnées pour le polygone
+                coords = [(lon, lat) for lat, lon in coins]
                 if coords[0] != coords[-1]:
-                    coords.append(coords[0])
+                    coords.append(coords[0])  # Fermeture du polygone
+                print(f" ➤ Coordonnées du polygone : {coords}")
                 polygon = Polygon(coords)
                 point = Point(lon_capteur, lat_capteur)
                 in_zone = polygon.contains(point)
@@ -281,21 +287,38 @@ class Message(models.Model):
         return f"Message pour zone {self.zone.nom} ({self.zone.user.username}) à {self.date_heure}"
 
 from django.db.models import Count
+from .models import Animal, Capteur
+from django.db.models import Count
+
 class Statistiques:
     @staticmethod
     def nombre_capteurs_par_animal(user):
+        # Récupérer tous les utilisateurs associés
         utilisateurs = user.get_all_related_users()
+
+        # Récupérer tous les animaux depuis la base de données
+        animaux = Animal.objects.all()
+        # Créer un dictionnaire avec le type_animal_id comme clé et le nom comme valeur
+        animal_dict = {animal.id: animal.type_animal for animal in animaux}
+
+        # Récupérer les statistiques des capteurs avec type_animal_id
         stats = (
             Capteur.objects
             .filter(user__in=utilisateurs)
-            .values('type_animal')
+            .values('type_animal_id')  # Utiliser type_animal_id pour correspondre avec l'ID de l'animal
             .annotate(total=Count('id'))
         )
-        resultat = {animal[1]: 0 for animal in Capteur.ANIMAUX_CHOICES}
+
+        # Initialiser les résultats avec les animaux présents dans la base de données
+        resultat = {animal_name: 0 for animal_name in animal_dict.values()}
+
+        # Mettre à jour les résultats avec les données des capteurs
         for stat in stats:
-            animal_nom = dict(Capteur.ANIMAUX_CHOICES).get(stat['type_animal'])
+            animal_id = stat['type_animal_id']  # ID de l'animal
+            animal_nom = animal_dict.get(animal_id)  # Trouver le nom de l'animal à partir de l'ID
             if animal_nom:
                 resultat[animal_nom] = stat['total']
+
         return resultat
 
     @staticmethod
@@ -307,6 +330,3 @@ class Statistiques:
     def nombre_capteurs_inactifs(user):
         utilisateurs = user.get_all_related_users()
         return Capteur.objects.filter(user__in=utilisateurs, actif=False).count()
-
-
-

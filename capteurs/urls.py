@@ -1,9 +1,14 @@
 
 from django.urls import path
-
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import *  
 
 urlpatterns = [
+     path('capteurs/animaux/', AnimalListView.as_view(), name='liste_des_animaux'),  # URL pour la vue de la liste des animaux
+     path('capteurs/ajouter_animal/', ajouter_animal, name='ajouter_animal'),  # URL pour la vue de la liste des animaux
+    path('capteurs/modifier_animal/<int:animal_id>/', modifier_animal, name='modifier_animal'),
+    path('capteurs/supprimer_animal/<int:animal_id>/',supprimer_animal, name='supprimer_animal'),
     path('capteurs/liste_des_capteurs/', CapteursListView.as_view(), name='liste_des_capteurs'),  # URL correcte
     path('capteurs/ajouter_capteur/', AjoutCapteursView.as_view(), name='ajouter_capteur'),
     path('capteurs/supprimer_capteur/', AjoutCapteursView.as_view(), name='supprimer_capteur'),
@@ -24,13 +29,13 @@ urlpatterns = [
 
      # urls.py
     path('zone/securite/<int:user_id>/<int:zone_id>/', ZoneSecuriteView.as_view(), name="zone_securite"),
-    path('zone./localisation_betail', ZoneSecuriteView.as_view(),name="localisation_betail"),
+    path('zone/localisation_betail', ZoneSecuriteView.as_view(),name="localisation_betail"),
     path('zones/updateposition/<int:zone_id>/', update_position, name='update_position'),
 
     #route api
     path('api/position/', recevoir_position, name='recevoir_position'),
     path('suivrebetail/', suivreBetail, name='suivrebetail'),
     
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     
 
