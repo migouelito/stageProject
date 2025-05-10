@@ -2,123 +2,264 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-    * {
-        box-sizing: border-box;
+    :root {
+        --vert-fonce: #008000;
+        --vert-clair: #008000;
+        --vert-moyen: #2E7D32;
+        --noir: #212121;
+        --gris-fonce: #424242;
+        --gris-clair: #f5f5f5;
+        --blanc: #ffffff;
+        --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background-color: var(--gris-clair);
+        font-family: 'Poppins', sans-serif;
+        color: var(--noir);
+        padding: 20px;
     }
 
     .container-header {
         display: flex;
         align-items: center;
-        margin-bottom: 20px;
-        padding: 10px 20px;
-        background-color: #f4f4f4;
-        border-radius: 8px;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        padding: 25px 30px;
+        background: var(--card-gradient);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+        border-left: 5px solid #000000;
+        transition: var(--transition);
     }
-
-    .container-header::before {
+    
+    .container-header:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .container-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #008000; /* Vert #008000 comme demandé */
+        letter-spacing: -0.5px;
+    }
+    
+    .container-header::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 0%;
+        width: 0;
         height: 6px;
-        background-color: #000000;
-        animation: loadBar 1s forwards;
+        background: #000000;
+        border-radius: 3px;
+        animation: loadBar 1s forwards; /* Animation de 1 seconde comme demandé */
     }
-
+    
     @keyframes loadBar {
         0% { width: 0%; }
         100% { width: 100%; }
     }
-
-    .chart-container {
-        width: 95%;
-        max-width: 1200px;
-        margin: 40px auto;
-        padding: 30px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
     }
 
-    .alert {
-        color: red;
-        font-weight: bold;
+    .chef-card {
+        background: var(--blanc);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .chef-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .chef-header {
+        background: linear-gradient(135deg, var(--vert-fonce), var(--vert-moyen));
+        color: white;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .chef-icon {
+        background-color: rgba(255, 255, 255, 0.2);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 1.5rem;
+    }
+
+    .chef-info h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0 0 5px 0;
+    }
+
+    .chef-info p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .sous-utilisateurs {
+        padding: 15px 20px;
+    }
+
+    .sous-title {
+        display: flex;
+        align-items: center;
+        color: var(--vert-fonce);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .sous-title i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+    }
+
+    .sous-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sous-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .sous-item:last-child {
+        border-bottom: none;
+    }
+
+    .sous-icon {
+        background-color: var(--gris-clair);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        color: var(--vert-moyen);
+        font-size: 0.9rem;
+    }
+
+    .sous-name {
+        font-size: 0.95rem;
+        color: var(--gris-fonce);
+    }
+
+    .empty-card {
+        grid-column: 1 / -1;
         text-align: center;
+        padding: 40px;
+        background: var(--blanc);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+
+    .empty-card i {
+        font-size: 2.5rem;
+        color: var(--gris-fonce);
+        margin-bottom: 15px;
+    }
+
+    .empty-card h3 {
+        color: var(--noir);
+        margin-bottom: 10px;
+    }
+
+    .empty-card p {
+        color: var(--gris-fonce);
+        margin: 0;
     }
 </style>
 
 <div class="container-header">
-    <h2>Mes statistiques</h2>
+    <h2>Tableau de bord des statistiques</h2>
+    <i class="fas fa-chart-line"></i>
 </div>
 
-{% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
+<div class="stats-container">
+    {% for chef in chefs_d_elevage %}
+    <div class="chef-card">
+        <div class="chef-header">
+            <div class="chef-icon">
+                <i class="fas fa-user-tie"></i>
             </div>
-        {% endfor %}
+            <div class="chef-info">
+                <h3>{{ chef.prenom }} {{ chef.nom }}</h3>
+                <p>Chef d'élevage</p>
+            </div>
+        </div>
+        
+        <div class="sous-utilisateurs">
+            <div class="sous-title">
+                <i class="fas fa-users"></i>
+                <span>Sous-utilisateurs ({{ chef.nombre_fils }})</span>
+            </div>
+            
+            <ul class="sous-list">
+                {% for sous in chef.sous_utilisateurs.all|slice:":5" %}
+                <li class="sous-item">
+                    <div class="sous-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="sous-name">{{ sous.prenom }} {{ sous.nom }}</span>
+                </li>
+                {% empty %}
+                <li class="sous-item">
+                    <div class="sous-icon">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <span class="sous-name">Aucun sous-utilisateur</span>
+                </li>
+                {% endfor %}
+                
+                {% if chef.nombre_fils > 5 %}
+                <li class="sous-item">
+                    <div class="sous-icon">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    <span class="sous-name">+{{ chef.nombre_fils|add:"-5" }} autres</span>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-{% endif %}
-
-<div class="chart-container">
-    <canvas id="animalChart"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Filtrer les animaux avec un nombre de capteurs > 0
-    const labels = [];
-    const data = [];
-
-    {% for animal, count in capteurs_par_animal.items %}
-        {% if count > 0 %}
-            labels.push("{{ animal }}");
-            data.push({{ count }});
-        {% endif %}
+    {% empty %}
+    <div class="empty-card">
+        <i class="fas fa-user-times"></i>
+        <h3>Aucun chef d'élevage trouvé</h3>
+        <p>Il n'y a actuellement aucun chef d'élevage enregistré dans le système.</p>
+    </div>
     {% endfor %}
-
-    const ctx = document.getElementById('animalChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Nombre de capteurs par animal',
-                data: data,
-                backgroundColor: '#28a745',  // Barres en vert
-                borderColor: '#28a745',  // Bordures en vert
-                borderWidth: 1,
-                borderRadius: 5,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            }
-        }
-    });
-
-    // Disparition automatique des messages flash
-    const messages = document.querySelectorAll('.messages .alert');
-    messages.forEach(function(message) {
-        setTimeout(function() {
-            message.style.transition = 'opacity 1s';
-            message.style.opacity = 0;
-            setTimeout(() => message.remove(), 1000);
-        }, 2000);
-    });
-});
-</script>
+</div>
 
 {% endblock %}

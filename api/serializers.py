@@ -1,11 +1,45 @@
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 
-class UserSerializer(serializers.ModelSerializer):
+from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'telephone', 'password']
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+
+        # Valide le mot de passe s’il est fourni
+        if password:
+            try:
+                validate_password(password, user=instance)
+            except ValidationError as e:
+                raise serializers.ValidationError({'password': e.messages})
+
+        # Met à jour les autres champs
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # Applique le mot de passe seulement s’il est valide
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
+
 
 
 from rest_framework import serializers
@@ -107,3 +141,7 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id', 'user', 'zone_name', 'corps_message', 'is_read', 'date_heure']
+
+
+class UnreadMessagesCountSerializer(serializers.Serializer):
+    unread_count = serializers.IntegerField()

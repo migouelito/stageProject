@@ -2,9 +2,19 @@
 {% load static %}
 {% load i18n %}  {# Charger i18n pour pouvoir utiliser {% trans %} #}
 {% block content %}
+
+<div class="container-header">
+    <h1>Modifier le rôle</h1>
+    <a href="{% url 'liste_des_roles' %}" class="btn-retour">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+        Retour à la liste
+    </a>
+</div>
+
 <div class="form-container">
     <div class="form-card">
-        <h2 class="form-title"><i class="fas fa-user-shield"></i>{% if form.instance.pk %}Modifier le rôle{% else %}Créer un rôle{% endif %}</h2>
 
         <form method="post" class="user-form">
             {% csrf_token %}
@@ -20,7 +30,7 @@
 
             <!-- Champ Nom du rôle -->
             <p>
-                <label for="{{ form.name.id_for_label }}">Nom du rôle :</label>
+                <label for="{{ form.name.id_for_label }}">Nom du rôle  <span style="color: red;"; class="required">*</span></label>
                 {{ form.name }}
                 {% for error in form.name.errors %}
                     <span class="text-danger">{{ error }}</span>
@@ -66,7 +76,7 @@
         --border-color: #e0e0e0;
         --light-gray: #f5f5f5;
     }
-
+    
     .form-container {
         display: flex;
         justify-content: center;
@@ -74,42 +84,44 @@
         min-height: 100vh;
         padding: 2rem;
         background-color: #f1f8e9;
+        width: 100%;
+        max-width: 1000px; /* Fixe la largeur du formulaire à celle du conteneur header */
+        margin: 0 auto; /* Centrer le formulaire horizontalement */
     }
-
+    
     .form-card {
         width: 100%;
-        max-width: 700px;
         background: white;
         border-radius: 12px;
         box-shadow: 0 8px 30px rgba(0, 100, 0, 0.1);
         padding: 2.5rem;
         border-top: 4px solid var(--primary-color);
     }
-
+    
     .form-title {
         color: var(--primary-color);
         text-align: center;
         margin-bottom: 2rem;
         font-size: 1.8rem;
     }
-
+    
     .form-title i {
         margin-right: 12px;
     }
-
+    
     .user-form p {
         margin-bottom: 1.5rem;
         display: flex;
         flex-direction: column;
     }
-
+    
     .user-form label {
         font-weight: 600;
         color: var(--primary-dark);
         margin-bottom: 0.5rem;
         font-size: 0.95rem;
     }
-
+    
     .user-form input[type="text"],
     .user-form input[type="email"],
     .user-form input[type="tel"],
@@ -122,28 +134,28 @@
         transition: all 0.3s;
         background-color: var(--light-gray);
     }
-
+    
     .user-form input:focus,
     .user-form select:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.2);
         outline: none;
     }
-
+    
     .permissions-group {
         margin-top: 1rem;
     }
-
+    
     .permissions-group ul {
         list-style: none;
         padding: 0;
         margin-top: 0.5rem;
     }
-
+    
     .permissions-group li {
         margin-bottom: 0.5rem;
     }
-
+    
     .permissions-group .permission-label {
         display: flex;
         align-items: center;
@@ -151,20 +163,20 @@
         color: var(--primary-dark); /* ✅ Texte en vert */
         cursor: pointer;
     }
-
+    
     .permissions-group input[type="checkbox"] {
         margin-right: 10px;
         width: 18px;
         height: 18px;
         accent-color: var(--primary-color); /* ✅ Case à cocher verte */
     }
-
+    
     .form-actions {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
     }
-
+    
     .submit-btn {
         flex: 1;
         padding: 0.9rem;
@@ -180,13 +192,13 @@
         justify-content: center;
         transition: all 0.3s;
     }
-
+    
     .submit-btn:hover {
         background: var(--primary-dark);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
     }
-
+    
     .cancel-btn {
         flex: 1;
         padding: 0.9rem;
@@ -203,21 +215,21 @@
         justify-content: center;
         transition: all 0.3s;
     }
-
+    
     .cancel-btn:hover {
         background: #ffebee;
     }
-
+    
     .form-actions i {
         margin-right: 8px;
     }
-
+    
     .text-danger {
         color: var(--danger-color);
         font-size: 0.85rem;
         margin-top: 0.3rem;
     }
-
+    
     .alert-danger {
         background-color: #fbe9e7;
         border: 1px solid var(--danger-color);
@@ -226,23 +238,87 @@
         border-radius: 6px;
         margin-bottom: 1.5rem;
     }
-
+    
     @media (max-width: 768px) {
         .form-container {
             padding: 1rem;
             background-color: white;
         }
-
+    
         .form-card {
             padding: 1.5rem;
             box-shadow: none;
             border: 1px solid var(--border-color);
         }
-
+    
         .form-actions {
             flex-direction: column;
         }
     }
+    
+    .container-header {
+        max-width: 1000px;
+        margin: 0 auto 30px;
+        padding: 25px 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .container-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        animation: loadBar 0.8s ease-out forwards;
+    }
+    
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    
+    .container-header h1 {
+        font-size: 28px;
+        color: var(--primary-dark);
+        margin: 0;
+        font-weight: 700;
+        position: relative;
+    }
+    
+    .btn-retour {
+        background-color: var(--primary-dark);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 10px rgba(46, 125, 50, 0.3);
+    }
+    
+    .btn-retour:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        background-color: var(--primary-color);
+    }
+    
+    .btn-retour:active {
+        transform: translateY(0);
+    }
+    
 </style>
 
 <script>

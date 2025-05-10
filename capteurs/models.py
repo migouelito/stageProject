@@ -53,7 +53,7 @@ class ZoneSecurite(models.Model):
     # Pour les polygones génériques
     coins = models.JSONField(null=True, blank=True)  # Liste [(lat, lon), ...]
     def __str__(self):
-        return f'● Zone: {self.nom}   ● Utilisateur: {self.user.username}'
+        return f'{self.nom}'
     
     def point_dans_zone(self, latitude, longitude):
         """
@@ -120,10 +120,8 @@ class Animal(models.Model):
 
 class Capteur(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='capteurs')
-    identifiant = models.IntegerField()
+    identifiant = models.IntegerField(unique=True)
     type_animal = models.ForeignKey(Animal, on_delete=models.CASCADE)  # 🔁 Clé étrangère renommée
-    latitude = models.FloatField()
-    longitude = models.FloatField()
     last_seen = models.DateTimeField(null=True, blank=True)
     is_zone = models.BooleanField(default=True)
     actif = models.BooleanField(default=True)
@@ -290,32 +288,35 @@ from django.db.models import Count
 from .models import Animal, Capteur
 from django.db.models import Count
 
+from django.db.models import Count
+from django.db.models import Count
+from .models import Animal, Capteur, ZoneSecurite
+
 class Statistiques:
     @staticmethod
     def nombre_capteurs_par_animal(user):
-        # Récupérer tous les utilisateurs associés
-        utilisateurs = user.get_all_related_users()
-
-        # Récupérer tous les animaux depuis la base de données
         animaux = Animal.objects.all()
-        # Créer un dictionnaire avec le type_animal_id comme clé et le nom comme valeur
         animal_dict = {animal.id: animal.type_animal for animal in animaux}
 
-        # Récupérer les statistiques des capteurs avec type_animal_id
+        if user.owner is None:
+            # Cas propriétaire : récupérer ses capteurs + ceux de ses sub-users
+            utilisateurs = user.get_all_related_users()
+            capteurs = Capteur.objects.filter(user__in=utilisateurs)
+        else:
+            # Cas sous-utilisateur : capteurs liés à ses zones uniquement (peu importe le propriétaire)
+            zones_utilisateur = ZoneSecurite.objects.filter(user=user)
+            capteurs = Capteur.objects.filter(zone_securite__in=zones_utilisateur)
+
         stats = (
-            Capteur.objects
-            .filter(user__in=utilisateurs)
-            .values('type_animal_id')  # Utiliser type_animal_id pour correspondre avec l'ID de l'animal
+            capteurs
+            .values('type_animal_id')
             .annotate(total=Count('id'))
         )
 
-        # Initialiser les résultats avec les animaux présents dans la base de données
         resultat = {animal_name: 0 for animal_name in animal_dict.values()}
-
-        # Mettre à jour les résultats avec les données des capteurs
         for stat in stats:
-            animal_id = stat['type_animal_id']  # ID de l'animal
-            animal_nom = animal_dict.get(animal_id)  # Trouver le nom de l'animal à partir de l'ID
+            animal_id = stat['type_animal_id']
+            animal_nom = animal_dict.get(animal_id)
             if animal_nom:
                 resultat[animal_nom] = stat['total']
 
@@ -323,10 +324,56 @@ class Statistiques:
 
     @staticmethod
     def nombre_capteurs_actifs(user):
-        utilisateurs = user.get_all_related_users()
-        return Capteur.objects.filter(user__in=utilisateurs, actif=True).count()
+        if user.owner is None:
+            # Propriétaire - tous les capteurs de son groupe
+            utilisateurs = user.get_all_related_users()
+            return Capteur.objects.filter(user__in=utilisateurs, actif=True).count()
+        else:
+            # Sous-utilisateur - capteurs dans ses zones (peu importe le propriétaire)
+            zones_utilisateur = ZoneSecurite.objects.filter(user=user)
+            return Capteur.objects.filter(zone_securite__in=zones_utilisateur, actif=True).count()
 
     @staticmethod
     def nombre_capteurs_inactifs(user):
-        utilisateurs = user.get_all_related_users()
-        return Capteur.objects.filter(user__in=utilisateurs, actif=False).count()
+        if user.owner is None:
+            # Propriétaire - tous les capteurs de son groupe
+            utilisateurs = user.get_all_related_users()
+            return Capteur.objects.filter(user__in=utilisateurs, actif=False).count()
+        else:
+            # Sous-utilisateur - capteurs dans ses zones (peu importe le propriétaire)
+            zones_utilisateur = ZoneSecurite.objects.filter(user=user)
+            return Capteur.objects.filter(zone_securite__in=zones_utilisateur, actif=False).count()
+        
+   
+    @staticmethod
+    def statistique_zone(user):
+        """
+        Récupère le nombre de capteurs actifs, inactifs et le nombre total d'animaux
+        pour chaque zone de sécurité associée à un utilisateur (propriétaire ou sous-utilisateur).
+        """
+        if user.owner is None:
+            # Cas propriétaire : récupérer les zones de sécurité des sub-utilisateurs
+            utilisateurs = user.get_all_related_users()
+            zones_utilisateur = ZoneSecurite.objects.filter(user__in=utilisateurs)
+        else:
+            # Cas sous-utilisateur : récupérer uniquement ses zones de sécurité
+            zones_utilisateur = ZoneSecurite.objects.filter(user=user)
+
+        statistiques = {}
+
+        for zone in zones_utilisateur:
+            # Compter les capteurs actifs et inactifs pour cette zone
+            capteurs_actifs = Capteur.objects.filter(zone_securite=zone, actif=True).count()
+            capteurs_inactifs = Capteur.objects.filter(zone_securite=zone, actif=False).count()
+
+            # Compter le nombre total d'animaux (capteurs) pour cette zone
+            total_animaux = Capteur.objects.filter(zone_securite=zone).count()
+
+            # Ajouter les statistiques de cette zone dans le dictionnaire
+            statistiques[zone.nom] = {
+                "actifs": capteurs_actifs,
+                "inactifs": capteurs_inactifs,
+                "total_animaux": total_animaux  # Ajout du nombre total d'animaux
+            }
+
+        return statistiques

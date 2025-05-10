@@ -9,22 +9,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #3a86ff;
-            --secondary: #4cc9f0;
-            --success: #38b000;
-            --warning: #ffba08;
-            --danger: #d90429;
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #38b000; /* Vert */
+            --warning: #f8961e;
+            --danger: #d90429; /* Rouge */
             --dark: #2b2d42;
             --light: #f8f9fa;
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #ebf4ff 100%);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            --shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         
         body {
@@ -32,45 +35,47 @@
             color: var(--dark);
             line-height: 1.6;
             padding: 20px;
+            min-height: 100vh;
         }
+
         .container-header {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* aligne les éléments à gauche */
-            gap: 15px; /* espacement entre l'icône et le titre */
-            margin-bottom: 30px;
-            padding: 15px 25px;
-            background-color: white;
-            border-radius: 12px;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding: 25px 30px;
+            background: var(--card-gradient);
+            border-radius: 16px;
             box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
+            border-left: 5px solid #000000;
+            transition: var(--transition);
         }
         
-        
+        .container-header:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
         
         .container-header h2 {
             font-size: 1.8rem;
-            color: #008000;
-        
+            font-weight: 1000;
+            color: #008000; /* Vert #008000 comme demandé */
+            letter-spacing: -0.5px;
         }
         
-        .container-header i {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-        
-        .container-header::before {
+        .container-header::after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 0%;
-            height: 6px; /* plus épaisse */
-            background-color: black; /* couleur noire */
-            animation: loadBar 1.5s forwards;
+            width: 0;
+            height: 6px;
+            background: #000000;
+            border-radius: 3px;
+            animation: loadBar 1s forwards; /* Animation de 1 seconde comme demandé */
         }
-        
         
         @keyframes loadBar {
             0% { width: 0%; }
@@ -80,57 +85,85 @@
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 25px;
+            margin-bottom: 40px;
         }
         
         .stat-card {
-            background-color: white;
-            border-radius: 12px;
+            background: var(--card-gradient);
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            padding: 20px;
+            padding: 25px;
             display: flex;
             align-items: center;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border-top: 3px solid transparent;
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            z-index: 1;
         }
         
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 20px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: white;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1) rotate(5deg);
         }
         
         .active-icon {
-            background-color: var(--success);
+            background: linear-gradient(135deg, #38b000 0%, #2d8c00 100%);
         }
         
         .inactive-icon {
-            background-color: var(--danger);
+            background: linear-gradient(135deg, #d90429 0%, #a60321 100%);
         }
         
         .total-icon {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        }
+        
+        .stat-info {
+            z-index: 2;
         }
         
         .stat-info h3 {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 2.2rem;
+            font-weight: 800;
             margin-bottom: 5px;
+            color: #000000;
         }
         
         .stat-info p {
-            color: #666;
+            color: #6c757d;
             font-size: 1rem;
+            font-weight: 500;
         }
         
         .charts-container {
@@ -140,23 +173,43 @@
         }
         
         .chart-container {
-            background-color: white;
-            border-radius: 12px;
+            background: var(--card-gradient);
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            padding: 25px;
-            height: 400px;
+            padding: 30px;
+            height: 420px;
+            transition: var(--transition);
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
         }
         
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .chart-header h3 {
-            font-size: 1.2rem;
-            color: var(--dark);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #000000;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .chart-header h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #000000;
+            border-radius: 3px;
         }
         
         .chart-legend {
@@ -167,20 +220,35 @@
         .legend-item {
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
         
         .legend-color {
             width: 12px;
             height: 12px;
-            border-radius: 50%;
-            margin-right: 5px;
+            border-radius: 3px;
+            margin-right: 8px;
         }
         
         .chart-wrapper {
             position: relative;
-            height: 100%;
+            height: calc(100% - 50px);
             width: 100%;
+        }
+        
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            background: var(--card-gradient);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .no-data p {
+            font-size: 1.2rem;
+            color: #6c757d;
         }
         
         @media (max-width: 768px) {
@@ -190,254 +258,329 @@
             
             .dashboard {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .container-header {
+                padding: 20px;
+            }
+            
+            .container-header h2 {
+                font-size: 1.5rem;
             }
         }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        
+        .chart-container {
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
     </style>
-
-<body>
-    <div class="container-header">
-        <i class="fas fa-chart-pie"></i>
-        <h2>Tableau de bord des statistiques</h2>
-    </div>
+    <body>
+        <div class="container-header">
+            <h2>Tableau de bord des statistiques</h2>
+            <i class="fas fa-chart-line" style="font-size: 1.8rem; color: #008000;"></i>
+        </div>
     
-    <div class="dashboard">
-        <div class="stat-card">
-            <div class="stat-icon active-icon">
-                <i class="fas fa-power-off"></i>
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-icon active-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="capteurs-actifs">0</h3>
+                    <p>Capteurs actifs</p>
+                </div>
             </div>
-            <div class="stat-info">
-                <h3 id="capteurs-actifs">0</h3>
-                <p>Capteurs actifs</p>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon inactive-icon">
-                <i class="fas fa-plug"></i>
-            </div>
-            <div class="stat-info">
-                <h3 id="capteurs-inactifs">0</h3>
-                <p>Capteurs inactifs</p>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon total-icon">
-                <i class="fas fa-microchip"></i>
-            </div>
-            <div class="stat-info">
-                <h3 id="capteurs-total">0</h3>
-                <p>Total des capteurs</p>
-            </div>
-        </div>
-    </div>
     
-    <div class="charts-container">
-        <div class="chart-container">
-            <div class="chart-header">
-                <h3>Répartition des capteurs par animal</h3>
+            <div class="stat-card">
+                <div class="stat-icon inactive-icon">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="capteurs-inactifs">0</h3>
+                    <p>Capteurs inactifs</p>
+                </div>
             </div>
-            <div class="chart-wrapper">
-                <canvas id="pieChart"></canvas>
+    
+            <div class="stat-card">
+                <div class="stat-icon total-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="capteurs-total">0</h3>
+                    <p>Total des capteurs</p>
+                </div>
             </div>
         </div>
-        
-        <div class="chart-container">
-            <div class="chart-header">
-                <h3>Nombre de capteurs par animal</h3>
+    
+        <div class="charts-container">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Répartition des capteurs par animal</h3>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #000000;"></span>
+                            <span>Capteurs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
-            <div class="chart-wrapper">
-                <canvas id="barChart"></canvas>
+    
+         
+    
+            {% if not user.owner %}
+            <div class="chart-container" id="zone-stats-container">
+                <div class="chart-header">
+                    <h3>Statistiques par zone</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <div id="zone-stats-content" style="height: 100%; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f5f5f5;">
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Zone</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Capteurs actifs</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Capteurs inactifs</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Total animaux</th> <!-- Nouvelle colonne -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for zone_name, stats in statistiques_zone.items %}
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">{{ zone_name }}</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #38b000;">{{ stats.actifs }}</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #d90429;">{{ stats.inactifs }}</td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #000000;">{{ stats.total_animaux }}</td> <!-- Nouvelle cellule pour le total -->
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
             </div>
+            {% endif %}
         </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Récupérer les données de l'utilisateur connecté depuis le contexte Django
-            const capteursParAnimal = {
-                {% for animal, count in capteurs_par_animal.items %}
-                    "{{ animal }}": {{ count }},
-                {% endfor %}
-            };
-            
-            const capteursActifs = {{ capteurs_actifs }};
-            const capteursInactifs = {{ capteurs_inactifs }};
-            const capteursTotal = capteursActifs + capteursInactifs;
-            
-            // Mettre à jour les compteurs
-            document.getElementById('capteurs-actifs').textContent = capteursActifs;
-            document.getElementById('capteurs-inactifs').textContent = capteursInactifs;
-            document.getElementById('capteurs-total').textContent = capteursTotal;
-            
-            // Filtrer pour ne garder que les animaux avec des capteurs
-            const filteredCapteursParAnimal = {};
-            for (const [animal, count] of Object.entries(capteursParAnimal)) {
-                if (count > 0) {
-                    filteredCapteursParAnimal[animal] = count;
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const capteursParAnimal = {
+                    {% for animal, count in capteurs_par_animal.items %}
+                        "{{ animal }}": {{ count }},
+                    {% endfor %}
+                };
+    
+                const capteursActifs = {{ capteurs_actifs }};
+                const capteursInactifs = {{ capteurs_inactifs }};
+                const capteursTotal = capteursActifs + capteursInactifs;
+    
+                function animateCounters() {
+                    const animateCounter = (element, target) => {
+                        let count = 0;
+                        const duration = 1500;
+                        const increment = target / (duration / 16);
+    
+                        const updateCount = () => {
+                            count += increment;
+                            if (count < target) {
+                                element.textContent = Math.floor(count);
+                                requestAnimationFrame(updateCount);
+                            } else {
+                                element.textContent = target;
+                            }
+                        };
+    
+                        requestAnimationFrame(updateCount);
+                    };
+    
+                    animateCounter(document.getElementById('capteurs-actifs'), capteursActifs);
+                    animateCounter(document.getElementById('capteurs-inactifs'), capteursInactifs);
+                    animateCounter(document.getElementById('capteurs-total'), capteursTotal);
                 }
-            }
-            
-            // Préparation des données pour les graphiques
-            const labels = Object.keys(filteredCapteursParAnimal);
-            const data = Object.values(filteredCapteursParAnimal);
-            
-            // Si aucune donnée, afficher un message
-            if (data.length === 0) {
-                document.querySelector('.charts-container').innerHTML = '<div class="no-data"><p>Aucune donnée disponible pour le moment</p></div>';
-                return;
-            }
-            
-            // Couleurs pour le graphique circulaire
-            const backgroundColor = [
-                '#3a86ff', // bleu
-                '#8ac926', // vert
-                '#ffbe0b', // jaune
-                '#fb5607', // orange
-                '#ff006e', // rose
-                '#8338ec', // violet
-                '#3a0ca3', // indigo
-                '#4cc9f0'  // bleu clair
-            ];
-            
-            // Graphique circulaire
-            const ctxPie = document.getElementById('pieChart').getContext('2d');
-            new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColor,
-                        borderColor: '#ffffff',
-                        borderWidth: 2,
-                        hoverOffset: 15
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} capteurs (${percentage}%)`;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '60%',
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true
+    
+                animateCounters();
+    
+                const filteredCapteursParAnimal = {};
+                for (const [animal, count] of Object.entries(capteursParAnimal)) {
+                    if (count > 0) {
+                        filteredCapteursParAnimal[animal] = count;
                     }
                 }
-            });
-            
-            // Graphique en barres
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Nombre de capteurs',
-                        data: data,
-                        backgroundColor: backgroundColor,
-                        borderColor: backgroundColor,
-                        borderWidth: 1,
-                        borderRadius: 6,
-                        barThickness: 30,
-                        maxBarThickness: 40
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
+    
+                const labels = Object.keys(filteredCapteursParAnimal);
+                const data = Object.values(filteredCapteursParAnimal);
+    
+                if (data.length > 0) {
+                    const ctxBar = document.getElementById('barChart').getContext('2d');
+                    new Chart(ctxBar, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Nombre de capteurs',
+                                data: data,
+                                backgroundColor: '#000000',
+                                borderColor: '#ffffff',
+                                borderWidth: 10,
+                                borderRadius: 8,
+                                barThickness: 40,
+                                hoverBackgroundColor: '#333333',
+                            }]
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.raw} capteurs`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0,
-                                font: {
-                                    size: 12
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    backgroundColor: '#2b2d42',
+                                    titleFont: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    bodyFont: {
+                                        size: 13
+                                    },
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `${context.raw} capteurs`;
+                                        }
+                                    },
+                                    displayColors: false,
+                                    padding: 12,
+                                    cornerRadius: 8
                                 }
                             },
-                            grid: {
-                                display: true,
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 12
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6c757d',
+                                        font: {
+                                            weight: '500'
+                                        }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: '#6c757d',
+                                        font: {
+                                            weight: '500'
+                                        }
+                                    }
                                 }
+                            },
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeOutQuart'
                             }
                         }
-                    },
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeOutQuart'
-                    }
+                    });
+    
+                    {% if not user.owner %}
+                    const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+                    new Chart(ctxDoughnut, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Actifs', 'Inactifs'],
+                            datasets: [{
+                                data: [capteursActifs, capteursInactifs],
+                                backgroundColor: ['#38b000', '#d90429'],
+                                borderColor: ['#fff', '#fff'],
+                                borderWidth: 3,
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        font: {
+                                            size: 13,
+                                            weight: '500'
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: '#2b2d42',
+                                    titleFont: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    bodyFont: {
+                                        size: 13
+                                    },
+                                    callbacks: {
+                                        label: function (context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const value = context.raw;
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${value} capteurs (${percentage}%)`;
+                                        }
+                                    },
+                                    padding: 12,
+                                    cornerRadius: 8
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true
+                            }
+                        }
+                    });
+                    {% endif %}
+                } else {
+                    document.querySelector('.charts-container').innerHTML = `
+                        <div class="no-data">
+                            <i class="fas fa-database" style="font-size: 3rem; color: #dee2e6; margin-bottom: 20px;"></i>
+                            <p>Aucune donnée disponible pour le moment</p>
+                        </div>
+                    `;
                 }
             });
-            
-            // Animation des compteurs
-            function animateCounters() {
-                const counters = document.querySelectorAll('.stat-info h3');
-                counters.forEach(counter => {
-                    const target = parseInt(counter.textContent);
-                    let count = 0;
-                    const duration = 1500; // ms
-                    const frameDuration = 1000 / 60; // 60fps
-                    const totalFrames = Math.round(duration / frameDuration);
-                    const increment = target / totalFrames;
-                    
-                    const timer = setInterval(() => {
-                        count += increment;
-                        if (count >= target) {
-                            counter.textContent = target;
-                            clearInterval(timer);
-                        } else {
-                            counter.textContent = Math.floor(count);
-                        }
-                    }, frameDuration);
-                });
-            }
-            
-            // Démarrer l'animation des compteurs
-            animateCounters();
-        });
-    </script>
-</body>
+        </script>
+        
+    </body>
+    
 {% endblock %}

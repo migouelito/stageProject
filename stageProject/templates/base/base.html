@@ -115,6 +115,7 @@
     
             .sidebar-collapsed .logout-btn .nav-text {
                 display: none;
+
             }
     
             .sidebar-collapsed .logout-btn {
@@ -122,43 +123,10 @@
                 padding: 12px 0;
             }
     
-            /* User info */
-            .user-info {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                margin-bottom: 30px;
-                padding: 0 15px;
-                width: 100%;
-            }
-    
-            .user-avatar {
-                width: 70px;
-                height: 70px;
-                border-radius: 50%;
-                object-fit: cover;
-                border: 3px solid var(--accent-color);
-                filter: grayscale(100%) brightness(0);
-                transition: all var(--transition-speed) ease;
-            }
-    
-            .user-name,
-            .user-role {
-                color: #000;
-                margin: 8px 0 0;
-                white-space: nowrap;
-                text-align: center;
-                width: 100%;
-                font-weight: 700;
-                transition: all calc(var(--transition-speed) * 0.8) ease;
-            }
-    
-            .user-role {
-                font-size: 0.8em;
-                color: #666;
-                font-weight: 500;
-            }
-    
+          /* User info */
+
+
+     
             /* Nav items */
             .nav-items {
                 width: 100%;
@@ -253,8 +221,9 @@
                 /* Texte des boutons */
                 .nav-text {
                     margin-left: 14px;
-                    font-size: 14px;
-                    font-weight: 500;
+                    font-size: 12px;
+                    font-style:bold;
+                    font-weight: 800;
                     transition: all var(--transition-speed) ease;
                 }
         
@@ -349,11 +318,52 @@
                 overflow-x: auto; /* Permet le défilement horizontal si nécessaire */
                 white-space: nowrap; /* Empêche le retour à la ligne des éléments enfants */
             }
+        
+            
+         
+            .app-logo {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+            
+            .logo-circle {
+                position: relative;
+                width: 160px;  /* Ajusté pour plus d'espace */
+                height: 160px;
+                border-radius: 50%;
+                background-color: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .app-avatar {
+                width: 150px;  /* Taille du logo ajustée */
+                height: 150px;
+                border-radius: 50%;
+                object-fit: cover;
+                z-index: 2;  /* S'assurer que le logo est au-dessus du texte */
+            }
+            
+            .arc-text {
+                position: absolute;
+                top: 0;  /* Position du texte au-dessus du cercle */
+                left: 0;
+                width: 100%;
+                height: 100%;
+                font-size: 20px;  /* Taille du texte ajustée */
+                font-weight: bold;
+                fill: var(--accent-color); /* ou ex: #2e7d32 */
+                z-index: 1;  /* Le texte est derrière le logo */
+            }
 
+             
             
         </style>
-        
-           
+    
       
         
     </head>
@@ -363,13 +373,25 @@
             <div class="sticky-bar" id="stickyBar"></div>
             <div class="navbar">
                 <!-- User info -->
-                {% if user.is_authenticated %}
-                <div class="user-info">
-                    <img src="{% static 'images/utilisateur.png' %}" alt="Utilisateur" class="user-avatar">
-                    <p class="user-name">{{ user.username }}</p>
-                    <p class="user-role">{{ user.email }}</p>
-                </div>
-                {% endif %}
+             
+                <div class="app-logo">
+                    <div class="logo-circle">
+                      <svg viewBox="0 0 200 200" class="arc-text">
+                        <defs>
+                          <path id="arcPath" d="M 50 40 A 70 70 0 0 1 150 40" /> <!-- Arc au-dessus -->
+                        </defs>
+                        <text width="100%">
+                          <textPath href="#arcPath" startOffset="50%" text-anchor="middle">
+                            B‑Suivi
+                          </textPath>
+                        </text>
+                      </svg>
+                      <img src="{% static 'utilisateurs/images/blocalisation.png' %}" alt="Logo de B-Suivi" class="app-avatar">
+                    </div>
+                  </div>
+                  
+                  
+                
                 
                 <!-- Navigation items -->
                 <div class="nav-items">
@@ -380,16 +402,29 @@
                         </div>
                         <span class="nav-text">Accueil</span>
                     </a>
-                
+                    
+
+                    {% if not request.user.owner %}
+                    <a href="{% url 'liste_des_animaux' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_animaux' %}active{% endif %}" id="home-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/betail.png' %}" alt="Accueil">
+                        </div>
+                        <span class="nav-text">Catégorie bétail</span>
+                    </a>
+                    {% endif %}
+
                     <!-- Capteurs -->
                     <a href="{% url 'liste_des_capteurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_capteurs' %}active{% endif %}" id="capteurs-link">
                         <div class="icon-container">
-                            <img src="{% static 'images/betail.png' %}" alt="Capteurs">
+                            <img src="{% static 'images/capteurs.png' %}" alt="Capteurs">
                         </div>
-                        <span class="nav-text">Betail</span>
+                        <span class="nav-text">Capteurs</span>
                     </a>
                 
                 
+                
+                    
+                    {% if not request.user.owner %}
                     <!-- Localisation -->
                     <a href="{% url 'liste_des_zones' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_zones' %}active{% endif %}" id="localisation-link">
                         <div class="icon-container">
@@ -397,15 +432,17 @@
                         </div>
                         <span class="nav-text">Zone de securite </span>
                     </a>
+                    {% endif %}
 
-
+                    {% if request.user.owner  %}
                       <!-- Localisation -->
-                      <a href="{% url 'suivrebetail' %}" class="nav-link {% if request.resolver_match.url_name == 'suivrebetail' %}active{% endif %}" id="localisation-link">
+                      <a href="{% url 'suivrebetail' request.user.id %}" class="nav-link {% if request.resolver_match.url_name == 'suivrebetail' %}active{% endif %}" id="localisation-link">
                         <div class="icon-container">
                             <img src="{% static 'images/localisation.png' %}" alt="Localisation">
                         </div>
                         <span class="nav-text">Suivre le betail </span>
                         </a>
+                    {% endif %}
           
                            
                
@@ -439,34 +476,21 @@
                         setInterval(updateUnreadMessagesCount, 10000);  // Rafraîchir toutes les 10 secondes
                     </script>
              
+                
                     
-                    <div class="nav-dropdown {% if request.resolver_match.url_name == 'liste_des_roles' or request.resolver_match.url_name == 'liste_des_utilisateurs' %}open{% endif %}">
-                        <button class="nav-link dropdown-toggle" id="users-toggle">
-                            <div class="icon-container">
-                                <img src="{% static 'images/users.png' %}" alt="Utilisateurs">
-                            </div>
-                            <span class="nav-text">Utilisateurs</span>
-                            <span class="arrow">&#9654;</span>
-                        </button>
-                    
-                        <div class="dropdown-menu" id="users-menu">
+                      
 
-
+                            {% if not request.user.owner %}
                             <a href="{% url 'liste_des_utilisateurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_utilisateurs' %}active{% endif %}">
                                 <div class="icon-container">
-                                    <img src="{% static 'images/liste.png' %}" alt="Liste d'Utilisateurs">
+                                    <img src="{% static 'images/users.png' %}" alt="Liste d'Utilisateurs">
                                 </div>
-                                <span class="nav-text">Liste utilisateurs</span>
+                                <span class="nav-text">Liste des éleveurs</span>
                             </a>
-
-                            <a href="{% url 'liste_des_roles' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_roles' %}active{% endif %}">
-                                <div class="icon-container">
-                                    <img src="{% static 'images/roles.png' %}" alt="Permissions">
-                                </div>
-                                <span class="nav-text">Rôles utilisateurs</span>
-                            </a>
+                            {% endif %}
+                        
                             
-                        </div>
+                     
 
                         <a href="{% url 'parametre' %}" class="nav-link {% if request.resolver_match.url_name == 'parametre' %}active{% endif %}">
                             <div class="icon-container">
@@ -475,17 +499,7 @@
                             <span class="nav-text">Paramètres</span>
                         </a>
                     </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.getElementById('users-toggle');
-        const dropdown = toggle.closest('.nav-dropdown');
-    
-        toggle.addEventListener('click', function () {
-            dropdown.classList.toggle('open');
-        });
-    });
-    
-</script>                    
+                  
 
 
         </div>
@@ -598,6 +612,290 @@
 
 
 </style>
+
+<style>
+    .profile-dropdown {
+        --profile-primary-color: #008000;
+        --profile-hover-color: #27ae60;
+        --profile-background: #ffffff;
+        --profile-text-color: #333;
+        --profile-border-color: #e0e0e0;
+        --profile-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --profile-transition: all 0.3s ease;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .profile-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .avatar-container {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--profile-transition);
+    }
+    
+    .avatar-container:hover {
+        transform: scale(1.05);
+        box-shadow: var(--profile-shadow);
+    }
+    
+    .avatar.user-icon {
+        width: 100%;
+        height: 100%;
+        background-color: var(--profile-primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z'/%3E%3C/svg%3E");
+        background-size: 60%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    .dropdown-content {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 240px;
+        background-color: var(--profile-background);
+        border-radius: 8px;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: var(--profile-transition);
+        box-shadow: var(--profile-shadow);
+        z-index: 1000;
+    }
+    
+    .dropdown-content.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .menu-header {
+        padding: 16px;
+        background: linear-gradient(45deg, var(--profile-primary-color), var(--profile-hover-color));
+        color: white;
+    }
+    
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .username {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    
+    .role {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    .menu-items {
+        padding: 8px 0;
+    }
+    
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        color: var(--profile-text-color);
+        text-decoration: none;
+        transition: var(--profile-transition);
+    }
+    
+    .menu-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .menu-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        display: inline-block;
+        background-size: cover;
+    }
+    
+    .profile-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232ecc71' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E");
+    }
+    
+    .logout-icon {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232ecc71' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'%3E%3C/path%3E%3Cpolyline points='16 17 21 12 16 7'%3E%3C/polyline%3E%3Cline x1='21' y1='12' x2='9' y2='12'%3E%3C/line%3E%3C/svg%3E");
+    }
+
+
+        /* Style personnalisé pour la modale de déconnexion */
+        .swal-logout-popup {
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .swal-logout-title {
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+            font-size: 1.4rem !important;
+            margin-bottom: 0.8rem !important;
+        }
+        
+        .swal-logout-confirm {
+            font-weight: 600 !important;
+            padding: 0.6em 1.8em !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3) !important;
+        }
+        
+        .swal-logout-cancel {
+            font-weight: 500 !important;
+            padding: 0.6em 1.8em !important;
+            border-radius: 8px !important;
+            margin-right: 12px !important;
+        }
+        
+        .swal2-icon.swal2-warning {
+            color: #e74c3c !important;
+            border-color: rgba(231, 76, 60, 0.2) !important;
+        }
+
+  
+            /* Style pour la modal de profil */
+            .custom-profile-modal {
+                font-family: 'Segoe UI', Roboto, sans-serif;
+            }
+            
+            .profile-modal-popup {
+                border-radius: 12px !important;
+                max-width: 500px !important;
+                padding: 2rem !important;
+                box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2) !important;
+                transition: transform 0.3s ease !important;
+            }
+            
+            .profile-modal-title {
+                font-size: 1.4rem !important;
+                color: #2c3e50 !important;
+                margin-bottom: 1.5rem !important;
+                text-align: center !important;
+                font-weight: 600 !important;
+            }
+            
+            .profile-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 0 1rem;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background-color: #ecf0f1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .profile-avatar svg {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .profile-details {
+                width: 100%;
+                margin-top: 1rem;
+            }
+            
+            .profile-field {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.8rem 0;
+                border-bottom: 1px solid #ecf0f1;
+            }
+            
+            .profile-field:last-child {
+                border-bottom: none;
+            }
+            
+            .field-label {
+                color: #7f8c8d;
+                font-weight: 500;
+                font-size: 0.95rem;
+            }
+            
+            .field-value {
+                color: #2c3e50;
+                font-weight: 500;
+                text-align: right;
+            }
+            
+            .role-badge {
+                background-color: #3498db;
+                color: white !important;
+                padding: 0.2rem 0.8rem;
+                border-radius: 20px;
+                font-size: 0.85rem;
+            }
+            
+            .profile-edit-button {
+                border-radius: 8px !important;
+                padding: 0.7rem 1.8rem !important;
+                font-weight: 600 !important;
+                box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3) !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            .profile-edit-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3) !important;
+            }
+            
+            .profile-close-button {
+                font-size: 1.5rem !important;
+                color: #7f8c8d !important;
+                transition: color 0.3s ease !important;
+            }
+            
+            .profile-close-button:hover {
+                color: #e74c3c !important;
+            }
+            
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+                margin: 1rem auto;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        
+    
+    </style>
+ 
 <script>
     function dismissAlert(id) {
         const alert = document.getElementById(id);
@@ -682,178 +980,224 @@
                 {% endif %}
             </div>
         </a>
-
-        <!-- Profil (Icône Person) -->
-        <a href="#" class="nav-link" id="profile-link" data-user-id="{{ user.id }}">
-            <div class="icon-container" style="position: relative;">
-                <img src="{% static 'images/userr.png' %}" alt="Profile">
+        <div class="profile-dropdown">
+            <a href="#" class="profile-trigger" id="profile-link-icon" data-user-id="{{ user.id }}">
+                <div class="avatar-container">
+                    <div class="avatar user-icon"></div>
+                </div>
+            </a>
+        
+            <div id="dropdown-menu" class="dropdown-content">
+                <div class="menu-header">
+                    <div class="user-info">
+                        <span class="username">{{ user.username }}</span>
+                        <span class="role">{{ user.role|default:"Utilisateur" }}</span>
+                    </div>
+                </div>
+                <div class="menu-items">
+                    <a href="#" id="profile-menu" class="menu-item">
+                        <i class="menu-icon profile-icon"></i>
+                        <span>Mon profil</span>
+                    </a>
+                    <a href="#" id="logout-menu" class="menu-item">
+                        <i class="menu-icon logout-icon"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                </div>
             </div>
-        </a>
+        </div>
+        
+        <form method="post" action="{% url 'logout' %}" class="logout-form" style="display: none;">
+            {% csrf_token %}
+            <button type="submit" id="logout-btn"></button>
+        </form>
         
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const initUserProfileModal = () => {
-                const profileLink = document.getElementById('profile-link');
-                if (!profileLink) return;
         
+      
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const profileIcon = document.getElementById('profile-link-icon');
+                const dropdown = document.getElementById('dropdown-menu');
+                const profileMenu = document.getElementById('profile-menu');
+                const logoutMenu = document.getElementById('logout-menu');
+            
                 const config = {
                     apiUrl: '/utilisateurs/profil_utilisateur/',
                     modalStyling: {
                         zIndex: 999999,
                         backdropOpacity: 0.4,
                         background: '#ffffff',
-                        accentColor: '#008000'
+                        borderRadius: '12px',
+                        confirmButtonColor: '#27ae60'
                     }
                 };
-        
-                const fetchUserProfile = async (userId) => {
-                    try {
-                        const response = await fetch(`${config.apiUrl}${userId}/`);
-                        if (!response.ok) throw new Error('Erreur réseau');
-                        return await response.json();
-                    } catch (error) {
-                        console.error('Erreur fetch:', error);
-                        throw error;
-                    }
-                };
-        
-                const renderProfileModal = (userData) => {
-                    return Swal.fire({
-                        title: `<span style="color: black; font-weight: bold;">${userData.username} <span class="user-badge">👤</span></span>`,
-                        html: `
-                            <div style="text-align: left; color: black;">
-                                <div style="margin-bottom: 15px;">
-                                    <div style="font-weight: bold; color: black;">Nom complet</div>
-                                    <div>${userData.first_name || '-'} ${userData.last_name || '-'}</div>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <div style="font-weight: bold; color: black;">Nom d'utilisateur</div>
-                                    <div>${userData.username}</div>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <div style="font-weight: bold; color: black;">Email</div>
-                                    <div>${userData.email || 'Non renseigné'}</div>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <div style="font-weight: bold; color: black;">Téléphone</div>
-                                    <div>${userData.telephone || 'Non renseigné'}</div>
-                                </div>
-                                <div>
-                                    <div style="font-weight: bold; color: black;">Rôle</div>
-                                    <div>${userData.role || 'Utilisateur'}</div>
-                                </div>
-                            </div>
-                        `,
-                        icon: 'info',
+            
+                profileIcon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                });
+            
+                profileMenu.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    dropdown.classList.remove('active');
+            
+                    Swal.fire({
+                        title: 'Chargement en cours',
+                        html: '<div class="loading-spinner"></div>',
+                        allowOutsideClick: false,
                         showConfirmButton: false,
-                        showCloseButton: true,
-                        background: config.modalStyling.background,
-                        width: '500px',
-                        padding: '2rem',
-                        backdrop: `rgba(0, 0, 0, ${config.modalStyling.backdropOpacity})`,
-                        customClass: {
-                            container: 'swal2-custom-container',
-                            popup: 'swal2-custom-popup'
-                        },
+                        backdrop: 'rgba(0,0,0,0.4)',
                         didOpen: () => {
-                            const popup = Swal.getPopup();
-                            popup.style.zIndex = `${config.modalStyling.zIndex}`;
-                            popup.animate([{ opacity: 0 }, { opacity: 1 }], {
-                                duration: 300,
-                                easing: 'ease-out'
-                            });
+                            Swal.showLoading();
                         }
                     });
-                };
-                
-                profileLink.addEventListener('click', async (e) => {
-                    e.preventDefault();
-        
-                    Swal.fire({
-                        title: 'Chargement...',
-                        allowOutsideClick: false,
-                        background: config.modalStyling.background,
-                        didOpen: () => Swal.showLoading()
-                    });
-        
+            
                     try {
-                        const userData = await fetchUserProfile(profileLink.dataset.userId);
+                        const userId = profileIcon.dataset.userId;
+                        const response = await fetch(`${config.apiUrl}${userId}/`);
+                        const userData = await response.json();
                         Swal.close();
-                        await renderProfileModal(userData);
+            
+                        Swal.fire({
+                            title: `<span style="color: #2c3e50;">Profil de <strong>${userData.username}</strong></span>`,
+                            html: `
+                                <div class="profile-container">
+                                    <div class="profile-avatar">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="#7f8c8d"/>
+                                            <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="#7f8c8d"/>
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="profile-details">
+                                        <div class="profile-field">
+                                            <span class="field-label">Nom complet</span>
+                                            <span class="field-value">${userData.first_name || '-'} ${userData.last_name || '-'}</span>
+                                        </div>
+                                        
+                                        <div class="profile-field">
+                                            <span class="field-label">Nom d'utilisateur</span>
+                                            <span class="field-value">${userData.username}</span>
+                                        </div>
+                                        
+                                        <div class="profile-field">
+                                            <span class="field-label">Email</span>
+                                            <span class="field-value">${userData.email || 'Non renseigné'}</span>
+                                        </div>
+                                        
+                                        <div class="profile-field">
+                                            <span class="field-label">Téléphone</span>
+                                            <span class="field-value">${userData.telephone || 'Non renseigné'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            showCloseButton: true,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Ok',
+                            confirmButtonColor: '#008000',
+                            cancelButtonColor: '#7f8c8d',
+                            focusConfirm: false,
+                            backdrop: 'rgba(0,0,0,0.4)',
+                            customClass: {
+                                container: 'custom-profile-modal',
+                                popup: 'profile-modal-popup',
+                                title: 'profile-modal-title',
+                                htmlContainer: 'profile-modal-content',
+                                confirmButton: 'profile-edit-button',
+                                closeButton: 'profile-close-button'
+                            },
+                            willOpen: () => {
+                                document.querySelector('.profile-modal-popup').style.transform = 'scale(0.9)';
+                                setTimeout(() => {
+                                    document.querySelector('.profile-modal-popup').style.transform = 'scale(1)';
+                                }, 10);
+                            }
+                        });
                     } catch (error) {
                         Swal.fire({
                             title: 'Erreur',
-                            text: 'Impossible de charger les informations',
+                            text: 'Impossible de charger les informations du profil.',
                             icon: 'error',
-                            background: config.modalStyling.background
+                            confirmButtonColor: '#e74c3c',
+                            backdrop: 'rgba(0,0,0,0.4)'
                         });
                     }
                 });
-            };
-        
-            if (typeof Swal !== 'undefined') {
-                initUserProfileModal();
-            } else {
-                console.error('SweetAlert2 non chargé');
-            }
-        });
-        </script>
-        
             
-        
-        
-        
-
-        <!-- Logout -->
-        <form method="post" action="{% url 'logout' %}" class="logout-form">
-            {% csrf_token %}
-            <button type="submit" class="logout-btn" id="logout-btn">
-                <div class="icon-container">
-                    <img src="{% static 'images/shutdown.png' %}" alt="Déconnexion">
-                </div>
-                <span class="nav-text"></span>
-            </button>
-        </form>
-       
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const logoutForm = document.querySelector('.logout-form');
+                logoutMenu.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    dropdown.classList.remove('active');
             
-                if (logoutForm) {
-                    logoutForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-            
-                        const bodyClass = document.body.className;
-                        const isDark = bodyClass.includes('dark-theme');
-            
-                        Swal.fire({
-                            title: 'Déconnexion ? 😢',
-                            text: "Voulez-vous vous déconnecter ?",
-                            icon: 'question',
-                            iconColor: isDark ? '#f1c40f' : '#ff0000',
-                            confirmButtonColor: isDark ? '#3498db' : '#ff0000',
-                            color: isDark ? '#ecf0f1' : '#333',
-                            showCancelButton: true,
-                            confirmButtonColor: isDark ? '#3498db' : '#e74c3c',
-                            cancelButtonColor: '#008000', 
-                            confirmButtonText: 'Oui, déconnecte-moi',
-                            cancelButtonText: 'Rester connecté',
-                            customClass: {
-                                popup: 'rounded-xl shadow-lg'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                logoutForm.submit();
-                            }
-                        });
+                    Swal.fire({
+                        title: 'Déconnexion',
+                        html: '<span style="font-size: 1.1rem;">Voulez-vous vraiment vous déconnecter ?</span>',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Oui, déconnecter',
+                        cancelButtonText: 'Annuler',
+                        confirmButtonColor: '#e74c3c',
+                        cancelButtonColor: '#008000',
+                        reverseButtons: true,
+                        focusCancel: false,
+                        customClass: {
+                            container: 'swal-logout-container',
+                            popup: 'swal-logout-popup',
+                            header: 'swal-logout-header',
+                            title: 'swal-logout-title',
+                            confirmButton: 'swal-logout-confirm',
+                            cancelButton: 'swal-logout-cancel'
+                        },
+                        width: '26em',
+                        padding: '1.5em',
+                        backdrop: 'rgba(0,0,0,0.4)',
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'À bientôt !',
+                                text: 'Déconnexion en cours...',
+                                icon: 'success',
+                                timer: 1500,
+                                timerProgressBar: true,
+                                showConfirmButton: false,
+                                willClose: () => {
+                                    document.querySelector('.logout-form').submit();
+                                }
+                            });
+                        }
                     });
-                }
-            });
-        </script>
-        
-
+                });
             
+                window.addEventListener('click', (e) => {
+                    if (!profileIcon.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            
+                const style = document.createElement('style');
+                style.textContent = `
+                    .profile-modal-container .swal2-popup {
+                        padding: 0 0 20px 0;
+                    }
+                    .profile-field {
+                        margin-bottom: 12px;
+                        display: flex;
+                        align-items: baseline;
+                    }
+                    .profile-field label {
+                        font-weight: bold;
+                        color: #2ecc71;
+                        margin-right: 8px;
+                        min-width: 120px;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+            </script>
+            
+        
                     
     </div>
 </div>
@@ -891,37 +1235,8 @@
                 padding-top: 40px;
             }
 
-            .logout-form {
-                background: none;
-                border: none;
-                padding: 0;
-                margin: 0;
-            }
-            
-            .logout-btn {
-                background: none;
-                border: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-            }
-            
-            .logout-btn .icon-container {
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .logout-btn img {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                filter: none;
-            }
+     
+       
             
             
         </style>
@@ -953,50 +1268,7 @@
         
     </style>
         
-    <style>
-        .nav-dropdown {
-            width: 100%;
-            position: relative; /* Ajouter cette propriété pour positionner correctement les éléments */
-        }
-    
-        .dropdown-toggle {
-            width: 100%;
-            justify-content: space-between;
-            display: flex;
-            align-items: center;
-            border: none;
-            background: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            color: inherit;
-            text-align: left;
-        }
-    
-     
-        .arrow {
-            transition: transform 0.3s ease;
-            font-size: 0.8rem;
-            margin-left: auto;
-        }
-    
-        .dropdown-menu {
-            display: none;
-            flex-direction: column;
-            padding: 0;
-            margin: 0;
-            margin-left: 15px; /* Garder la marge pour les aligner correctement */
-        }
-    
-        .nav-dropdown.open .dropdown-menu {
-            display: flex;
-        }
-    
-        .nav-dropdown.open .arrow {
-            transform: rotate(90deg);
-        }
-    
-    </style>
-
+   
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarContainer = document.getElementById('sidebarContainer');

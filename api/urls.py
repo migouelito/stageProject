@@ -9,8 +9,8 @@ urlpatterns = [
     # Endpoint pour obtenir un token d'accès et un token de rafraîchissement
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/user/', UserInfoView.as_view(), name='user_info'), 
-    path('api/user/<str:username>/', UserProfileView.as_view(), name='user-profile'),
+    path('api/user/', UserDetail.as_view(), name='user-detail'),  # Route pour accéder et modifier les informations de l'utilisateur
+    path('api/user/', UserProfileView.as_view(), name='user-profile'),
 
        # autres urls
     path('api/protected/', ProtectedView.as_view(), name='protected_view'),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/suivre-betail/', views.suivre_betail_api, name='suivre_betail_api'),
     path('api/messages/', MessageListCreateAPIView.as_view(), name='message-list-create'),
     path('api/messages/<int:pk>/read/', mark_message_as_read, name='mark-message-as-read'),
+    path('api/messages/non_lu/', UnreadMessagesCountView.as_view(), name='unread_messages_count'),
     path('api/position/', receive_gps, name='receive_gps'),
     path('api/capteur/update-position/', mettre_a_jour_position, name='update_capteur_position'),
     path('api/suivre/', views.suivre_betail_api, name='suivre_betail'),  # Pas besoin de user_id dans l'URL

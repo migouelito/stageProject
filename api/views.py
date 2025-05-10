@@ -24,51 +24,70 @@ class EmailTokenObtainPairView(TokenObtainPairView):
 # views.py
 
 
+from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .serializers import UserSerializer
-
-class UserInfoView(APIView):
-    permission_classes = [IsAuthenticated]  # Seules les requêtes authentifiées peuvent accéder à cette vue
-
-    def get(self, request):
-        # Récupérer l'utilisateur actuellement authentifié
-        user = request.user
-        
-        # Sérialiser les informations de l'utilisateur
-        serializer = UserSerializer(user)
-        
-        # Retourner les données sérialisées
-        return Response(serializer.data)
-
-from rest_framework.permissions import AllowAny  # Importer AllowAny
-from utilisateurs.models import User
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer
 
+class UserDetail(APIView):
+    permission_classes = [IsAuthenticated]  # Assurez-vous que seul un utilisateur authentifié peut accéder à cette vue
+
+    def get(self, request):
+        # Récupère l'utilisateur authentifié
+        user = request.user
+        serializer = UserSerializer(user)  # Sérialisation de l'utilisateur
+        return Response(serializer.data)  # Retourne les données de l'utilisateur dans la réponse
+
+    def put(self, request):
+        # Met à jour l'utilisateur authentifié avec les données envoyées dans la requête
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)  # Utilisation de partial=True pour permettre la mise à jour partielle
+
+        if serializer.is_valid():
+            serializer.save()  # Sauvegarde les modifications
+            return Response(serializer.data)  # Retourne les nouvelles données de l'utilisateur après la mise à jour
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Retourne les erreurs si la validation échoue
+
+from rest_framework.permissions import IsAuthenticated  # Utilise l'authentification
+from rest_framework.authentication import TokenAuthentication  # Utilise TokenAuthentication
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import UserProfileSerializer
+from utilisateurs.models import User
+
 class UserProfileView(APIView):
-    permission_classes = [AllowAny]  # Désactive l'authentification pour cette vue
+    permission_classes = [IsAuthenticated]  # Assurez-vous que l'utilisateur est authentifié
+    authentication_classes = [TokenAuthentication]  # Authentification par token
 
-    def get(self, request, username):
+    def get(self, request):
         try:
-            # Essayer de récupérer l'utilisateur par le nom d'utilisateur
-            user = User.objects.filter(username=username).first()
+            # Récupérer l'utilisateur authentifié
+            user = request.user  # L'utilisateur est récupéré depuis le token dans la requête
 
-            if user is None:
-                # Si l'utilisateur n'est pas trouvé, retourner une erreur
-                return Response({"detail": "Utilisateur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+            # Sérialiser les données de l'utilisateur
+            serializer = UserProfileSerializer(user)
 
-            # Sérialisation des données utilisateur
-            serializer = UserSerializer(user)
-
-            # Retourner les données sérialisées
             return Response(serializer.data)
-
         except Exception as e:
-            # Si une exception est levée, renvoyer une erreur générique
+            return Response({"detail": f"Une erreur est survenue: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        try:
+            user = request.user  # L'utilisateur authentifié
+
+            # Sérialiser les données reçues et valider
+            serializer = UserProfileSerializer(user, data=request.data, partial=True)  # Utilisez partial=True pour la mise à jour partielle
+            if serializer.is_valid():
+                # Mettre à jour l'utilisateur
+                serializer.save()  # Cela va appeler la méthode update du sérialiseur
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
             return Response({"detail": f"Une erreur est survenue: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 from rest_framework import generics, permissions
@@ -255,3 +274,30 @@ def suivre_betail_api(request):
         })
 
     return Response({'zones_data': zones_data})
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UnreadMessagesCountSerializer
+from capteurs.models import Message
+from rest_framework import serializers
+
+class UnreadMessagesCountSerializer(serializers.Serializer):
+    unread_count = serializers.IntegerField()
+
+class UnreadMessagesCountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.sub_users.exists():
+            user_ids = [user.id] + list(user.sub_users.values_list('id', flat=True))
+        else:
+            user_ids = [user.id]
+
+        unread_count = Message.objects.filter(user_id__in=user_ids, is_read=False).count()
+
+        serializer = UnreadMessagesCountSerializer({'unread_count': unread_count})
+        return Response(serializer.data)

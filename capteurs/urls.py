@@ -34,7 +34,7 @@ urlpatterns = [
 
     #route api
     path('api/position/', recevoir_position, name='recevoir_position'),
-    path('suivrebetail/', suivreBetail, name='suivrebetail'),
+    path('suivrebetail/<int:user_id>/', suivreBetail, name='suivrebetail'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     

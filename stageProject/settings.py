@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "textile-decorative-till-hoping.trycloudflare.com"
+MY_GLOBAL_VARIABLE = "compatible-moments-diesel-findlaw.trycloudflare.com"
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct

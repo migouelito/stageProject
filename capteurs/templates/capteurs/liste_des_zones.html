@@ -36,7 +36,7 @@
     }
     
     .container-header h1 {
-        font-size: 30px;
+        font-weight: 1000;
         color: #008000;
         margin: 0 0 15px 0;
         padding-left: 0;
@@ -81,6 +81,7 @@
     .users-table tr {
         background-color: white;
         font-weight: bold;
+        font-size:13px;
     }
 
     .users-table tr:hover {
@@ -114,25 +115,29 @@
         color: #008000; /* Texte vert */
         padding: 8px 16px;
         border: 2px solid #008000; /* Bordure verte */
-        border-radius: 5px;
+        border-radius: 10px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         font-weight: bold;
-        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
     }
-    
+
     .add-btn:hover {
         background-color: #008000; /* Fond vert au survol */
         color: white; /* Texte blanc au survol */
+        box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
     }
-    
+
     .add-btn .icon {
         width: 20px;
         height: 20px;
         margin-right: 8px;
+        fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
     }
-
     /* Styles de la modal */
 .modal {
     display: none; /* Cacher la modal par défaut */
@@ -222,7 +227,7 @@
     outline: none;
     font-weight: bold; /* Texte en gras */
     color: #000; /* Texte noir */
-    font-size: 15px;
+    font-size: 12px;
     background-color: #fff;
     transition: all 0.3s ease-in-out;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -300,12 +305,12 @@
                     <td>
                         {% if zone.active_securite %}
                             <span style="display: flex; align-items: center;">
-                                <span style="width: 30px; height: 30px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+                                <span style="width: 20px; height: 20px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
                                 Activée
                             </span>
                         {% else %}
                             <span style="display: flex; align-items: center;">
-                                <span style="width:30px; height: 30px; background-color: #e74c3c; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+                                <span style="width:20px; height: 20px; background-color: #e74c3c; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
                                 Désactivée
                             </span>
                         {% endif %}
@@ -313,16 +318,17 @@
                     
                     <td>
                         <div class="actions">
-                            <!-- Premier bouton : Passer l'ID de la zone et de l'utilisateur dans l'URL ou dans un callback -->
-                            <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
-                                <img src="{% static 'images/zone.png' %}" alt="Voir">
+                            <!-- voir ce que ce passe dans la zone -->
+                            <a href="{% url 'suivrebetail'  user_id=zone.user.id %}" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
+                                <img src="{% static 'images/zone.png' %}" alt="Modifier">
                             </a>
-                            
-                            
+
                             <!-- Modifier la zone -->
-                            <a href="javascript:void(0);" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
-                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
+                            <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
+                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="modifier">
                             </a>
+                       
+                    
                             
                             <!-- Supprimer la zone -->
                             <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">

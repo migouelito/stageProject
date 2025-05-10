@@ -33,5 +33,28 @@ class User(AbstractUser):
         # Retourne une liste de tous les utilisateurs associés
         return User.objects.filter(id__in=[u.id for u in users])
     
+    
+    @staticmethod
+    def get_chefs_d_elevage_et_nb_fils():
+        """
+        Retourne une liste de dictionnaires contenant les utilisateurs qui :
+        - ne sont pas superutilisateurs
+        - ne sont pas des sous-utilisateurs (owner=None)
+        Pour chaque utilisateur, on retourne :
+        - son prénom
+        - son nom
+        - le nombre de sous-utilisateurs (fils) associés
+        """
+        users = User.objects.filter(is_superuser=False, owner__isnull=True)
+        resultats = []
+
+        for user in users:
+            resultats.append({
+                "prenom": user.first_name,
+                "nom": user.last_name,
+                "nombre_fils": user.sub_users.count()
+            })
+
+        return resultats
 
     

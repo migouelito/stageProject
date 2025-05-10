@@ -1,45 +1,71 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
+{% load static %}
+
 <style>
-  
     .container-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
-        padding-bottom: 10px;
+        padding: 20px;
         position: relative;
         flex-wrap: wrap;
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-left: 5px solid #000000;
     }
 
-    .container-header::before {
+    .container-header::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
         width: 100%;
         height: 6px;
-        background-color: black;
-        animation: loadBar 1s forwards;
-
+        background: linear-gradient(to right, #000000, #000000);
+        border-radius: 0 0 12px 12px;
     }
 
-    @keyframes loadBar {
-        0% { width: 0%; }
-        100% { width: 100%; }
-    }
-    
     .container-header h1 {
-        font-size: 30px;
         color: #008000;
-        margin: 0 0 15px 0;
-        padding-left: 0;
+        margin: 0;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+        font-weight: 1000;
     }
 
-    /* Carte Leaflet */
+    .btn-retour {
+        background-color: #008000;
+        color: white;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        font-weight:bold;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-retour:hover {
+        background-color: #008000;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-retour::before {
+        content: "←";
+        margin-right: 8px;
+        font-size: 16px;
+    }
+
     #map {
-        height: calc(100vh - 100px);  /* Enlève la hauteur de l'en-tête */
+        height: calc(100vh - 100px);
         width: 100%;
         border: 2px solid #ddd;
         border-radius: 5px;
@@ -49,32 +75,43 @@
 
 <div class="container-header">
     <h1>Suivez en temps réel votre bétail</h1>
-    <!-- Barre de chargement juste en dessous du titre -->
+    {%if not request.user.owner %}
+    <a href="{% url 'liste_des_zones' %}" class="btn-retour">Retour à la liste des zones</a>
+    {% endif %}
 </div>
 
 <div id="map" style="width: 100%; height: 500px;"></div>
 
-<!-- Leaflet CSS & JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
 <script>
     const userId = "{{ user_id }}";
     console.log('user_id récupéré:', userId);
 
     const trackerMarkers = {};
-    const map = L.map('map').setView([0, 0], 2); // Position par défaut
+    const map = L.map('map').setView([0, 0], 2);
 
-    // Définir les tuiles de la carte
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    function getGreenIcon() {
+    function getAnimalIcon(type_animal) {
+        let iconUrl = '';
+        switch(type_animal) {
+            case 'boeuf':
+                iconUrl = '{% static "utilisateurs/images/boeufl.png" %}';
+                break;
+            case 'ane':
+            case 'mouton':
+                iconUrl = '{% static "utilisateurs/images/iconsinfo.png" %}';
+                break;
+            default:
+                iconUrl = '{% static "utilisateurs/images/iconsinfo.png" %}';
+        }
         return new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            iconUrl: iconUrl,
             shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
+            iconSize: [50, 50],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30],
             shadowSize: [41, 41]
         });
     }
@@ -83,32 +120,45 @@
 
     socket.onopen = function () {
         console.log('WebSocket connecté !');
-        // Augmenter la barre de chargement à 100% dès que WebSocket est connecté
-        document.querySelector('.load-bar').style.width = '100%'; 
     };
+
+    const zoneLayers = {};
 
     socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const trackerId = data.tracker_id || 'default';
-        const icon = getGreenIcon();
+        const type_animal = data.type_animal || 'unknown';
+        const icon = getAnimalIcon(type_animal);
+
+        const currentLatLng = [data.latitude, data.longitude];
 
         if (trackerMarkers[trackerId]) {
-            trackerMarkers[trackerId].setLatLng([data.latitude, data.longitude]);
-            if (trackerMarkers[trackerId]._popup) {
-                trackerMarkers[trackerId]._popup.setContent(`🐄 Bœuf ${trackerId}`);
-            }
+            trackerMarkers[trackerId].setLatLng(currentLatLng);
+            trackerMarkers[trackerId]._popup.setContent(`🐄 ${type_animal} ${trackerId}`);
         } else {
-            const marker = L.marker([data.latitude, data.longitude], {
+            const marker = L.marker(currentLatLng, {
                 icon: icon,
                 riseOnHover: true
             }).addTo(map);
-
-            marker.bindPopup(`🐄 Bœuf ${trackerId}`, { autoPan: false });
+            marker.bindPopup(`🐄 ${type_animal} ${trackerId}`, { autoPan: false });
             trackerMarkers[trackerId] = marker;
         }
 
-        // Commenté pour éviter de forcer le zoom
-        // map.setView([data.latitude, data.longitude], 14); 
+        // Vérifie si l'animal est dans une zone
+        Object.values(zoneLayers).forEach(zone => {
+            let inside = false;
+            if (zone.type === 'polygon') {
+                inside = L.polygon(zone.coords).getBounds().contains(currentLatLng);
+            } else if (zone.type === 'circle') {
+                const dist = map.distance(currentLatLng, zone.coords);
+                inside = dist <= zone.radius;
+            }
+
+            zone.layer.setStyle({
+                color: inside ? 'green' : 'red',
+                fillColor: inside ? 'green' : 'red'
+            });
+        });
     };
 
     socket.onerror = function (error) {
@@ -119,56 +169,61 @@
         console.warn('WebSocket fermé:', event.code);
     };
 
-    // ----------------------------
-    // Affichage des zones de sécurité
-    // ----------------------------
     const zonesData = JSON.parse('{{ zones_data_json|escapejs }}');
+    const allBounds = [];
 
     zonesData.forEach(zone => {
         const forme = zone.forme;
-        console.log('Traitement de la zone #', zone.id, zone);  // Debug log pour vérifier les données
-
         try {
-            if (forme === 'polygon' && zone.coins) {
-                const coords = zone.coins;
-                if (coords && coords.length > 2) {
-                    const latlngs = coords.map(pt => [pt[0], pt[1]]);
-                    L.polygon(latlngs, {
-                        color: 'green',
-                        weight: 3,
-                        fillOpacity: 0.2
-                    }).addTo(map).bindPopup(`Zone #${zone.id} (Polygone)`);
-                }
-            } else if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
-                L.circle([zone.latitude, zone.longitude], {
-                    radius: zone.rayon,
-                    color: 'blue',
+            let latLngs;
+
+            if (forme === 'polygon' && zone.coins && zone.coins.length > 2) {
+                latLngs = zone.coins.map(pt => [pt[0], pt[1]]);
+                const layer = L.polygon(latLngs, {
+                    color: 'green',
                     weight: 3,
-                    fillColor: 'blue',
+                    fillOpacity: 0.2
+                }).addTo(map).bindPopup(`Zone #${zone.id} (Polygone)`);
+                zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer: layer };
+                allBounds.push(...latLngs);
+            } else if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
+                const center = [zone.latitude, zone.longitude];
+                const layer = L.circle(center, {
+                    radius: zone.rayon,
+                    color: 'green',
+                    weight: 3,
+                    fillColor: 'green',
                     fillOpacity: 0.1
                 }).addTo(map).bindPopup(`Zone #${zone.id} (Cercle)`);
+                zoneLayers[zone.id] = { type: 'circle', coords: center, radius: zone.rayon, layer: layer };
+                const circleBounds = layer.getBounds();
+                allBounds.push(circleBounds.getSouthWest(), circleBounds.getNorthEast());
             } else if (forme === 'rectangle' && zone.coin1_lat) {
-                const latlngs = [
+                latLngs = [
                     [zone.coin1_lat, zone.coin1_lon],
                     [zone.coin2_lat, zone.coin2_lon],
                     [zone.coin3_lat, zone.coin3_lon],
                     [zone.coin4_lat, zone.coin4_lon],
                     [zone.coin1_lat, zone.coin1_lon]
                 ];
-                L.polygon(latlngs, {
-                    color: 'orange',
+                const layer = L.polygon(latLngs, {
+                    color: 'green',
                     weight: 3,
                     fillOpacity: 0.2
                 }).addTo(map).bindPopup(`Zone #${zone.id} (Rectangle)`);
+                zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer: layer };
+                allBounds.push(...latLngs);
             } else {
-                console.warn(`Zone #${zone.id} avec forme non traitée: ${forme}`);
+                console.warn(`Zone #${zone.id} forme inconnue: ${forme}`);
             }
         } catch (e) {
-            console.error(`Erreur lors du traitement de la zone #${zone.id}:`, e);
+            console.error(`Erreur zone #${zone.id}:`, e);
         }
     });
+
+    if (allBounds.length > 0) {
+        map.fitBounds(allBounds, { padding: [20, 20] });
+    }
 </script>
-
-
 
 {% endblock %}

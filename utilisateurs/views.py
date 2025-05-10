@@ -284,11 +284,8 @@ class CreateUtilisateurView(PermissionRequiredMixin, CreateView):
     permission_required = 'utilisateurs.view_user'
 
     def dispatch(self, request, *args, **kwargs):
-        # Choisir le template dynamiquement selon le type d'utilisateur
-        if request.user.is_superuser:
-            self.template_name = 'utilisateurs/create_utilisateuradmin.html'
-        else:
-            self.template_name = 'utilisateurs/create_utilisateur.html'
+        # Pas besoin de changer de template, on utilise le même pour tous
+        self.template_name = 'utilisateurs/create_utilisateur.html'
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):

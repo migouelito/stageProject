@@ -42,8 +42,6 @@ class CapteurForm(forms.ModelForm):
         capteur = super().save(commit=False)
 
         if self.instance.pk is None:
-            capteur.latitude = 48.8566
-            capteur.longitude = 2.3522
             capteur.actif = False
 
         if self.user:

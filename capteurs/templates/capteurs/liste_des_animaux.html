@@ -1,13 +1,14 @@
 
-{% extends 'base/baseadmin.html' %}
+{% extends 'base/base.html' %}
 {% load static %}
 
 {% block content %}
-    <title>Liste des Animaux</title>
+    <title>Liste des catégories d'nimaux</title>
     <!-- Lien vers le CSS -->
     <style>
         * {
             box-sizing: border-box; /* S'assurer que tout est inclus dans la largeur de l'élément */
+            
         }
 
 
@@ -86,6 +87,7 @@
             font-size: 30px;
             color: #008000;
             margin: 0 0 15px 0;
+            font-weight: 1000;
             padding-left: 0;
         }
 
@@ -139,6 +141,8 @@
         .users-table tr {
             background-color: white;
             font-weight: bold;
+            font-size:14px;
+
         }
 
         .users-table tr:hover {
@@ -157,8 +161,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 30px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
             padding: 0;
         }
         
@@ -172,25 +176,29 @@
             color: #008000; /* Texte vert */
             padding: 8px 16px;
             border: 2px solid #008000; /* Bordure verte */
-            border-radius: 5px;
+            border-radius: 10px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             font-weight: bold;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
         }
 
         .add-btn:hover {
             background-color: #008000; /* Fond vert au survol */
             color: white; /* Texte blanc au survol */
+            box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
         }
 
         .add-btn .icon {
             width: 20px;
             height: 20px;
             margin-right: 8px;
+            fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
         }
-
         .search-container {
             flex-grow: 1;
             display: flex;
@@ -209,7 +217,7 @@
             outline: none;
             font-weight: bold; /* Texte en gras */
             color: #000; /* Texte noir */
-            font-size: 15px;
+            font-size: 12px;
             background-color: #fff;
             transition: all 0.3s ease-in-out;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -230,108 +238,7 @@
             box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
         }
 
-        /* Moadl*/
-         /* Styles de la modal */
-    .modal {
-        display: none; /* Cacher la modal par défaut */
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4); /* Fond noir avec transparence */
-        border-radius: 10px; /* Bordure arrondie pour la modal */
-        animation: fadeIn 0.5s ease; /* Animation d'apparition */
-    }
-
-    /* Animation d'apparition */
-    @keyframes fadeIn {
-        0% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
-        }
-    }
-
-    /* Contenu de la modal */
-    .modal-content {
-        background-color: #fff;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 500px;
-        border-radius: 10px; /* Arrondir les coins du contenu de la modal */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre autour du contenu */
-        animation: slideUp 0.5s ease-out; /* Animation de glissement de haut en bas */
-    }
-
-    /* Animation de glissement vers le haut */
-    @keyframes slideUp {
-        0% {
-            transform: translateY(-20px);
-        }
-        100% {
-            transform: translateY(0);
-        }
-    }
-
-    /* Pied de la modal */
-    .modal-footer {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-    }
-
-    /* Bouton de fermeture */
-    .close-btn {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        border: none;
-        background: none;
-        cursor: pointer;
-    }
-
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
-    }
-
-    /* Boutons */
-    .btn {
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-        border: none;
-        transition: all 0.3s ease; /* Transition fluide au survol */
-    }
-
-    .btn-danger {
-        background-color: #d9534f; /* Rouge pour supprimer */
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background-color: #c9302c; /* Couleur rouge plus foncée au survol */
-    }
-
-    .btn-secondary {
-        background-color: white; /* Blanc pour annuler */
-        color: #black; /* Couleur bleu clair */
-        border: 1px solid black; /* Bordure bleue */
-    }
-
-    .btn-secondary:hover {
-        background-color: #f7f7f7; /* Légère couleur grise en survol */
-        color: black; /* Bleu plus foncé en survol */
-    }
+   
     </style>
 </head>
 <body>
@@ -340,7 +247,7 @@
 
     <!-- En-tête de la page -->
     <div class="container-header">
-        <h1>Liste des Animaux</h1>
+        <h1>Liste des catégories d'animaux</h1>
         <!-- Barre de recherche centrée -->
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Rechercher un capteur..." onkeyup="searchCapteurs()">
@@ -355,7 +262,7 @@
     <div class="modal" id="addModal">
         <div class="modal-content">
             <button class="close-btn" id="closeModalBtn">&times;</button>
-            <h2 id="modalTitle">Ajouter un Animal</h2>
+        
             <form method="POST" enctype="multipart/form-data" id="animalForm" action="{% url 'ajouter_animal' %}">
                 {% csrf_token %}
                 <input type="hidden" name="animal_id" id="animalId"> <!-- Champ caché pour l'ID de l'animal -->
@@ -375,16 +282,7 @@
         </div>
     </div>
 
-   <!-- Modale de confirmation de suppression -->
-<div class="modal" id="deleteModal">
-    <div class="modal-content">
-        <button class="close-btn" id="closeDeleteModalBtn">&times;</button>
-        <h2>Confirmer la Suppression</h2>
-        <p>Êtes-vous sûr de vouloir supprimer cet animal ? Cette action est irréversible.</p>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
-        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Annuler</button>
-    </div>
-</div>
+
 
 
     <!-- Tableau des animaux -->
@@ -402,7 +300,7 @@
                 <td>{{ animal.type_animal }}</td>
                 <td>
                     {% if animal.image %}
-                        <img src="{{ animal.image.url }}" alt="{{ animal.type_animal }}" width="40" height="40">
+                        <img src="{{ animal.image.url }}" alt="{{ animal.type_animal }}" width="30" height="30">
                     {% else %}
                         <span>Aucune image</span>
                     {% endif %}
@@ -427,230 +325,324 @@
 
 </div>
 
+   <!-- Modale de confirmation de suppression -->
+   <div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <button class="close-btn" id="closeDeleteModalBtn">&times;</button>
+        <h2>Confirmer la Suppression</h2>
+        <p>Êtes-vous sûr de vouloir supprimer cet animal ? Cette action est irréversible.</p>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Annuler</button>
+    </div>
+</div>
+
 <script>
-// Fonction pour ouvrir le modal en mode ajout ou modification
-document.getElementById('showAddFormBtn').addEventListener('click', function() {
-    const modal = document.getElementById('addModal');
-    modal.classList.add('show');
-    // Réinitialiser le formulaire pour l'ajout
-    document.getElementById('animalForm').reset();
-    document.getElementById('modalTitle').textContent = "Ajouter un Animal";
-    document.getElementById('submitBtn').textContent = "Ajouter";
-    document.getElementById('animalId').value = ''; // Champ caché
-});
-
-function editAnimal(animalId) {
-    const modal = document.getElementById('addModal');
-    modal.classList.add('show');
-    document.getElementById('modalTitle').textContent = "Modifier un Animal";
-    document.getElementById('submitBtn').textContent = "Modifier";  // Changer le texte du bouton en "Modifier"
-    document.getElementById('submitBtn').setAttribute("formaction", `/capteurs/modifier_animal/${animalId}/`); // Mettre à jour l'URL de l'action du formulaire
-
-    fetch(`/capteurs/modifier_animal/${animalId}/`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('animalId').value = data.id;
-            document.getElementById('type_animal').value = data.type_animal;
-
-            const imagePreview = document.getElementById('imagePreview');
-            if (data.image_url) {
-                imagePreview.innerHTML = `
-                    <p>Image actuelle : ${data.image_name}</p>
-                    <img src="${data.image_url}" width="100" height="100">
-                `;
-            } else {
-                imagePreview.innerHTML = '<span>Aucune image</span>';
-            }
-        })
-        .catch(error => console.error('Erreur lors de la récupération des données de l\'animal:', error));
-}
-
-document.getElementById('closeModalBtn').addEventListener('click', function() {
-    const modal = document.getElementById('addModal');
-    modal.classList.remove('show');
-});
-
-// Fermer le modal en cliquant à l'extérieur de la fenêtre
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('addModal');
-    if (event.target === modal) {
-        modal.classList.remove('show');
+    // Ouvre le modal en mode ajout
+    document.getElementById('showAddFormBtn').addEventListener('click', function () {
+        const modal = document.getElementById('addModal');
+        modal.classList.add('show');
+    
+        // Réinitialiser les champs
+        document.getElementById('animalForm').reset();
+        document.getElementById('submitBtn').textContent = "Ajouter";
+        document.getElementById('submitBtn').removeAttribute("formaction");
+        document.getElementById('animalId').value = "";
+        
+        const preview = document.getElementById('imagePreview');
+        if (preview) preview.innerHTML = ''; // Vider l'aperçu image
+    
+        // Ajouter un titre si besoin
+        const modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.textContent = "Ajouter un Animal";
+    });
+    
+    // Ouvre le modal en mode modification
+    function editAnimal(animalId) {
+        const modal = document.getElementById('addModal');
+        modal.classList.add('show');
+    
+        document.getElementById('submitBtn').textContent = "Modifier";
+        document.getElementById('submitBtn').setAttribute("formaction", `/capteurs/modifier_animal/${animalId}/`);
+    
+        const modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.textContent = "Modifier un Animal";
+    
+        fetch(`/capteurs/modifier_animal/${animalId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('animalId').value = data.id;
+                document.getElementById('type_animal').value = data.type_animal;
+    
+                const preview = document.getElementById('imagePreview');
+                if (preview) {
+                    if (data.image_url) {
+                        preview.innerHTML = `
+                            <p>Image actuelle : ${data.image_name}</p>
+                            <img src="${data.image_url}" width="100" height="100">
+                        `;
+                    } else {
+                        preview.innerHTML = "<span>Aucune image</span>";
+                    }
+                }
+            })
+            .catch(error => console.error("Erreur lors de la récupération de l'animal :", error));
     }
-});
-
-// Fonction pour ouvrir le modal de suppression
-let currentAnimalId = null; // ID de l'animal actuellement sélectionné pour suppression
-function showDeleteModal(animalId) {
-    const modal = document.getElementById('deleteModal');
-    modal.classList.add('show');
-    currentAnimalId = animalId; // Sauvegarder l'ID de l'animal à supprimer
-}
-
-// Fonction pour fermer le modal de suppression
-document.getElementById('closeDeleteModalBtn').addEventListener('click', function() {
-    const modal = document.getElementById('deleteModal');
-    modal.classList.remove('show');
-});
-
-// Fermer le modal de suppression en cliquant à l'extérieur de la fenêtre
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('deleteModal');
-    if (event.target === modal) {
-        modal.classList.remove('show');
+    
+    // Ferme le modal d'ajout/modification
+    document.getElementById('closeModalBtn').addEventListener('click', function () {
+        document.getElementById('addModal').classList.remove('show');
+    });
+    
+    // Fermer en cliquant à l'extérieur du modal
+    window.addEventListener('click', function (event) {
+        const addModal = document.getElementById('addModal');
+        const deleteModal = document.getElementById('deleteModal');
+    
+        if (event.target === addModal) addModal.classList.remove('show');
+        if (event.target === deleteModal) deleteModal.classList.remove('show');
+    });
+    
+    // === MODAL DE SUPPRESSION ===
+    let currentAnimalId = null;
+    
+    function showDeleteModal(animalId) {
+        currentAnimalId = animalId;
+        document.getElementById('deleteModal').classList.add('show');
     }
-});
-// Fonction pour supprimer l'animal
-document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-    if (currentAnimalId !== null) {
-        // Envoi de la requête pour supprimer l'animal
-        fetch(`/capteurs/supprimer_animal/${currentAnimalId}/`, {
-            method: 'POST',  // Changer DELETE par POST
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Fermer le modal et supprimer la ligne dans le tableau
-                document.getElementById(`delete-animal-${currentAnimalId}`).closest('tr').remove();
-                const modal = document.getElementById('deleteModal');
-                modal.classList.remove('show');
-            } else {
-                alert('Erreur lors de la suppression de l\'animal.');
-            }
-        })
-        .catch(error => console.error('Erreur lors de la suppression de l\'animal:', error));
-    }
-});
-
-
-// Annuler la suppression
-document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
-    const modal = document.getElementById('deleteModal');
-    modal.classList.remove('show');
-});
-
-    // Fonction de recherche des animaux
-    function searchCapteurs() {
-        const input = document.getElementById('searchInput');
-        const filter = input.value.toLowerCase();  // Convertir la recherche en minuscules pour comparaison
-        const table = document.querySelector('.users-table');
-        const rows = table.getElementsByTagName('tr');  // Obtenir toutes les lignes du tableau
-
-        // Parcourir toutes les lignes du tableau et masquer celles qui ne correspondent pas
-        for (let i = 1; i < rows.length; i++) {  // Commencer à 1 pour ignorer l'en-tête
-            const cells = rows[i].getElementsByTagName('td');
-            const typeAnimal = cells[0].textContent || cells[0].innerText;  // Obtenir le texte de la première cellule (type d'animal)
-
-            // Vérifier si le type d'animal correspond à la recherche
-            if (typeAnimal.toLowerCase().indexOf(filter) > -1) {
-                rows[i].style.display = '';  // Afficher la ligne si elle correspond
-            } else {
-                rows[i].style.display = 'none';  // Masquer la ligne si elle ne correspond pas
-            }
+    
+    document.getElementById('closeDeleteModalBtn').addEventListener('click', function () {
+        document.getElementById('deleteModal').classList.remove('show');
+    });
+    
+    document.getElementById('cancelDeleteBtn').addEventListener('click', function () {
+        document.getElementById('deleteModal').classList.remove('show');
+    });
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        if (currentAnimalId !== null) {
+            fetch(`/capteurs/supprimer_animal/${currentAnimalId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById(`delete-animal-${currentAnimalId}`).closest('tr').remove();
+                    document.getElementById('deleteModal').classList.remove('show');
+                } else {
+                    alert("Erreur lors de la suppression de l'animal.");
+                }
+            })
+            .catch(error => console.error("Erreur de suppression :", error));
         }
+    });
+    
+    // === BARRE DE RECHERCHE ===
+    function searchCapteurs() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll(".users-table tbody tr");
+    
+        rows.forEach(row => {
+            const typeAnimal = row.querySelector("td").textContent.toLowerCase();
+            row.style.display = typeAnimal.includes(filter) ? "" : "none";
+        });
     }
-
-
-</script>
-
-
+    </script>
+    
 </body>
 </html>
 
 <style>
-    /* Styles généraux du modale */
+ /* Styles généraux du modal */
 .modal {
-    display: none; /* Par défaut, le modale est caché */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fond sombre semi-transparent */
+    background-color: rgba(0, 0, 0, 0.7); /* Fond plus foncé pour meilleur contraste */
     z-index: 9999;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.3s ease, visibility 0.3s ease; /* Animation de transition */
-    visibility: hidden; /* Cacher le modale par défaut */
-    opacity: 0; /* Opacité à zéro pour le rendre invisible */
+    transition: all 0.3s ease;
+    visibility: hidden;
+    opacity: 0;
 }
 
-/* Contenu du modale */
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 40%;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-    transform: scale(0.9); /* Initialement légèrement rétréci */
-    transition: transform 0.3s ease; /* Animation de la taille */
-}
-
-/* Effet d'ouverture du modale */
+/* Animation améliorée */
 .modal.show {
     display: flex;
     visibility: visible;
     opacity: 1;
 }
 
-/* Animation de l'apparition du modale */
-.modal.show .modal-content {
-    transform: scale(1); /* Agrandissement à la taille normale */
+/* Contenu du modal redesigné */
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-/* Bouton de fermeture du modale */
+/* Animation du contenu */
+.modal.show .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+/* En-tête du modal */
+.modal-content h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eaeaea;
+}
+
+/* Texte de confirmation */
+.modal-content p {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* Bouton de fermeture élégant */
 .close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     background-color: transparent;
     border: none;
-    font-size: 20px;
-    color: #333;
+    font-size: 24px;
+    color: #aaa;
     cursor: pointer;
+    transition: color 0.2s;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
-/* Style du formulaire dans le modale */
-.modal .form-group {
-    margin-bottom: 15px;
-}
-
-.modal .form-group label {
-    font-size: 16px;
+.close-btn:hover {
     color: #333;
+    background-color: #f5f5f5;
 }
 
-.modal .form-control {
+/* Style des boutons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 5px; /* Espacement horizontal uniforme */
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+    box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+}
+
+.btn-primary {
+    background-color:#388E3C;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: green;
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Style du formulaire dans le modal */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-control {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
+    padding: 12px;
+    border-radius: 6px;
     border: 1px solid #ddd;
     font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.modal .form-control:focus {
-    border-color: #4CAF50;
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
     outline: none;
 }
 
-/* Bouton de soumission du formulaire */
-.modal .btn-primary {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
+/* Image preview */
+#imagePreview {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
 }
 
-.modal .btn-primary:hover {
-    background-color: #45a049;
+#imagePreview img {
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+/* Actions en bas du modal */
+.modal-actions {
+    display: flex;
+    justify-content: center; /* Centrer les boutons */
+    margin-top: 25px;
+}
+
+/* Pour les boutons de soumission et actions principales */
+.modal form {
+    text-align: center; /* Centre les boutons dans les formulaires */
+}
+
+.modal .btn-primary,
+.modal #confirmDeleteBtn,
+.modal #cancelDeleteBtn {
+    display: inline-block;
+    min-width: 120px; /* Largeur minimale pour uniformité */
+    text-align: center;
+    margin: 10px 5px; /* Espacement uniforme */
 }
 </style>
 

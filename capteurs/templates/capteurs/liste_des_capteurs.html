@@ -130,7 +130,7 @@ select[multiple] {
         animation: loadBar 1s forwards;
     }
     .container-header h1 {
-        font-size: 30px;
+        font-weight: 1000;
         color: #008000;
         margin: 0 0 15px 0;
         padding-left: 0;
@@ -184,10 +184,11 @@ select[multiple] {
     }
  
     
-    /* Lignes en bleu */
+    /* Lignes en blanc */
     .users-table tr {
         background-color:white;
         font-weight: bold;
+        font-size:14px;
     }
     
     .users-table tr:hover {
@@ -226,23 +227,28 @@ select[multiple] {
         color: #008000; /* Texte vert */
         padding: 8px 16px;
         border: 2px solid #008000; /* Bordure verte */
-        border-radius: 5px;
+        border-radius: 10px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         font-weight: bold;
-        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
     }
-    
+
     .add-btn:hover {
         background-color: #008000; /* Fond vert au survol */
         color: white; /* Texte blanc au survol */
+        box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
     }
-    
+
     .add-btn .icon {
         width: 20px;
         height: 20px;
         margin-right: 8px;
+        fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
     }
 
     
@@ -265,7 +271,7 @@ select[multiple] {
         outline: none;
         font-weight: bold; /* Texte en gras */
         color: #000; /* Texte noir */
-        font-size: 15px;
+        font-size: 12px;
         background-color: #fff;
         transition: all 0.3s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -296,22 +302,7 @@ select[multiple] {
     margin: 20px auto;
 }
 
-/* Style général des alertes */
-.alert {
-    padding: 15px 20px;
-    border-radius: 10px;
-    font-size: 16px;
-    text-align: left;
-    font-weight: bold;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    animation: slideIn 0.6s ease-in-out;
-    transition: opacity 0.4s ease-out;
-    color: #fff; /* Texte blanc */
-}
+
 
 /* Animation d'apparition */
 @keyframes slideIn {
@@ -325,11 +316,6 @@ select[multiple] {
     }
 }
 
-
-
-
-
-
 </style>
 
    
@@ -339,7 +325,7 @@ select[multiple] {
 
 {% block content %}
 <div class="container-header">
-    <h1>Liste des animaux</h1>
+    <h1>Liste des capteurs</h1>
 
      <!-- Barre de recherche centrée -->
      <div class="search-container">
@@ -366,10 +352,11 @@ select[multiple] {
         }
     </script>
     
-
+    {% if not request.user.owner %}
     <a href="#" id="addCapteurBtn" class="add-btn">
-        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un capteur" class="icon"> Ajouter un animal
+        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un capteur" class="icon"> Ajouter un capteur
     </a>
+    {% endif %}
     
     
 </div>
@@ -384,10 +371,13 @@ select[multiple] {
 <table class="users-table">
     <thead>
         <tr>
-            <th>NUMERO DU DISPOSITIF</th>
+            <th>NUMERO DU CAPTEUR</th>
             <th>TYPE D'ANIMAL</th>
             <th>ZONE DE SECURITE</th>  <!-- Nouvelle colonne pour la zone -->
+            <th>STATUT</th>  <!-- Nouvelle colonne pour la zone -->
+            {% if not request.user.owner %}
             <th>ACTIONS</th> 
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -403,6 +393,17 @@ select[multiple] {
                     {% endif %}
                 </td>
                 <td>
+                    {% if capteur.actif %}
+                      <span style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: green;"></span>
+                    {% else %}
+                      <span style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: red;"></span>
+                    {% endif %}
+                  </td>
+                  
+                  
+
+                <td>
+                    {% if not request.user.owner %}
                     <div class="actions">
                         <a href="javascript:void(0);" class="detail-capteur-btn" data-capteur-id="{{ capteur.id }}">
                             <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Voir les détails">
@@ -416,6 +417,7 @@ select[multiple] {
                             <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
                         </a>
                     </div>
+                    {% endif %}
                 </td>
             </tr>
         {% empty %}
@@ -437,34 +439,29 @@ select[multiple] {
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
-            <button type="button" class="btn" id="modalCancelBtn">Annuler</button>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         function init() {
             const modal = document.getElementById("actionModal");
             const modalTitle = document.getElementById("modalTitle");
             const modalBody = document.getElementById("modalBody");
             const modalActionBtn = document.getElementById("modalActionBtn");
-            const modalCancelBtn = document.getElementById("modalCancelBtn");
             const closeBtn = document.querySelector(".close");
     
             function openModal(title, content, actionText, actionCallback, hideActionBtn = false) {
-                modalTitle.textContent = title;
+                // Supprime l'affichage du titre
+                modalTitle.textContent = "";
+                modalTitle.style.display = "none";
+    
                 modalBody.innerHTML = content;
                 modalActionBtn.textContent = actionText;
+                modalActionBtn.style.display = hideActionBtn ? "none" : "inline";
     
-                // Rendre le bouton d'action (comme "Mettre à jour", "Supprimer", etc.) invisible si nécessaire
-                if (hideActionBtn) {
-                    modalActionBtn.style.display = "none";  // Cacher le bouton d'action
-                } else {
-                    modalActionBtn.style.display = "inline";  // Afficher le bouton d'action
-                }
-    
-                modalActionBtn.onclick = function() {
+                modalActionBtn.onclick = function () {
                     if (actionCallback) actionCallback();
                     closeModal();
                 };
@@ -477,213 +474,196 @@ select[multiple] {
             }
     
             closeBtn.addEventListener("click", closeModal);
-            modalCancelBtn.addEventListener("click", closeModal);
-            window.addEventListener("click", function(event) {
+            window.addEventListener("click", function (event) {
                 if (event.target === modal) {
                     closeModal();
                 }
             });
     
-
             function setupAddCapteurFormHandler() {
                 const form = document.getElementById("addCapteurForm");
                 if (!form) return;
-            
-                form.addEventListener("submit", function(e) {
+    
+                form.addEventListener("submit", function (e) {
                     e.preventDefault();
-                    
                     const url = form.action;
                     const formData = new FormData(form);
-                    
+    
                     fetch(url, {
                         method: "POST",
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        body: formData,
                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            // Si la réponse indique une erreur, réinjecter le formulaire avec les erreurs
-                            return response.text().then(html => {
-                                document.getElementById("modalBody").innerHTML = html;
-                                setupAddCapteurFormHandler();
-                            });
-                        } else {
-                            // Si tout va bien, fermer le modal et recharger la page
-                            closeModal();
-                            location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Erreur lors de l'envoi du formulaire :", error);
-                    });
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.text().then((html) => {
+                                    document.getElementById("modalBody").innerHTML = html;
+                                    setupAddCapteurFormHandler();
+                                });
+                            } else {
+                                closeModal();
+                                location.reload();
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de l'envoi du formulaire :", error);
+                        });
                 });
             }
-            document.querySelectorAll(".modify-capteur-btn").forEach(btn => {
-                btn.addEventListener("click", function(e) {
+    
+            document.querySelectorAll(".modify-capteur-btn").forEach((btn) => {
+                btn.addEventListener("click", function (e) {
                     e.preventDefault();
-            
                     const capteurId = this.getAttribute("data-capteur-id");
-            
+    
                     fetch(`/capteurs/modifier_capteur/${capteurId}/`)
-                        .then(response => response.text())
-                        .then(html => {
+                        .then((response) => response.text())
+                        .then((html) => {
                             openModal(
-                                "Modifier le capteur",
+                                "", // pas de titre
                                 html,
                                 "Mettre à jour",
                                 null,
                                 true
                             );
-            
-                            const form = document.querySelector('.form-style');
+    
+                            const form = document.querySelector(".form-style");
                             if (form) {
-                                form.setAttribute('action', `/capteurs/modifier_capteur/${capteurId}/`);
+                                form.setAttribute("action", `/capteurs/modifier_capteur/${capteurId}/`);
                                 setupUpdateCapteurFormHandler(form);
                             }
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             console.error("Erreur lors du chargement du formulaire de modification du capteur :", error);
                         });
                 });
             });
-            
+    
             function setupUpdateCapteurFormHandler(form) {
-                form.addEventListener("submit", function(e) {
+                form.addEventListener("submit", function (e) {
                     e.preventDefault();
-            
                     const url = form.action;
                     const formData = new FormData(form);
-            
+    
                     fetch(url, {
                         method: "POST",
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: formData
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        body: formData,
                     })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(html => {
-                                document.getElementById("modalBody").innerHTML = html;
-                                const newForm = document.querySelector('.form-style');
-                                if (newForm) {
-                                    setupUpdateCapteurFormHandler(newForm);
-                                }
-                            });
-                        } else {
-                            closeModal();
-                            location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Erreur lors de la soumission du formulaire de modification du capteur :", error);
-                    });
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.text().then((html) => {
+                                    document.getElementById("modalBody").innerHTML = html;
+                                    const newForm = document.querySelector(".form-style");
+                                    if (newForm) {
+                                        setupUpdateCapteurFormHandler(newForm);
+                                    }
+                                });
+                            } else {
+                                closeModal();
+                                location.reload();
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de la soumission du formulaire de modification du capteur :", error);
+                        });
                 });
             }
-            
-
-            // Fonction pour ajouter un capteur
-            document.getElementById("addCapteurBtn").addEventListener("click", function(e) {
+    
+            document.getElementById("addCapteurBtn").addEventListener("click", function (e) {
                 e.preventDefault();
     
                 fetch("{% url 'ajouter_capteur' %}")
-                    .then(response => response.text())
-                    .then(html => {
+                    .then((response) => response.text())
+                    .then((html) => {
                         openModal(
-                            "Ajouter un capteur",
+                            "", // pas de titre
                             html,
                             "",
                             null,
-                            true  // Cacher le bouton d'action pour cette fenêtre
+                            true
                         );
-    
                         setupAddCapteurFormHandler();
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         console.error("Erreur lors du chargement du formulaire :", error);
-                        openModal("Erreur", `
-                            <div class="alert alert-danger">
-                                Impossible de charger le formulaire : ${error.message}
-                            </div>
-                        `, "Fermer", closeModal, true); // Cacher le bouton d'action pour cette fenêtre
+                        openModal(
+                            "",
+                            `<div class="alert alert-danger">Impossible de charger le formulaire : ${error.message}</div>`,
+                            "Fermer",
+                            closeModal,
+                            true
+                        );
                     });
             });
     
-            // Fonction pour afficher les détails du capteur
-            document.querySelectorAll(".detail-capteur-btn").forEach(btn => {
-                btn.addEventListener("click", function(e) {
+            document.querySelectorAll(".detail-capteur-btn").forEach((btn) => {
+                btn.addEventListener("click", function (e) {
                     e.preventDefault();
-    
                     const capteurId = this.getAttribute("data-capteur-id");
     
                     fetch(`/capteurs/detail_capteur/${capteurId}/`)
-                        .then(response => response.text())
-                        .then(html => {
+                        .then((response) => response.text())
+                        .then((html) => {
                             openModal(
-                                "Détails du capteur",
+                                "", // pas de titre
                                 html,
                                 "",
                                 null,
-                                true  // Cacher le bouton d'action pour cette fenêtre
+                                true
                             );
-                          
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             console.error("Erreur lors du chargement des détails du capteur :", error);
                         });
                 });
             });
     
-            // Gestion des boutons de suppression
-            document.addEventListener("click", function(event) {
+            document.addEventListener("click", function (event) {
                 if (event.target.closest(".delete-btn")) {
                     event.preventDefault();
-    
                     const btn = event.target.closest(".delete-btn");
                     const capteurId = btn.getAttribute("data-id");
     
                     openModal(
-                        "Confirmation de suppression", 
-                        "Êtes-vous sûr de vouloir supprimer ce capteur ?", 
-                        "Supprimer", 
-                        function() {
+                        "", // pas de titre
+                        "Êtes-vous sûr de vouloir supprimer ce capteur ?",
+                        "Supprimer",
+                        function () {
                             fetch(`/supprimer-capteur/${capteurId}/`, {
                                 method: "POST",
                                 headers: {
                                     "X-CSRFToken": getCSRFToken(),
-                                    "Content-Type": "application/json"
-                                }
+                                    "Content-Type": "application/json",
+                                },
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    btn.closest("tr").remove();
-                                    closeModal();
-                                } else {
-                                    alert("Erreur lors de la suppression.");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Erreur lors de la suppression :", error);
-                                alert("Impossible de supprimer le capteur.");
-                            });
+                                .then((response) => response.json())
+                                .then((data) => {
+                                    if (data.success) {
+                                        btn.closest("tr").remove();
+                                        closeModal();
+                                    } else {
+                                        alert("Erreur lors de la suppression.");
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Erreur lors de la suppression :", error);
+                                    alert("Impossible de supprimer le capteur.");
+                                });
                         },
-                        false  // Ne pas cacher le bouton d'action ici (le garder visible)
+                        false
                     );
                 }
             });
     
             function getCSRFToken() {
-                return document.querySelector('[name=csrfmiddlewaretoken]').value;
+                return document.querySelector("[name=csrfmiddlewaretoken]").value;
             }
         }
     
         init();
     });
+    </script>
     
-</script>
-
-
+    
 {% endblock %}

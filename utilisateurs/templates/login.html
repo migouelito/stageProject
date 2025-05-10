@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url("{% static 'utilisateurs/images/vache.jpg' %}");
+            background-image: url("{% static 'utilisateurs/images/IoTBetail.jpeg' %}");
             background-size: cover;
             background-position: center;
             display: flex;
@@ -18,93 +18,18 @@
         }
 
         .login-container {
-            background-color: #fff;
-            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            width: 320px;
             max-width: 90%;
             margin: auto;
             opacity: 0;
             transform: translateY(-20px);
-            animation: fadeInSlide 0.8s ease-out forwards;
-        }
-
-        @keyframes fadeInSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-sizing: border-box;
-        }
-
-        .login-container input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            border: none;
-            color: #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-        }
-
-        .login-container input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .login-container a {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: #007BFF;
-            text-decoration: none;
-        }
-
-        .login-container a:hover {
-            text-decoration: underline;
-        }
-
-        /* Animation des messages d'erreur */
-        .errorlist, .non-field-errors {
-            background-color: #dc3545;
-            color: white;
-            font-size: 0.9em;
-            padding: 8px 10px;
-            list-style: none;
-            font-weight: bold;
-            border-radius: 5px;
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: fadeInError 0.6s ease-out forwards;
-        }
-
-        @keyframes fadeInError {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            animation: fadeInZoom 0.8s ease-out forwards;
+            position: relative;
+            overflow: hidden;
         }
 
         @keyframes fadeInZoom {
@@ -118,14 +43,211 @@
             }
         }
 
-        .login-container {
-            animation: fadeInZoom 0.8s ease-out forwards;
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
         }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+        }
+
+        .login-container input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .login-container input[type="submit"]:hover {
+            background-color: #27ae60;
+        }
+
+        .login-container a {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .login-container a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        .errorlist, .non-field-errors {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 0.9em;
+            padding: 10px 15px;
+            list-style: none;
+            font-weight: bold;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInError 0.6s ease-out forwards;
+            margin-bottom: 15px;
+        }
+
+        @keyframes fadeInError {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container img.logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 100px;
+            height: auto;
+        }
+
+        /* Loading animation */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2ecc71;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Placeholder styling */
+        ::placeholder {
+            color: #95a5a6;
+            opacity: 1;
+        }
+
+        :-ms-input-placeholder {
+            color: #95a5a6;
+        }
+
+        ::-ms-input-placeholder {
+            color: #95a5a6;
+        }
+
+
+
+        .app-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-circle {
+            position: relative;
+            width: 160px;  /* Ajusté pour plus d'espace */
+            height: 160px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .app-avatar {
+            width: 150px;  /* Taille du logo ajustée */
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            z-index: 2;  /* S'assurer que le logo est au-dessus du texte */
+        }
+        
+        .arc-text {
+            position: absolute;
+            top: 0;  /* Position du texte au-dessus du cercle */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: 20px;  /* Taille du texte ajustée */
+            font-weight: bold;
+            fill: var(--accent-color); /* ou ex: #2e7d32 */
+            z-index: 1;  /* Le texte est derrière le logo */
+        }
+        
     </style>
 </head>
 <body>
 
     <div class="login-container">
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <div class="app-logo">
+            <div class="logo-circle">
+              <svg viewBox="0 0 200 200" class="arc-text">
+                <defs>
+                  <path id="arcPath" d="M 50 40 A 70 70 0 0 1 150 40" /> <!-- Arc au-dessus -->
+                </defs>
+                <text width="100%">
+                  <textPath href="#arcPath" startOffset="50%" text-anchor="middle">
+                    B‑Suivi
+                  </textPath>
+                </text>
+              </svg>
+              <img src="{% static 'utilisateurs/images/blocalisation.png' %}" alt="Logo de B-Suivi" class="app-avatar">
+            </div>
+          </div>
+
         <h2>Connexion</h2>
 
         {% if form.non_field_errors %}
@@ -136,11 +258,12 @@
         </div>
         {% endif %}
         
-        <form method="post">
+        <form method="post" id="loginForm">
             {% csrf_token %}
         
             <div class="form-group">
-                {{ form.email }}
+                <input type="email" name="email" class="input-field" placeholder="Adresse email" required 
+                       value="{{ form.email.value|default_if_none:'' }}">
                 {% if form.email.errors %}
                     <ul class="errorlist">
                         {% for error in form.email.errors %}
@@ -151,7 +274,7 @@
             </div>
         
             <div class="form-group">
-                {{ form.password }}
+                <input type="password" name="password" class="input-field" placeholder="Mot de passe" required>
                 {% if form.password.errors %}
                     <ul class="errorlist">
                         {% for error in form.password.errors %}
@@ -179,6 +302,29 @@
                 setTimeout(() => error.remove(), 500);
             });
         }, 3000);
+
+        // Gestion du loading lors de la soumission du formulaire
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        });
+
+        // Focus personnalisé pour les champs
+        const inputFields = document.querySelectorAll('.input-field');
+        inputFields.forEach(input => {
+            // Animation au focus
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#2ecc71';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.borderColor = '#ddd';
+            });
+        });
+
+        // Conserver le mot de passe en cas d'erreur (si le navigateur ne le fait pas automatiquement)
+        {% if form.password.value %}
+        document.querySelector('input[name="password"]').value = "{{ form.password.value }}";
+        {% endif %}
     </script>
 
 </body>

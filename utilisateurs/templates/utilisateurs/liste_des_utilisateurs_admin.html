@@ -29,7 +29,7 @@
 
      
     .container-header h1 {
-        font-size: 30px;
+        font-weight: 1000;
         color: #008000;
         margin: 0 0 15px 0;
         padding-left: 0;
@@ -61,7 +61,7 @@
 
     .users-table tbody td {
         padding: 14px;
-        font-size: 14px;
+        font-size: 13px;
         border-bottom: 1px solid #eee;
         font-weight: bold;
         
@@ -109,25 +109,29 @@
         color: #008000; /* Texte vert */
         padding: 8px 16px;
         border: 2px solid #008000; /* Bordure verte */
-        border-radius: 5px;
+        border-radius: 10px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         font-weight: bold;
-        transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
     }
-    
+
     .add-btn:hover {
         background-color: #008000; /* Fond vert au survol */
         color: white; /* Texte blanc au survol */
+        box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
     }
 
     .add-btn .icon {
         width: 20px;
         height: 20px;
         margin-right: 8px;
+        fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
     }
-
    
     .search-container {
         flex-grow: 1;
@@ -147,7 +151,7 @@
         outline: none;
         font-weight: bold; /* Texte en gras */
         color: #000; /* Texte noir */
-        font-size: 15px;
+        font-size: 12px;
         background-color: #fff;
         transition: all 0.3s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -554,9 +558,6 @@ select[multiple] {
 
 
 </style>
-
-
-
 
 
 {% endblock %}

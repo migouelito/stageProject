@@ -27,6 +27,7 @@ class PositionConsumer(AsyncWebsocketConsumer):
                 latitude = position.get('latitude')
                 longitude = position.get('longitude')
                 tracker_id = position.get('tracker_id')
+                type_animal = position.get('type_animal')  # Ajout ici
 
                 if latitude and longitude and tracker_id:
                     await self.channel_layer.group_send(
@@ -35,7 +36,8 @@ class PositionConsumer(AsyncWebsocketConsumer):
                             'type': 'send_position',
                             'latitude': latitude,
                             'longitude': longitude,
-                            'tracker_id': tracker_id
+                            'tracker_id': tracker_id,
+                            'type_animal': type_animal  # Ajout dans l'événement
                         }
                     )
 
@@ -43,8 +45,9 @@ class PositionConsumer(AsyncWebsocketConsumer):
         latitude = event['latitude']
         longitude = event['longitude']
         tracker_id = event['tracker_id']
+        type_animal = event.get('type_animal')  # Récupération ici
 
-        # Appel de la méthode, mais on ne rejette plus l'envoi
+        # Vérification zone
         dans_zone = await self.is_capteur_in_zone(tracker_id, latitude, longitude)
         print(f"📍 Capteur {tracker_id} est dans la zone ? {'✅ Oui' if dans_zone else '❌ Non'}")
 
@@ -63,12 +66,14 @@ class PositionConsumer(AsyncWebsocketConsumer):
         if not has_access:
             return
 
-        # Envoi des données si tout est valide
+        # Envoi des données avec type_animal
         await self.send(text_data=json.dumps({
             'latitude': latitude,
             'longitude': longitude,
-            'tracker_id': tracker_id
+            'tracker_id': tracker_id,
+            'type_animal': type_animal  # Inclusion dans l'envoi final
         }))
+
 
 
     @sync_to_async

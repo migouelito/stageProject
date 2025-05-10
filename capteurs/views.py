@@ -15,18 +15,19 @@ class CapteursListView(PermissionRequiredMixin, ListView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.has_perm(self.permission_required):
             messages.error(request, "Vous n'avez pas la permission d'accéder à cette page.")
-            return redirect('homePage')  # Redirection personnalisée
+            return redirect('homePage')
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         user = self.request.user
-        if user.owner:  # si c'est un sous-utilisateur
-            parent = user.owner
-            utilisateurs = [parent] + list(parent.sub_users.all())
-        else:  # si c'est un utilisateur principal
-            utilisateurs = [user] + list(user.sub_users.all())
-        return Capteur.objects.filter(user__in=utilisateurs)
 
+        # Cas 1 : si c’est un owner, il voit ses propres capteurs
+        if not user.owner:
+            return Capteur.objects.filter(user=user)
+
+        # Cas 2 : sinon, c’est un sub-user, on affiche les capteurs dont la zone est liée à lui
+        zones_utilisateur = ZoneSecurite.objects.filter(user=user)
+        return Capteur.objects.filter(zone_securite__in=zones_utilisateur)
 
     def handle_no_permission(self):
         messages.error(self.request, "Vous n'avez pas la permission de voir cette page.")
@@ -37,10 +38,6 @@ from django.views.generic import FormView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib import messages  # Importer les messages Django
-
-
-import csv
-from django.db import IntegrityError
 
 class AjoutCapteursView(FormView):
     template_name = 'capteurs/ajouter_capteur.html'
@@ -55,38 +52,112 @@ class AjoutCapteursView(FormView):
     def post(self, request, *args, **kwargs):
         nombre_formulaires = self.request.session.get('nombre_capteurs', 1)
         form_list = [CapteurForm(request.POST, user=request.user) for _ in range(nombre_formulaires)]
-
+        
+        file_uploaded = 'csv_file' in request.FILES
         valid_forms = [form for form in form_list if form.is_valid()]
-
-        if len(valid_forms) == len(form_list):
+        
+        # Récupérer le type_animal et la zone de sécurité du premier formulaire valide
+        type_animal = valid_forms[0].cleaned_data.get('type_animal') if valid_forms else None
+        zone_securite = valid_forms[0].cleaned_data.get('zone_securite') if valid_forms else None
+        
+        # Validation du CSV
+        csv_valid = True
+        csv_errors = []
+        csv_data = []
+        
+        if file_uploaded:
+            file = request.FILES['csv_file']
+            csv_valid, csv_data, csv_errors = self.valider_csv(file)
+        
+        # Si tous les formulaires et le CSV sont valides
+        if len(valid_forms) == len(form_list) and csv_valid:
             parent_user = request.user.owner if hasattr(request.user, 'owner') and request.user.owner else request.user
-
             erreurs = []
+            capteurs_crees = []
+
+            # Enregistrer les capteurs à partir des formulaires
             for form in valid_forms:
                 try:
                     capteur = form.save(commit=False)
                     capteur.user = parent_user
+                    if zone_securite:
+                        capteur.zone_securite = zone_securite  # Associer la zone de sécurité choisie
                     capteur.save()
+                    capteurs_crees.append(capteur.identifiant)
                 except IntegrityError:
-                    erreurs.append(f"Le capteur avec l’identifiant '{form.cleaned_data.get('identifiant')}' existe déjà.")
+                    erreurs.append(f"Le capteur avec l'identifiant '{form.cleaned_data.get('identifiant')}' existe déjà.")
                 except Exception as e:
-                    erreurs.append(f"Erreur inconnue lors de l'enregistrement d’un capteur : {str(e)}")
+                    erreurs.append(f"Erreur lors de l'enregistrement : {str(e)}")
 
-            if 'csv_file' in request.FILES:
-                file = request.FILES['csv_file']
-                messages.info(request, f"Fichier CSV reçu : {file.name}")
-                self.importer_capteurs_csv(file, parent_user)
+            # Enregistrer les capteurs du CSV avec le type_animal et la zone de sécurité du formulaire
+            if file_uploaded and type_animal:
+                for identifiant in csv_data:
+                    try:
+                        if identifiant not in capteurs_crees:  # Éviter les doublons
+                            Capteur.objects.create(
+                                user=parent_user,
+                                identifiant=identifiant,
+                                type_animal=type_animal,
+                                zone_securite=zone_securite,  # Associer la zone de sécurité
+                                actif=False
+                            )
+                            capteurs_crees.append(identifiant)
+                    except IntegrityError:
+                        erreurs.append(f"Le capteur CSV avec l'identifiant '{identifiant}' existe déjà.")
+                    except Exception as e:
+                        erreurs.append(f"Erreur avec le capteur CSV '{identifiant}': {str(e)}")
 
+            # Gestion des messages
             if erreurs:
                 for err in erreurs:
                     messages.error(request, err)
+                if capteurs_crees:
+                    messages.success(request, f"{len(capteurs_crees)} capteur(s) créé(s) avec succès !")
                 return self.form_invalid(form_list)
             else:
-                messages.success(request, "Les capteurs ont été ajoutés avec succès ! ✅")
+                total = len(valid_forms) + len(csv_data) if file_uploaded else len(valid_forms)
+                messages.success(request, f"{total} capteur(s) ajouté(s) avec succès !")
                 return super().form_valid(valid_forms)
         else:
-            messages.error(request, "Il y a des erreurs dans les formulaires. Veuillez les corriger. ⚠️")
+            # Afficher les erreurs de formulaire et du CSV
+            for form in form_list:
+                if not form.is_valid():
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            messages.error(request, f"{form.fields[field].label}: {error}")
+            
+            for error in csv_errors:
+                messages.error(request, error)
+            
             return self.form_invalid(form_list)
+
+    def valider_csv(self, file):
+        try:
+            import csv
+            from io import TextIOWrapper
+
+            csv_file = TextIOWrapper(file, encoding='utf-8')
+            reader = csv.reader(csv_file)
+            next(reader)  # Ignore l'entête
+
+            identifiants = []
+            erreurs = []
+            
+            for i, row in enumerate(reader, start=2):
+                if not row or not row[0].strip():
+                    erreurs.append(f"Ligne {i}: Identifiant manquant ou vide")
+                    continue
+                
+                identifiant = row[0].strip()
+                if Capteur.objects.filter(identifiant=identifiant).exists():
+                    erreurs.append(f"Ligne {i}: Le capteur '{identifiant}' existe déjà")
+                else:
+                    identifiants.append(identifiant)
+            
+            return (len(erreurs) == 0, identifiants, erreurs)
+
+        except Exception as e:
+            return (False, [], [f"Erreur de lecture du CSV: {str(e)}"])
 
     def form_invalid(self, form_list):
         return self.render_to_response(self.get_context_data(form_list=form_list))
@@ -96,47 +167,6 @@ class AjoutCapteursView(FormView):
         context['form_list'] = kwargs.get('form_list', [])
         context['nombre_formulaires'] = self.request.session.get('nombre_capteurs', 1)
         return context
-
-    def importer_capteurs_csv(self, file, user):
-        try:
-            import csv
-            from io import TextIOWrapper
-            from django.db import IntegrityError
-
-            csv_file = TextIOWrapper(file, encoding='utf-8')
-            reader = csv.reader(csv_file)
-            next(reader)  # Ignore l'entête
-
-            nb_ajoutes = 0
-            erreurs = []
-
-            for i, row in enumerate(reader, start=2):
-                try:
-                    if len(row) < 2:
-                        erreurs.append(f"Ligne {i} : ligne incomplète.")
-                        continue
-
-                    Capteur.objects.create(
-                        user=user,
-                        identifiant=row[0],
-                        type_animal=row[1],
-                        latitude=48.8566,
-                        longitude=2.3522,
-                        actif=False
-                    )
-                    nb_ajoutes += 1
-                except IntegrityError:
-                    erreurs.append(f"Ligne {i} : le capteur '{row[0]}' existe déjà.")
-                except Exception as e:
-                    erreurs.append(f"Ligne {i} : erreur inattendue : {str(e)}")
-
-            if nb_ajoutes:
-                messages.success(self.request, f"{nb_ajoutes} capteur(s) importé(s) avec succès depuis le fichier CSV. ✅")
-            for erreur in erreurs:
-                messages.error(self.request, erreur)
-
-        except Exception as e:
-            messages.error(self.request, f"Erreur lors de la lecture du fichier CSV : {str(e)}")
 
 
 from django.views.generic.edit import UpdateView
@@ -215,9 +245,6 @@ from django.shortcuts import render
 from .models import Statistiques
 from django.contrib.auth.decorators import login_required
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
 @login_required
 def dashboard(request):
     user = request.user
@@ -225,9 +252,7 @@ def dashboard(request):
     if user.is_superuser:
         # Statistiques générales pour l'admin (tous les utilisateurs par exemple)
         stats = {
-            'capteurs_par_animal': Statistiques.nombre_capteurs_par_animal(user),
-            'capteurs_actifs': Statistiques.nombre_capteurs_actifs(user),
-            'capteurs_inactifs': Statistiques.nombre_capteurs_inactifs(user),
+        'chefs_d_elevage': User.get_chefs_d_elevage_et_nb_fils(),
         }
         return render(request, 'base/statistiqueadmin.html', stats)
     else:
@@ -236,6 +261,7 @@ def dashboard(request):
             'capteurs_par_animal': Statistiques.nombre_capteurs_par_animal(user),
             'capteurs_actifs': Statistiques.nombre_capteurs_actifs(user),
             'capteurs_inactifs': Statistiques.nombre_capteurs_inactifs(user),
+            'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
         }
         return render(request, 'base/statistique.html', stats)
 
@@ -686,24 +712,23 @@ import json
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import ZoneSecurite
+from django.http import Http404
 
 @login_required
-def suivreBetail(request):
-    user = request.user
+def suivreBetail(request, user_id=None):
+    try:
+        if user_id:
+            user = User.objects.get(id=user_id)
+        else:
+            user = request.user
+    except User.DoesNotExist:
+        raise Http404("Utilisateur non trouvé")
 
-    # Par défaut : ses propres zones
-    related_users = [user]
-
-    # Si l'utilisateur est un parent (donc sans owner)
-    if not user.owner:
-        related_users += list(user.sub_users.all())
-
-    # On filtre les zones selon l'utilisateur ou ses sub-users (si c’est un parent)
-    zones = ZoneSecurite.objects.filter(user__in=related_users)
+    # 🔒 Ne récupérer que les zones de CET utilisateur
+    zones = ZoneSecurite.objects.filter(user=user)
 
     zones_data = []
     for zone in zones:
-        # Conversion du champ 'coins' si nécessaire
         try:
             coins = json.loads(zone.coins) if zone.coins else None
         except json.JSONDecodeError:
@@ -723,15 +748,16 @@ def suivreBetail(request):
             'coin3_lon': zone.coin3_lon,
             'coin4_lat': zone.coin4_lat,
             'coin4_lon': zone.coin4_lon,
-            'coins': coins,  # Données de coins converties
+            'coins': coins,
         })
 
     zones_data_json = json.dumps(zones_data)
 
     return render(request, 'capteurs/suivrebetail.html', {
-        'user_id': user.id,  # ✅ toujours transmettre l'ID du user connecté
+        'user_id': user.id,
         'zones_data_json': zones_data_json
     })
+
 
 #gestion des animaux partie enregistrement des animaux par l'admin
 from .models import Animal

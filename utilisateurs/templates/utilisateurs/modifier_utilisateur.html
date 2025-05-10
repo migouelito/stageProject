@@ -2,215 +2,481 @@
 {% load static %}
 
 {% block content %}
+<div class="container-header">
+    <h1>Modifier les informations de l'utilisateur</h1>
+    <a href="{% url 'liste_des_utilisateurs' %}" class="btn-retour">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+        Retour à la liste
+    </a>
+</div>
+
 <div class="form-container">
     <div class="form-card">
-        <h2 class="form-title">
-            <i class="fas fa-user-edit"></i>
-            {% if form.instance.pk %}Modifier{% else %}Créer{% endif %} un Utilisateur
-        </h2>
-        
-        <form id="updateUserForm" method="post" class="user-form">
-            {% csrf_token %}
-            
-            <div class="form-fields">
-                {{ form.as_p }}
-            </div>
+        {% if form.instance.pk %}Modifier{% else %}Créer{% endif %} un Utilisateur
 
+        <form method="post" action="{% url 'modifier_utilisateur' user.id %}" class="user-form">
+            {% csrf_token %}
+        
+            <div class="form-row">
+                <div class="form-group floating">
+                    {{ form.username }}
+                    <label for="{{ form.username.id_for_label }}">Nom d'utilisateur<span class="required">*</span></label>
+                </div>
+                <div class="form-group floating">
+                    {{ form.first_name }}
+                    <label for="{{ form.first_name.id_for_label }}">Prénom<span class="required">*</span></label>
+                </div>
+            </div>
+        
+            <div class="form-row">
+                <div class="form-group floating">
+                    {{ form.last_name }}
+                    <label for="{{ form.last_name.id_for_label }}">Nom<span class="required">*</span></label>
+                </div>
+                <div class="form-group floating">
+                    {{ form.email }}
+                    <label for="{{ form.email.id_for_label }}">Email<span class="required">*</span></label>
+                </div>
+            </div>
+        
+            <div class="form-row">
+                <div class="form-group floating">
+                    {{ form.telephone }}
+                    <label for="{{ form.telephone.id_for_label }}">Téléphone<span class="required">*</span></label>
+                </div>
+                <div class="form-group floating">
+                    {{ form.password }}
+                    <label for="{{ form.password.id_for_label }}">Mot de passe<span class="required">*</span></label>
+                </div>
+            </div>
+        
+            <div class="form-row">
+                <div class="form-group checkbox">
+                    <label for="{{ form.is_active.id_for_label }}">
+                        {{ form.is_active }}
+                        <span class="checkmark"></span>
+                        Actif
+                    </label>
+                </div>
+                <div class="form-group select">
+                    <label for="{{ form.groups.id_for_label }}">Groupes</label>
+                    {{ form.groups }}
+                </div>
+            </div>
+        
             <div class="form-actions">
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-save"></i> Sauvegarder
-                </button>
-                <a href="javascript:history.back()" class="cancel-btn">
-                    <i class="fas fa-times"></i> Annuler
+                <a href="{% url 'liste_des_utilisateurs' %}" class="cancel-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                    Annuler
                 </a>
+                <button type="submit" class="submit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                    </svg>
+                    Sauvegarder
+                </button>
             </div>
         </form>
+        
     </div>
 </div>
 
 <style>
     :root {
-        --primary-color: #388e3c;  /* Vert principal */
-        --primary-dark: #2e7d32;   /* Vert foncé */
-        --primary-light: #81c784;  /* Vert clair */
-        --danger-color: #d32f2f;   /* Rouge pour les actions dangereuses */
+        --primary-color: #388e3c;
+        --primary-light: #81c784;
+        --primary-dark: #2e7d32;
+        --danger-color: #d32f2f;
         --text-color: #333;
         --border-color: #e0e0e0;
         --light-gray: #f5f5f5;
-        --success-color: #43a047;  /* Vert de succès */
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
-    /* Structure de base */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+
+    .required {
+        color: #d32f2f;
+        margin-left: 3px;
+    }
+
+    .container-header {
+        max-width: 1000px;
+        margin: 0 auto 30px;
+        padding: 25px 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .container-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        animation: loadBar 0.8s ease-out forwards;
+    }
+
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+
+    .container-header h1 {
+        font-size: 28px;
+        color: var(--primary-dark);
+        margin: 0;
+        font-weight: 700;
+        position: relative;
+    }
+
+    .btn-retour {
+        background-color: var(--primary-dark);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 10px rgba(46, 125, 50, 0.3);
+    }
+
+    .btn-retour:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        background-color: var(--primary-color);
+    }
+
+    .btn-retour:active {
+        transform: translateY(0);
+    }
+
     .form-container {
         display: flex;
         justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 2rem;
-        background-color: #f1f8e9;  /* Fond vert très clair */
+        padding: 0 20px 40px;
     }
 
     .form-card {
         width: 100%;
-        max-width: 700px;
+        max-width: 1000px;
         background: white;
         border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0, 100, 0, 0.1);  /* Ombre verte subtile */
-        padding: 2.5rem;
-        border-top: 4px solid var(--primary-color);
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 100, 0, 0.08);
+        position: relative;
+        overflow: hidden;
     }
 
-    .form-title {
-        color: var(--primary-color);
-        text-align: center;
-        margin-bottom: 2rem;
-        font-size: 1.8rem;
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
     }
 
-    .form-title i {
-        margin-right: 12px;
-    }
-
-    /* Styles des champs de formulaire */
-    .user-form p {
-        margin-bottom: 1.5rem;
+    .user-form {
         display: flex;
         flex-direction: column;
     }
 
-    .user-form label {
-        font-weight: 600;
-        color: #2e7d32;  /* Vert foncé pour les labels */
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
+    .form-row {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
     }
 
-    .user-form input[type="text"],
-    .user-form input[type="email"],
-    .user-form input[type="tel"],
-    .user-form input[type="password"],
-    .user-form select {
-        padding: 0.8rem 1rem;
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+        position: relative;
+    }
+
+    /* Style des champs flottants */
+    .floating {
+        position: relative;
+        padding-top: 18px;
+    }
+
+    .floating label {
+        position: absolute;
+        top: 28px;
+        left: 12px;
+        color: #757575;
+        font-size: 14px;
+        font-weight: 500;
+        pointer-events: none;
+        transition: var(--transition);
+        background: white;
+        padding: 0 5px;
+    }
+
+    .floating input, 
+    .floating select {
+        width: 100%;
+        padding: 12px 16px;
         border: 1px solid var(--border-color);
         border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s;
-        background-color: var(--light-gray);
+        font-size: 15px;
+        transition: var(--transition);
     }
 
-    .user-form input:focus,
-    .user-form select:focus {
+    .floating input:focus,
+    .floating select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.2);  /* Ombre verte */
+        box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2);
         outline: none;
     }
 
-    /* Checkbox personnalisée */
-    .user-form input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--primary-color);
-        margin-right: 8px;
+    .floating input:focus + label,
+    .floating input:not(:placeholder-shown) + label,
+    .floating select:focus + label,
+    .floating select:not(:placeholder-shown) + label {
+        top: 0;
+        left: 10px;
+        font-size: 12px;
+        color: var(--primary-dark);
     }
 
-    /* Style pour les groupes (checkboxes multiples) */
-    .user-form ul {
-        list-style: none;
-        padding: 0;
-        margin: 0.5rem 0 0 0;
-    }
-
-    .user-form ul li {
-        margin-bottom: 0.5rem;
-    }
-
-    .user-form ul li label {
+    /* Style des cases à cocher */
+    .checkbox {
         display: flex;
         align-items: center;
-        font-weight: normal;
+        padding-top: 18px;
+    }
+
+    .checkbox label {
+        display: flex;
+        align-items: center;
         cursor: pointer;
+        position: relative;
+        padding-left: 30px;
         color: #555;
     }
 
-    /* Boutons */
+    .checkbox input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .checkmark {
+        position: absolute;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        transition: var(--transition);
+    }
+
+    .checkbox:hover input ~ .checkmark {
+        border-color: var(--primary-light);
+    }
+
+    .checkbox input:checked ~ .checkmark {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .checkmark::after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .checkbox input:checked ~ .checkmark::after {
+        display: block;
+    }
+
+    /* Style des selects */
+    .select select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        transition: var(--transition);
+    }
+
+    .select select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2);
+        outline: none;
+    }
+
+    /* Boutons d'action */
     .form-actions {
         display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
+        gap: 16px;
+        margin-top: 32px;
+        flex-wrap: wrap;
+    }
+
+    .submit-btn,
+    .cancel-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
     }
 
     .submit-btn {
-        flex: 1;
-        padding: 0.9rem;
         background: var(--primary-color);
         color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        box-shadow: 0 2px 10px rgba(56, 142, 60, 0.3);
     }
 
     .submit-btn:hover {
         background: var(--primary-dark);
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+        box-shadow: 0 4px 15px rgba(56, 142, 60, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
     }
 
     .cancel-btn {
-        flex: 1;
-        padding: 0.9rem;
         background: white;
         color: var(--danger-color);
         border: 1px solid var(--danger-color);
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-align: center;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .cancel-btn:hover {
-        background: #ffebee;  /* Rouge très clair */
+        background: #ffebee;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
     }
 
-    .form-actions i {
-        margin-right: 8px;
+    .cancel-btn:active {
+        transform: translateY(0);
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
-        .form-container {
-            padding: 1rem;
-            background-color: white;
+        .container-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
         }
-        
+
+        .btn-retour {
+            width: 100%;
+            justify-content: center;
+        }
+
         .form-card {
-            padding: 1.5rem;
-            box-shadow: none;
-            border: 1px solid var(--border-color);
+            padding: 20px;
         }
-        
+
+        .form-row {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            min-width: 100%;
+        }
+
         .form-actions {
             flex-direction: column;
+            gap: 12px;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            width: 100%;
         }
     }
 </style>
 
 <script>
-    // Amélioration UX : focus sur le premier champ
     document.addEventListener('DOMContentLoaded', function() {
+        // Focus sur le premier champ
         const firstInput = document.querySelector('input:not([type="hidden"]), select');
         if (firstInput) firstInput.focus();
+
+        // Animation des champs flottants
+        document.querySelectorAll('.floating input, .floating select').forEach(input => {
+            // Si le champ a déjà une valeur au chargement
+            if (input.value) {
+                const label = input.nextElementSibling;
+                label.style.top = '0';
+                label.style.left = '10px';
+                label.style.fontSize = '12px';
+                label.style.color = '#2e7d32';
+            }
+
+            // Gestion des selects
+            if (input.tagName === 'SELECT') {
+                input.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (this.value) {
+                        label.style.top = '0';
+                        label.style.left = '10px';
+                        label.style.fontSize = '12px';
+                        label.style.color = '#2e7d32';
+                    } else {
+                        label.style.top = '28px';
+                        label.style.left = '12px';
+                        label.style.fontSize = '14px';
+                        label.style.color = '#757575';
+                    }
+                });
+            }
+        });
     });
 </script>
 {% endblock %}
