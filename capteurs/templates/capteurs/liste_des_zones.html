@@ -348,8 +348,8 @@
             <tr>
                 <th>Nom de la zone</th>
                 <th>Description</th>
-                <th>eleveur</th>
                 <th>Etat de la secuité</th>
+                <th>eleveur</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -358,12 +358,6 @@
                 <tr>
                     <td>{{ zone.nom }}</td>
                     <td>{{ zone.description }}</td>
-                    <td>   <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="20" height="20" fill="currentColor" 
-                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
-                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
-                     </svg>
-                        {{ zone.user.username }}</td>
                     <td>
                         {% if zone.active_securite %}
                             <span style="display: flex; align-items: center;">
@@ -377,6 +371,12 @@
                             </span>
                         {% endif %}
                     </td>
+                         <td>   <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="20" height="20" fill="currentColor" 
+                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
+                     </svg>
+                        {{ zone.user.username }}</td>
                     
                     <td>
                  <div class="actions">

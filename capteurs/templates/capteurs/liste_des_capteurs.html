@@ -334,7 +334,7 @@ select[multiple] {
   opacity: 1;
 }
 
-    
+ 
 </style>
 
    
@@ -390,7 +390,7 @@ select[multiple] {
 <table class="users-table">
     <thead>
         <tr>
-            <th>NUMERO DU CAPTEUR</th>
+            <th>NUMERO DE L'APPAREIL</th>
             <th>TYPE D'ANIMAL</th>
             <th>ZONE DE SECURITE</th>  <!-- Nouvelle colonne pour la zone -->
             <th>STATUT</th>  <!-- Nouvelle colonne pour la zone -->
@@ -474,137 +474,302 @@ select[multiple] {
 </div>
 
 
+   <!-- Modale de confirmation de suppression -->
+   <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeDeleteModalBtn">&times;</button>
+            <h2>Confirmer la Suppression</h2>
+            <p>Êtes-vous sûr de vouloir supprimer cet appareil ? </p>
+            <div class="modal-actions delete-modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+<style>
+
+/* Conteneur des boutons modale suppression */
+.delete-modal-actions {
+    display: flex;
+    justify-content: space-between; /* Espace entre les boutons */
+    margin-top: 20px;
+}
+
+/* Bouton Annuler : blanc avec bord */
+.delete-modal-actions .btn-secondary {
+    background-color: #fff;
+    color: #555;
+    border: 1.5px solid #ccc;
+    box-shadow: none;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.delete-modal-actions .btn-secondary:hover {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+/* Bouton Supprimer : rouge vif */
+.delete-modal-actions .btn-danger {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
+}
+
+.delete-modal-actions .btn-danger:hover {
+    background-color: #cc0000;
+    box-shadow: 0 6px 14px rgba(204, 0, 0, 0.5);
+}
+
+
+/* Responsive for smaller screens */
+@media (max-width: 400px) {
+    .modal-content {
+        padding: 15px 18px;
+    }
+
+    .btn {
+        min-width: 90px;
+        font-size: 13px;
+        padding: 7px 12px;
+        margin: 0 4px;
+    }
+}
+
+.modal-content h2 {
+    font-size: 18px;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1.5px solid #ddd;
+    padding-bottom: 8px;
+}
+</style>
+
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        function init() {
-            const modal = document.getElementById("actionModal");
-            const modalTitle = document.getElementById("modalTitle");
-            const modalBody = document.getElementById("modalBody");
-            const modalActionBtn = document.getElementById("modalActionBtn");
-            const closeBtn = document.querySelector(".close");
-    
-            function openModal(title, content, actionText, actionCallback, hideActionBtn = false) {
-                // Supprime l'affichage du titre
-                modalTitle.textContent = "";
-                modalTitle.style.display = "none";
-    
-                modalBody.innerHTML = content;
-                modalActionBtn.textContent = actionText;
-                modalActionBtn.style.display = hideActionBtn ? "none" : "inline";
-    
-                modalActionBtn.onclick = function () {
-                    if (actionCallback) actionCallback();
-                    closeModal();
-                };
-    
-                modal.style.display = "flex";
-            }
-    
-            function closeModal() {
-                modal.style.display = "none";
-            }
-    
-            closeBtn.addEventListener("click", closeModal);
-            window.addEventListener("click", function (event) {
-                if (event.target === modal) {
-                    closeModal();
-                }
-            });
-    
-            function setupAddCapteurFormHandler() {
-                const form = document.getElementById("addCapteurForm");
-                if (!form) return;
-    
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    const url = form.action;
-                    const formData = new FormData(form);
-    
-                    fetch(url, {
-                        method: "POST",
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
-                        body: formData,
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                return response.text().then((html) => {
-                                    document.getElementById("modalBody").innerHTML = html;
-                                    setupAddCapteurFormHandler();
-                                });
-                            } else {
-                                closeModal();
-                                location.reload();
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Erreur lors de l'envoi du formulaire :", error);
-                        });
+document.addEventListener("DOMContentLoaded", function () {
+    function init() {
+        const modal = document.getElementById("actionModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalBody = document.getElementById("modalBody");
+        const modalActionBtn = document.getElementById("modalActionBtn");
+        const closeBtn = document.querySelector(".close");
+
+        // Modal de suppression
+        const deleteModal = document.getElementById("deleteModal");
+        const closeDeleteModalBtn = document.getElementById("closeDeleteModalBtn");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+        function openModal(title, content, actionText, actionCallback, hideActionBtn = false) {
+            // Supprime l'affichage du titre
+            modalTitle.textContent = "";
+            modalTitle.style.display = "none";
+
+            modalBody.innerHTML = content;
+            modalActionBtn.textContent = actionText;
+            modalActionBtn.style.display = hideActionBtn ? "none" : "inline";
+
+            modalActionBtn.onclick = function () {
+                if (actionCallback) actionCallback();
+                closeModal();
+            };
+
+            modal.style.display = "flex";
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        // Fonctions pour le modal de suppression
+        function openDeleteModal(capteurId) {
+            deleteModal.style.display = "flex";
+            
+            // Gestionnaire pour le bouton de confirmation
+            confirmDeleteBtn.onclick = function () {
+                deleteCapteur(capteurId);
+            };
+        }
+
+        function closeDeleteModal() {
+            deleteModal.style.display = "none";
+            confirmDeleteBtn.onclick = null; // Nettoie le gestionnaire
+        }
+
+        function deleteCapteur(capteurId) {
+            fetch(`/supprimer-capteur/${capteurId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        // Supprimer la ligne du tableau
+                        const btn = document.querySelector(`.delete-btn[data-id="${capteurId}"]`);
+                        if (btn) {
+                            btn.closest("tr").remove();
+                        }
+                        closeDeleteModal();
+                    } else {
+                        alert("Erreur lors de la suppression.");
+                        closeDeleteModal();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erreur lors de la suppression :", error);
+                    alert("Impossible de supprimer le capteur.");
+                    closeDeleteModal();
                 });
+        }
+
+        // Gestionnaires d'événements pour le modal principal
+        closeBtn.addEventListener("click", closeModal);
+        window.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                closeModal();
             }
-    
-            document.querySelectorAll(".modify-capteur-btn").forEach((btn) => {
-                btn.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    const capteurId = this.getAttribute("data-capteur-id");
-    
-                    fetch(`/capteurs/modifier_capteur/${capteurId}/`)
-                        .then((response) => response.text())
-                        .then((html) => {
-                            openModal(
-                                "", // pas de titre
-                                html,
-                                "Mettre à jour",
-                                null,
-                                true
-                            );
-    
-                            const form = document.querySelector(".form-style");
-                            if (form) {
-                                form.setAttribute("action", `/capteurs/modifier_capteur/${capteurId}/`);
-                                setupUpdateCapteurFormHandler(form);
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Erreur lors du chargement du formulaire de modification du capteur :", error);
-                        });
-                });
-            });
-    
-            function setupUpdateCapteurFormHandler(form) {
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    const url = form.action;
-                    const formData = new FormData(form);
-    
-                    fetch(url, {
-                        method: "POST",
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
-                        body: formData,
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                return response.text().then((html) => {
-                                    document.getElementById("modalBody").innerHTML = html;
-                                    const newForm = document.querySelector(".form-style");
-                                    if (newForm) {
-                                        setupUpdateCapteurFormHandler(newForm);
-                                    }
-                                });
-                            } else {
-                                closeModal();
-                                location.reload();
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Erreur lors de la soumission du formulaire de modification du capteur :", error);
-                        });
-                });
+        });
+
+        // Gestionnaires d'événements pour le modal de suppression
+        closeDeleteModalBtn.addEventListener("click", closeDeleteModal);
+        cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+        
+        window.addEventListener("click", function (event) {
+            if (event.target === deleteModal) {
+                closeDeleteModal();
             }
-    
-            document.getElementById("addCapteurBtn").addEventListener("click", function (e) {
+        });
+
+        function setupAddCapteurFormHandler() {
+            const form = document.getElementById("addCapteurForm");
+            if (!form) return;
+
+            form.addEventListener("submit", function (e) {
                 e.preventDefault();
-    
-                fetch("{% url 'ajouter_capteur' %}")
+                const url = form.action;
+                const formData = new FormData(form);
+
+                fetch(url, {
+                    method: "POST",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            return response.text().then((html) => {
+                                document.getElementById("modalBody").innerHTML = html;
+                                setupAddCapteurFormHandler();
+                            });
+                        } else {
+                            closeModal();
+                            location.reload();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Erreur lors de l'envoi du formulaire :", error);
+                    });
+            });
+        }
+
+        document.querySelectorAll(".modify-capteur-btn").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const capteurId = this.getAttribute("data-capteur-id");
+
+                fetch(`/capteurs/modifier_capteur/${capteurId}/`)
+                    .then((response) => response.text())
+                    .then((html) => {
+                        openModal(
+                            "", // pas de titre
+                            html,
+                            "Mettre à jour",
+                            null,
+                            true
+                        );
+
+                        const form = document.querySelector(".form-style");
+                        if (form) {
+                            form.setAttribute("action", `/capteurs/modifier_capteur/${capteurId}/`);
+                            setupUpdateCapteurFormHandler(form);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Erreur lors du chargement du formulaire de modification du capteur :", error);
+                    });
+            });
+        });
+
+        function setupUpdateCapteurFormHandler(form) {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const url = form.action;
+                const formData = new FormData(form);
+
+                fetch(url, {
+                    method: "POST",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            return response.text().then((html) => {
+                                document.getElementById("modalBody").innerHTML = html;
+                                const newForm = document.querySelector(".form-style");
+                                if (newForm) {
+                                    setupUpdateCapteurFormHandler(newForm);
+                                }
+                            });
+                        } else {
+                            closeModal();
+                            location.reload();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Erreur lors de la soumission du formulaire de modification du capteur :", error);
+                    });
+            });
+        }
+
+        document.getElementById("addCapteurBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+
+            fetch("{% url 'ajouter_capteur' %}")
+                .then((response) => response.text())
+                .then((html) => {
+                    openModal(
+                        "", // pas de titre
+                        html,
+                        "",
+                        null,
+                        true
+                    );
+                    setupAddCapteurFormHandler();
+                })
+                .catch((error) => {
+                    console.error("Erreur lors du chargement du formulaire :", error);
+                    openModal(
+                        "",
+                        `<div class="alert alert-danger">Impossible de charger le formulaire : ${error.message}</div>`,
+                        "Fermer",
+                        closeModal,
+                        true
+                    );
+                });
+        });
+
+        document.querySelectorAll(".detail-capteur-btn").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                const capteurId = this.getAttribute("data-capteur-id");
+
+                fetch(`/capteurs/detail_capteur/${capteurId}/`)
                     .then((response) => response.text())
                     .then((html) => {
                         openModal(
@@ -614,86 +779,32 @@ select[multiple] {
                             null,
                             true
                         );
-                        setupAddCapteurFormHandler();
                     })
                     .catch((error) => {
-                        console.error("Erreur lors du chargement du formulaire :", error);
-                        openModal(
-                            "",
-                            `<div class="alert alert-danger">Impossible de charger le formulaire : ${error.message}</div>`,
-                            "Fermer",
-                            closeModal,
-                            true
-                        );
+                        console.error("Erreur lors du chargement des détails du capteur :", error);
                     });
             });
-    
-            document.querySelectorAll(".detail-capteur-btn").forEach((btn) => {
-                btn.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    const capteurId = this.getAttribute("data-capteur-id");
-    
-                    fetch(`/capteurs/detail_capteur/${capteurId}/`)
-                        .then((response) => response.text())
-                        .then((html) => {
-                            openModal(
-                                "", // pas de titre
-                                html,
-                                "",
-                                null,
-                                true
-                            );
-                        })
-                        .catch((error) => {
-                            console.error("Erreur lors du chargement des détails du capteur :", error);
-                        });
-                });
-            });
-    
-            document.addEventListener("click", function (event) {
-                if (event.target.closest(".delete-btn")) {
-                    event.preventDefault();
-                    const btn = event.target.closest(".delete-btn");
-                    const capteurId = btn.getAttribute("data-id");
-    
-                    openModal(
-                        "", // pas de titre
-                        "Êtes-vous sûr de vouloir supprimer ce capteur ?",
-                        "Supprimer",
-                        function () {
-                            fetch(`/supprimer-capteur/${capteurId}/`, {
-                                method: "POST",
-                                headers: {
-                                    "X-CSRFToken": getCSRFToken(),
-                                    "Content-Type": "application/json",
-                                },
-                            })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.success) {
-                                        btn.closest("tr").remove();
-                                        closeModal();
-                                    } else {
-                                        alert("Erreur lors de la suppression.");
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error("Erreur lors de la suppression :", error);
-                                    alert("Impossible de supprimer le capteur.");
-                                });
-                        },
-                        false
-                    );
-                }
-            });
-    
-            function getCSRFToken() {
-                return document.querySelector("[name=csrfmiddlewaretoken]").value;
+        });
+
+        // Gestionnaire pour les boutons de suppression - utilise maintenant le modal dédié
+        document.addEventListener("click", function (event) {
+            if (event.target.closest(".delete-btn")) {
+                event.preventDefault();
+                const btn = event.target.closest(".delete-btn");
+                const capteurId = btn.getAttribute("data-id");
+                
+                // Ouvre le modal de suppression spécifique
+                openDeleteModal(capteurId);
             }
+        });
+
+        function getCSRFToken() {
+            return document.querySelector("[name=csrfmiddlewaretoken]").value;
         }
-    
-        init();
-    });
+    }
+
+    init();
+});
     </script>
     
     
