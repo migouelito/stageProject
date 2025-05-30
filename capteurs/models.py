@@ -11,7 +11,7 @@ from django.utils import timezone
 from shapely.geometry import Point, Polygon
 from geopy.distance import geodesic  # ✅ Pour le calcul réel de distance
 import json
-
+from  django.db.models import PROTECT
 
 
 class ZoneSecurite(models.Model):
@@ -111,17 +111,23 @@ class ZoneSecurite(models.Model):
             return False
 
 class Animal(models.Model):
-    type_animal = models.CharField(max_length=20, unique=True)  # Si vous avez besoin d'un champ de texte pour le type d'animal
+    type_animal = models.CharField(max_length=20, unique=True)
     image = models.ImageField(upload_to='capteurs/', null=True, blank=True)
 
     def __str__(self):
-        return self.type_animal  # Affiche le nom de l'animal
+        return self.type_animal
+
+    def save(self, *args, **kwargs):
+        # Nettoie et met la première lettre en majuscule, le reste en minuscule
+        self.type_animal = self.type_animal.strip().capitalize()
+        super().save(*args, **kwargs)
+
 
 
 class Capteur(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='capteurs')
     identifiant = models.IntegerField(unique=True)
-    type_animal = models.ForeignKey(Animal, on_delete=models.CASCADE)  # 🔁 Clé étrangère renommée
+    type_animal = models.ForeignKey(Animal, on_delete=PROTECT)
     last_seen = models.DateTimeField(null=True, blank=True)
     is_zone = models.BooleanField(default=True)
     actif = models.BooleanField(default=True)

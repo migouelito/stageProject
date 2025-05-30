@@ -38,6 +38,26 @@ class CapteurForm(forms.ModelForm):
                 # Fallback en cas d'erreur
                 self.fields['zone_securite'].queryset = ZoneSecurite.objects.filter(user=self.user)
 
+    def clean_identifiant(self):
+        identifiant = self.cleaned_data.get('identifiant')
+
+        # Filtrer les capteurs avec ce même identifiant pour cet utilisateur
+        qs = Capteur.objects.filter(identifiant=identifiant)
+
+        if self.user:
+            qs = qs.filter(user=self.user)
+
+        # Exclure l'instance en édition (si modification)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Un capteur avec cet identifiant existe déjà .")
+
+        return identifiant
+
+ 
+
     def save(self, commit=True):
         capteur = super().save(commit=False)
 

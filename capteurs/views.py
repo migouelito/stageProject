@@ -37,7 +37,9 @@ class CapteursListView(PermissionRequiredMixin, ListView):
 from django.views.generic import FormView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.contrib import messages  # Importer les messages Django
+from django.contrib import messages
+from django.db import IntegrityError
+import openpyxl
 
 class AjoutCapteursView(FormView):
     template_name = 'capteurs/ajouter_capteur.html'
@@ -52,36 +54,32 @@ class AjoutCapteursView(FormView):
     def post(self, request, *args, **kwargs):
         nombre_formulaires = self.request.session.get('nombre_capteurs', 1)
         form_list = [CapteurForm(request.POST, user=request.user) for _ in range(nombre_formulaires)]
-        
-        file_uploaded = 'csv_file' in request.FILES
+
+        file_uploaded = 'xlsx_file' in request.FILES
         valid_forms = [form for form in form_list if form.is_valid()]
         
-        # Récupérer le type_animal et la zone de sécurité du premier formulaire valide
         type_animal = valid_forms[0].cleaned_data.get('type_animal') if valid_forms else None
         zone_securite = valid_forms[0].cleaned_data.get('zone_securite') if valid_forms else None
         
-        # Validation du CSV
-        csv_valid = True
-        csv_errors = []
-        csv_data = []
-        
+        excel_valid = True
+        excel_errors = []
+        excel_data = []
+
         if file_uploaded:
-            file = request.FILES['csv_file']
-            csv_valid, csv_data, csv_errors = self.valider_csv(file)
-        
-        # Si tous les formulaires et le CSV sont valides
-        if len(valid_forms) == len(form_list) and csv_valid:
+            file = request.FILES['xlsx_file']
+            excel_valid, excel_data, excel_errors = self.valider_excel(file)
+
+        if len(valid_forms) == len(form_list) and excel_valid:
             parent_user = request.user.owner if hasattr(request.user, 'owner') and request.user.owner else request.user
             erreurs = []
             capteurs_crees = []
 
-            # Enregistrer les capteurs à partir des formulaires
             for form in valid_forms:
                 try:
                     capteur = form.save(commit=False)
                     capteur.user = parent_user
                     if zone_securite:
-                        capteur.zone_securite = zone_securite  # Associer la zone de sécurité choisie
+                        capteur.zone_securite = zone_securite
                     capteur.save()
                     capteurs_crees.append(capteur.identifiant)
                 except IntegrityError:
@@ -89,25 +87,23 @@ class AjoutCapteursView(FormView):
                 except Exception as e:
                     erreurs.append(f"Erreur lors de l'enregistrement : {str(e)}")
 
-            # Enregistrer les capteurs du CSV avec le type_animal et la zone de sécurité du formulaire
             if file_uploaded and type_animal:
-                for identifiant in csv_data:
+                for identifiant in excel_data:
                     try:
-                        if identifiant not in capteurs_crees:  # Éviter les doublons
+                        if identifiant not in capteurs_crees:
                             Capteur.objects.create(
                                 user=parent_user,
                                 identifiant=identifiant,
                                 type_animal=type_animal,
-                                zone_securite=zone_securite,  # Associer la zone de sécurité
+                                zone_securite=zone_securite,
                                 actif=False
                             )
                             capteurs_crees.append(identifiant)
                     except IntegrityError:
-                        erreurs.append(f"Le capteur CSV avec l'identifiant '{identifiant}' existe déjà.")
+                        erreurs.append(f"Le capteur Excel avec l'identifiant '{identifiant}' existe déjà.")
                     except Exception as e:
-                        erreurs.append(f"Erreur avec le capteur CSV '{identifiant}': {str(e)}")
+                        erreurs.append(f"Erreur avec le capteur Excel '{identifiant}': {str(e)}")
 
-            # Gestion des messages
             if erreurs:
                 for err in erreurs:
                     messages.error(request, err)
@@ -115,49 +111,44 @@ class AjoutCapteursView(FormView):
                     messages.success(request, f"{len(capteurs_crees)} capteur(s) créé(s) avec succès !")
                 return self.form_invalid(form_list)
             else:
-                total = len(valid_forms) + len(csv_data) if file_uploaded else len(valid_forms)
+                total = len(valid_forms) + len(excel_data) if file_uploaded else len(valid_forms)
                 messages.success(request, f"{total} capteur(s) ajouté(s) avec succès !")
                 return super().form_valid(valid_forms)
         else:
-            # Afficher les erreurs de formulaire et du CSV
             for form in form_list:
                 if not form.is_valid():
                     for field, errors in form.errors.items():
                         for error in errors:
                             messages.error(request, f"{form.fields[field].label}: {error}")
             
-            for error in csv_errors:
+            for error in excel_errors:
                 messages.error(request, error)
-            
+
             return self.form_invalid(form_list)
 
-    def valider_csv(self, file):
+    def valider_excel(self, file):
         try:
-            import csv
-            from io import TextIOWrapper
-
-            csv_file = TextIOWrapper(file, encoding='utf-8')
-            reader = csv.reader(csv_file)
-            next(reader)  # Ignore l'entête
+            wb = openpyxl.load_workbook(file)
+            sheet = wb.active
 
             identifiants = []
             erreurs = []
-            
-            for i, row in enumerate(reader, start=2):
-                if not row or not row[0].strip():
+
+            for i, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+                if not row or not row[0]:
                     erreurs.append(f"Ligne {i}: Identifiant manquant ou vide")
                     continue
                 
-                identifiant = row[0].strip()
+                identifiant = str(row[0]).strip()
                 if Capteur.objects.filter(identifiant=identifiant).exists():
                     erreurs.append(f"Ligne {i}: Le capteur '{identifiant}' existe déjà")
                 else:
                     identifiants.append(identifiant)
-            
+
             return (len(erreurs) == 0, identifiants, erreurs)
 
         except Exception as e:
-            return (False, [], [f"Erreur de lecture du CSV: {str(e)}"])
+            return (False, [], [f"Erreur de lecture du fichier Excel: {str(e)}"])
 
     def form_invalid(self, form_list):
         return self.render_to_response(self.get_context_data(form_list=form_list))
@@ -183,7 +174,7 @@ class ModifierCapteurView(UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
 
-        # 🔁 Détecter le parent comme dans AjoutCapteursView
+        # Détecter le parent comme dans AjoutCapteursView
         user = self.request.user
         parent_user = user.owner if hasattr(user, 'owner') and user.owner else user
 
@@ -203,7 +194,7 @@ class ModifierCapteurView(UpdateView):
             return self.form_invalid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger. ⚠️")
+        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger. ")
         return super().form_invalid(form)
 
     
@@ -331,10 +322,34 @@ class MarquerCommeLuView(View):
         return redirect('notifications')  # Modifier 'notifications' selon le nom de ta vue
 
 
+from django.views import View
+from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Message  # Remplace par ton modèle réel
+
+from django.contrib import messages  # importer le module messages
 
 
+class MarquerTousCommeLuView(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
 
-#Zonne de securite
+        # Si l'utilisateur est un owner (il a des sub_users)
+        if user.sub_users.exists():
+            # Inclure l'utilisateur + tous ses sub-users
+            all_users = [user] + list(user.sub_users.all())
+            # Marquer comme lus les messages de toutes les zones appartenant à ces utilisateurs
+            messages_non_lus = Message.objects.filter(user__in=all_users, is_read=False)
+        else:
+            # Sinon, marquer seulement les messages liés à ses propres zones
+            messages_non_lus = Message.objects.filter(user=user, is_read=False)
+
+        count = messages_non_lus.count()
+        messages_non_lus.update(is_read=True)
+
+        messages.success(request, f"{count} message(s) marqué(s) comme lu(s).")
+        return redirect('notifications')  # Remplace 'notifications' si nécessaire
+
 
 
 
@@ -871,6 +886,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from .models import Animal
 
+from django.db.models import ProtectedError
+
 def supprimer_animal(request, animal_id):
     animal = get_object_or_404(Animal, id=animal_id)
 
@@ -878,8 +895,10 @@ def supprimer_animal(request, animal_id):
         try:
             animal.delete()
             messages.success(request, "Animal supprimé avec succès !")
-            return redirect('liste_des_animaux')  # Remplace 'liste_des_animaux' par le nom de ta vue
+        except ProtectedError:
+            messages.error(request, "Impossible de supprimer cet animal : il est encore lié à un capteur.")
         except Exception as e:
             messages.error(request, f"Erreur lors de la suppression de l'animal : {str(e)}")
-            return redirect('liste_des_animaux')
+        return redirect('liste_des_animaux')
+
 

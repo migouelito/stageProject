@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="container-header">
-    <h2>{% trans "Paramètres de l'application" %}</h2>
+    <h2 style="font-weight: 1000;">À propos de l'application</h2>
 </div>
 
 <!-- Affichage des messages -->
@@ -19,21 +19,59 @@
     </div>
 {% endif %}
 
-<!-- Formulaire pour changer la langue -->
-<div class="language-selection">
-    <h3>Changer la langue</h3>
-    <form method="post">
-        {% csrf_token %}
-        <div>
-            <label for="language">Choisissez votre langue:</label>
-            <select name="language" id="language" onchange="this.form.submit()">
-                <option value="fr" {% if language_code == 'fr' %}selected{% endif %}>Français</option>
-                <option value="en" {% if language_code == 'en' %}selected{% endif %}>English</option>
-                <option value="ar" {% if language_code == 'ar' %}selected{% endif %}>العربية</option>
-                <option value="es" {% if language_code == 'es' %}selected{% endif %}>Español</option>
-            </select>
-        </div>
-    </form>
+<div class="card-grid">
+    <div class="card">
+        <img src="{% static 'images/accueil.png' %}" alt="Accueil" class="card-icon">
+        <h3>Accueil</h3>
+        <p>Vue d'ensemble de votre activité et résumé des données importantes.</p>
+    </div>
+
+    <div class="card">
+         <img src="{% static 'images/betail.png' %}" alt="type betail" class="card-icon">
+        <h3>Type de bétail</h3>
+        <p>Gérez les types d'animaux comme les vaches, moutons, ânes, etc.</p>
+    </div>
+
+    <div class="card">
+            <img src="{% static 'images/zone.png' %}" alt="Zones" class="card-icon">
+        <h3>Zones</h3>
+        <p>Définissez des zones de sécurité pour vos troupeaux sur la carte.</p>
+    </div>
+
+    <div class="card">
+          <img src="{% static 'images/capteurs.png' %}" alt="Appareils" class="card-icon">
+        <h3>Appareils</h3>
+        <p>Ajoutez et suivez les capteurs GPS installés sur les animaux.</p>
+    </div>
+
+    <div class="card">
+         <img src="{% static 'images/users.png' %}" alt="Liste de mes éleveurs" class="card-icon">
+        <h3>Mes éleveurs</h3>
+        <p>Gérez les éleveurs sous votre supervision et leurs activités.</p>
+    </div>
+
+    <div class="card">
+       <img src="{% static 'images/notifications.png' %}" alt="Notifications" class="card-icon">
+        <h3>Notifications</h3>
+        <p>Recevez des alertes si un animal sort d'une zone définie.</p>
+    </div>
+
+    <div class="card">
+     <img src="{% static 'images/user.png' %}" alt="Profil" class="card-icon">
+        <h3>Profil</h3>
+        <p>Consultez et modifiez vos informations personnelles et mot de passe.</p>
+    </div>
+
+    <div class="card">
+        <img src="{% static 'images/iconsinfo.png' %}" alt="À propos" class="card-icon">
+        <h3>À propos</h3>
+        <p>Découvrez l'objectif de l'application et son fonctionnement global.</p>
+    </div>
+    <div class="card">
+        <img src="{% static 'images/phone.png' %}" alt="Application mobile" class="card-icon">
+        <h3>Application mobile</h3>
+        <p>Une application mobile est disponible pour les éleveurs afin de suivre leur bétail en temps réel.</p>
+</div>
 </div>
 
 <style>
@@ -65,35 +103,63 @@
         100% { width: 100%; }
     }
 
-    /* Style pour le formulaire de changement de langue */
-    .language-selection {
-        margin-top: 20px;
-    }
-    .language-selection label {
-        font-size: 16px;
-        margin-right: 10px;
-    }
-    .language-selection select {
-        padding: 5px 10px;
-        font-size: 16px;
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
     }
 
-    /* Style pour les messages */
-    .messages {
-        margin-bottom: 20px;
+    .card {
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
     }
-    .alert {
-        padding: 10px;
-        border-radius: 5px;
+
+    .card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        background-color: #90EE90;; /* vert */
+        color: white;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 15px;
+        filter: brightness(0); /* logo noir par défaut */
+        transition: filter 0.3s ease;
+    }
+
+    .card:hover .card-icon {
+        filter: brightness(0) invert(0); /* logo blanc au survol */
+    }
+
+    .card h3 {
+        font-size: 20px;
         margin-bottom: 10px;
+        color: #333;
+        transition: color 0.3s ease;
+        font-weight: 1000;
     }
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
+
+    .card:hover h3 {
+        color: black;
     }
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
+
+    .card p {
+        font-size: 14px;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .card:hover p {
+        color: black;
     }
 </style>
 

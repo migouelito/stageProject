@@ -18,6 +18,10 @@ class ConnexionView(LoginView):
     redirect_authenticated_user = True
     next_page = reverse_lazy('homePage')
 
+    def form_valid(self, form):
+        user = form.get_user()
+        messages.success(self.request, f"Connexion réussie. Bienvenue {user.username}!")
+        return super().form_valid(form)
 
 
 from django.contrib import messages
@@ -250,11 +254,12 @@ class UserListView(PermissionRequiredMixin, ListView):
                 return User.objects.filter(owner__isnull=True).exclude(id=user.id)
 
             if user.owner is None:
-                # Utilisateur parent : lui-même + ses enfants
-                return User.objects.filter(models.Q(id=user.id) | models.Q(owner=user))
+            # Utilisateur parent : uniquement ses enfants
+                return User.objects.filter(owner=user)
+
             else:
-                # Utilisateur fils : son parent + tous les enfants du parent
-                return User.objects.filter(models.Q(id=user.owner.id) | models.Q(owner=user.owner))
+                # Utilisateur fils : uniquement les enfants du parent (frères et sœurs)
+                return User.objects.filter(owner=user.owner)
 
         return User.objects.none()
 
@@ -300,8 +305,18 @@ class CreateUtilisateurView(PermissionRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger.")
+    
+
+        # Ajouter chaque erreur spécifique dans les messages
+        for field, errors in form.errors.items():
+            for error in errors:
+                if field == '__all__':
+                    messages.error(self.request, f"Erreur : {error}")
+                else:
+                    messages.error(self.request, f"{form.fields[field].label} : {error}")
+
         return super().form_invalid(form)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -330,8 +345,16 @@ class ModifierUtilisateurView(UpdateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        # Si le formulaire est invalide, on affiche un message d'erreur
-        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger.")
+    
+
+        # Ajouter chaque erreur spécifique dans les messages
+        for field, errors in form.errors.items():
+            for error in errors:
+                if field == '__all__':
+                    messages.error(self.request, f"Erreur : {error}")
+                else:
+                    messages.error(self.request, f"{form.fields[field].label} : {error}")
+
         return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
@@ -388,8 +411,12 @@ def delete_user(request, user_id):
 #Profil
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from .models import User
 from django.views import View
+from django.contrib.auth.hashers import make_password
+import json
+
+from .models import User  # Assure-toi que c’est bien ton modèle User personnalisé
+
 class UserProfilView(View):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
@@ -398,5 +425,48 @@ class UserProfilView(View):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'telephone': user.telephone,  # ← ici
+            'telephone': user.telephone,  # ← champ personnalisé
         })
+
+
+import json
+from django.views import View
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+User = get_user_model()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class modifierProfil(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            # Pour les données JSON
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.POST
+            
+            user_id = data.get("id") or kwargs.get('id')
+            user = get_object_or_404(User, id=user_id)
+
+            # Mise à jour des champs
+            user.username = data.get("username", user.username)
+            user.last_name = data.get("last_name", user.last_name)
+            user.first_name = data.get("first_name", user.first_name)
+            user.email = data.get("email", user.email)
+            user.telephone = data.get("telephone", user.telephone)
+
+            # Gestion du mot de passe
+            if data.get("password"):
+                user.set_password(data["password"])
+
+            user.save()
+
+            return JsonResponse({"message": "Utilisateur mis à jour avec succès."}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Données JSON invalides"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

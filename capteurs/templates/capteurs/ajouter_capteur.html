@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -65,23 +66,57 @@
             margin: 25px auto 0;
             width: 50%;
             min-width: 120px;
+            text-align: center;
+            text-decoration: none;
         }
 
         .btn-success:hover {
             background-color: #218838;
         }
 
-   
         .card {
             padding: 15px;
             margin-bottom: 15px;
             background: #f9f9f9;
             border-radius: 6px;
         }
+
+        .upload-section {
+            margin-top: 20px;
+        }
+
+        .file-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .input-file {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .download-link {
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .download-link a {
+            color: green;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .download-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 {% block content %}
+
+    <!-- FORMULAIRE D’AJOUT DE CAPTEUR -->
     <form method="post" action="{% url 'ajouter_capteur' %}" id="addCapteurForm" enctype="multipart/form-data" class="form-container">
         {% csrf_token %}
         {{ form.management_form }}
@@ -100,14 +135,23 @@
             {% endfor %}
         </div>
 
-        <!-- Upload CSV -->
+        <!-- Upload XLSX -->
         <div class="upload-section">
             <label for="file" class="file-label">
-                <i class="fas fa-upload"></i> Charger un fichier CSV
+                <i class="fas fa-upload"></i> Charger un fichier Excel (.xlsx)
             </label>
-            <input type="file" id="file" name="csv_file" class="input-file" accept=".csv">
+            <input type="file" id="file" name="xlsx_file" class="input-file" accept=".xlsx">
+            <div id="file-name" style="margin-top: 10px; font-style: italic; color: #555;"></div>
         </div>
 
+        <!-- Lien vert simple vers le modèle Excel -->
+        <div class="download-link">
+            <a href="{% static 'fichiers/modele_appareils.xlsx' %}" download>
+                <i class="fas fa-download"></i> Télécharger le modèle Excel
+            </a>
+        </div>
+
+        <!-- Bouton de validation -->
         <button type="submit" class="btn-success">
             <i class="fas fa-save"></i> Valider
         </button>
@@ -116,17 +160,27 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const formContainer = document.querySelector('.form-container');
         const fileInput = document.getElementById('file');
         const fileNameDisplay = document.getElementById('file-name');
 
+        // Empêche la fermeture de la fenêtre modale si l'utilisateur clique en dehors
+        document.addEventListener('click', function(event) {
+            if (!formContainer.contains(event.target)) {
+                event.stopPropagation(); // Empêche la propagation du clic et donc la fermeture
+            }
+        });
+
+        // Affiche le nom du fichier lorsque l'utilisateur sélectionne un fichier
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
+                fileNameDisplay.textContent = this.files[0].name + " (Excel)";
             } else {
                 fileNameDisplay.textContent = "Aucun fichier sélectionné";
             }
         });
     });
 </script>
+
 </body>
 </html>

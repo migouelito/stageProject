@@ -19,6 +19,7 @@ urlpatterns = [
 
     path('capteurs/message', MessageListView.as_view(), name="notifications"),
     path('capteurs/marquer_comme_lu/<int:message_id>/', MarquerCommeLuView.as_view(), name='marquer_comme_lu'),
+    path('capteurs/marquer_tout_comme_lu/', MarquerTousCommeLuView.as_view(), name='marquer_tout_comme_lu'),
     path('capteurs/delete_message/<int:message_id>/',supprimer_message, name='supprimer_message'),
 
     path('zone/liste_des_zones', ListeDesZones.as_view(),name="liste_des_zones"),

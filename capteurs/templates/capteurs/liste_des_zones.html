@@ -84,10 +84,10 @@
         font-size:13px;
     }
 
-    .users-table tr:hover {
-        background-color: #f9f9f9;
+       .users-table tr:hover {
+        background-color: #90EE90;
+        transition: background-color 0.3s ease;
     }
-
     .users-table td:last-child,
     .users-table th:last-child {
         text-align: right;
@@ -138,6 +138,7 @@
         margin-right: 8px;
         fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
     }
+    
     /* Styles de la modal */
 .modal {
     display: none; /* Cacher la modal par défaut */
@@ -159,9 +160,19 @@
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
+    width: 90%;
+    max-width: 420px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     border-radius: 10px; /* Arrondir les coins du contenu de la modal */
+}
+/* Title */
+.modal-content h2 {
+    font-size: 18px;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1.5px solid #ddd;
+    padding-bottom: 8px;
 }
 
 /* Pied de la modal */
@@ -202,9 +213,10 @@
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
+    background-color: #ff0000;
     color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
 }
 
 
@@ -232,7 +244,7 @@
     transition: all 0.3s ease-in-out;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 
-    background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 20px;
@@ -246,6 +258,51 @@
 #searchInput:focus {
     border-color: #008000;
     box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+}
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: max-content;
+  max-width: 220px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 
 
@@ -291,7 +348,7 @@
             <tr>
                 <th>Nom de la zone</th>
                 <th>Description</th>
-                <th>Utilisateur</th>
+                <th>eleveur</th>
                 <th>Etat de la secuité</th>
                 <th>Actions</th>
             </tr>
@@ -301,7 +358,12 @@
                 <tr>
                     <td>{{ zone.nom }}</td>
                     <td>{{ zone.description }}</td>
-                    <td>{{ zone.user.username }}</td>
+                    <td>   <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="20" height="20" fill="currentColor" 
+                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
+                     </svg>
+                        {{ zone.user.username }}</td>
                     <td>
                         {% if zone.active_securite %}
                             <span style="display: flex; align-items: center;">
@@ -317,24 +379,32 @@
                     </td>
                     
                     <td>
-                        <div class="actions">
-                            <!-- voir ce que ce passe dans la zone -->
-                            <a href="{% url 'suivrebetail'  user_id=zone.user.id %}" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
-                                <img src="{% static 'images/zone.png' %}" alt="Modifier">
-                            </a>
+                 <div class="actions">
+                    <!-- Voir ce que se passe dans la zone -->
+                <div class="tooltip">
+                    <a href="{% url 'suivrebetail' user_id=zone.user.id %}" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
+                    <img src="{% static 'images/zone.png' %}" alt="Voir la zone">
+                    </a>
+                    <div class="tooltiptext">Voir les mouvements dans la zone</div>
+                </div>
 
-                            <!-- Modifier la zone -->
-                            <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
-                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="modifier">
-                            </a>
-                       
-                    
-                            
-                            <!-- Supprimer la zone -->
-                            <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
-                                <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
-                            </a>
-                        </div>
+                <!-- Modifier la zone -->
+                <div class="tooltip">
+                    <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
+                    <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier la zone">
+                    </a>
+                    <div class="tooltiptext">Modifier cette zone</div>
+                </div>
+
+                <!-- Supprimer la zone -->
+                <div class="tooltip">
+                    <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
+                    <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer la zone">
+                    </a>
+                    <div class="tooltiptext">Supprimer cette zone</div>
+                </div>
+                </div>
+
                     </td>
                 </tr>
             {% empty %}
@@ -348,7 +418,7 @@
 
 
 
-<!-- ✅ Modal de suppression -->
+<!-- Modal de suppression -->
 <div id="suppressionModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -357,13 +427,13 @@
             <p>Êtes-vous sûr de vouloir supprimer cette zone ?</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">Supprimer</button>
             <button type="button" class="btn" id="btnAnnulerSuppression">Annuler</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">Supprimer</button>
         </div>
     </div>
 </div>
 
-<!-- ✅ Script JavaScript -->
+<!--  Script JavaScript -->
 <script>
     // Modal Création/Modification
     function ouvrirModalZone(estModification = false, id = null, nom = '', description = '', userId = '') {

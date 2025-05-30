@@ -27,7 +27,7 @@
     padding: 25px;
     border-radius: 8px;
     width: 90%;
-    max-width: 500px;
+    max-width: 420px;
     max-height: 90vh;        /* Hauteur max visible */
     overflow-y: auto;        /* Scroll interne si le contenu dépasse */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -107,10 +107,6 @@ select[multiple] {
     to { opacity: 1; transform: translateY(0); }
 }
 
-
-</style>
-
-<style>
     .container-header {
         display: flex;
         justify-content: space-between;
@@ -192,7 +188,8 @@ select[multiple] {
     }
     
     .users-table tr:hover {
-        background-color: white;
+        background-color: #90EE90;
+        transition: background-color 0.3s ease;
     }
     
     /* Colonne Actions totalement collée à droite */
@@ -276,7 +273,7 @@ select[multiple] {
         transition: all 0.3s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     
-        background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 12px center;
         background-size: 20px;
@@ -291,31 +288,53 @@ select[multiple] {
         border-color: #008000;
         box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
     }
+
+    /* style du texte indicatif */
+    .tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: max-content;
+  max-width: 200px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
     
-</style>
-
-
-<style>
- /* Conteneur des messages */
-.container {
-    max-width: 500px;
-    margin: 20px auto;
-}
-
-
-
-/* Animation d'apparition */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 </style>
 
    
@@ -325,7 +344,7 @@ select[multiple] {
 
 {% block content %}
 <div class="container-header">
-    <h1>Liste des capteurs</h1>
+    <h1>Liste des appareils</h1>
 
      <!-- Barre de recherche centrée -->
      <div class="search-container">
@@ -404,19 +423,30 @@ select[multiple] {
 
                 <td>
                     {% if not request.user.owner %}
-                    <div class="actions">
-                        <a href="javascript:void(0);" class="detail-capteur-btn" data-capteur-id="{{ capteur.id }}">
-                            <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Voir les détails">
-                        </a>
-                        
-                        <a href="#" class="modify-capteur-btn" data-capteur-id="{{ capteur.id }}">
-                            <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
-                        </a>
-                        
-                        <a href="javascript:void(0);" class="delete-btn" data-id="{{ capteur.id}}">
-                            <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
-                        </a>
-                    </div>
+              <div class="actions">
+                <div class="tooltip">
+                    <a href="javascript:void(0);" class="detail-capteur-btn" data-capteur-id="{{ capteur.id }}">
+                    <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Voir les détails">
+                    </a>
+                    <div class="tooltiptext">Voir les détails de l'appareil</div>
+                </div>
+
+                <div class="tooltip">
+                    <a href="#" class="modify-capteur-btn" data-capteur-id="{{ capteur.id }}">
+                    <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
+                    </a>
+                    <div class="tooltiptext">Modifier cet appareil</div>
+                </div>
+
+                <div class="tooltip">
+                    <a href="javascript:void(0);" class="delete-btn" data-id="{{ capteur.id }}">
+                    <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
+                    </a>
+                    <div class="tooltiptext">Supprimer cet appareil/div>
+                </div>
+            </div>
+
+                <div>
                     {% endif %}
                 </td>
             </tr>
@@ -442,6 +472,7 @@ select[multiple] {
         </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

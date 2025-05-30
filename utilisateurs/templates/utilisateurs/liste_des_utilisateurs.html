@@ -47,14 +47,17 @@
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .users-table thead th {
-        background-color: #008000;
-        color: #fff;
-        padding: 14px;
-        text-transform: uppercase;
-        font-size: 13px;
-        letter-spacing: 0.5px;
-    }
+   .users-table thead th {
+    background-color: #008000;
+    color: #fff;
+    padding: 14px;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-align: left;         /* Aligné à gauche */
+    vertical-align: bottom;   /* Aligné en bas */
+}
+
 
     .users-table tbody td {
         padding: 14px;
@@ -63,6 +66,7 @@
         font-weight: bold;
         
     }
+    
 
     .users-table tbody tr:nth-child(even) {
         background-color: #f9f9f9;
@@ -70,13 +74,13 @@
     }
 
     .users-table tbody tr:hover {
-        background-color: #eef6ff;
+        background-color: #90EE90;
         transition: background-color 0.3s ease;
     }
 
     .users-table td.actions {
         display: flex;
-        justify-content: center;
+
         gap: 10px;
     }
 
@@ -167,8 +171,7 @@
         background-color: #fff;
         transition: all 0.3s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    
-        background-image: url("data:image/svg+xml,%3Csvg fill='black' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 2a8 8 0 105.293 14.293l5.707 5.707 1.414-1.414-5.707-5.707A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 12px center;
         background-size: 20px;
@@ -183,6 +186,52 @@
         border-color: #008000;
         box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
     }
+    /*style  indicateurs */
+
+    .tooltip {
+  position: relative;
+  display: inline-block;
+  margin: 0 5px;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: max-content;
+  max-width: 220px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
   
 </style>
 
@@ -192,18 +241,11 @@
 
 {% block content %}
 
-{% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
+
 
 <div class="container-header">
-    <h1>Liste des utilisateurs</h1>
+    <h1>Liste des éleveurs
+    </h1>
 
          <!-- Barre de recherche centrée -->
          <div class="search-container">
@@ -243,7 +285,7 @@
         </script>
 
         <a href="{% url 'ajouter_utilisateur' %}" class="add-btn" >
-            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un utilisateur" class="icon"> Ajouter un utilisateur
+            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un utilisateur" class="icon"> Ajouter un éleveur
         </a>
         
 </div>
@@ -255,37 +297,58 @@
             <th>Prénom</th>
             <th>Téléphone</th>
             <th>Email</th>
-            <th>Rôle</th>
+            <th>Statut</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for utilisateur in users %}
             <tr>
-                <td>{{ utilisateur.username }}</td>
+                <td>
+                     <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="20" height="20" fill="currentColor" 
+                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
+                     </svg>
+                    {{ utilisateur.username }}</td>
                 <td>{{ utilisateur.last_name }}</td>
                 <td>{{ utilisateur.first_name }}</td>
                 <td>{{ utilisateur.telephone }}</td>
                 <td>{{ utilisateur.email }}</td>
-                <td>
-                    {% for group in utilisateur.groups.all %}
-                        {{ group.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        Aucun rôle
-                    {% endfor %}
-                </td>
-        
-                <td class="actions">
+              <td>
+                {% if utilisateur.is_active %}
+                    <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#28a745;"></span>
+                {% else %}
+                    <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#dc3545;"></span>
+                {% endif %}
+              </td>
+
+             <td class="actions">
+                <!-- Bouton Détails -->
+                <div class="tooltip">
                     <a href="#" class="detail-btn" data-role-id="{{ utilisateur.id }}">
                         <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Détails">
                     </a>
+                    <div class="tooltiptext">Voir les détails de l'éleveur</div>
+                </div>
+
+                <!-- Bouton Modifier -->
+                <div class="tooltip">
                     <a href="{% url 'modifier_utilisateur' utilisateur.id %}" class="modify-btn">
                         <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
                     </a>
+                    <div class="tooltiptext">Modifier cet l'éleveur</div>
+                </div>
+
+                <!-- Bouton Supprimer -->
+                <div class="tooltip">
                     <a href="#" class="delete-btn" data-user-id="{{ utilisateur.id }}" data-user-name="{{ utilisateur.username }}">
                         <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
                     </a>
-                </td>
+                    <div class="tooltiptext">Supprimer cet l'éleveur</div>
+                </div>
+            </td>
+
             </tr>
         {% empty %}
             <tr>
@@ -306,8 +369,9 @@
             <!-- Contenu dynamique -->
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
             <button type="button" class="btn" id="modalCancelBtn">Annuler</button>
+            <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
+
         </div>
     </div>
 </div>
@@ -470,48 +534,62 @@
 </style>
 
 <style>
-/* Styles du modal */
-.modal {
-    display: none; 
+ /* Styles de la modal */
+ .modal {
+    display: none; /* Cacher la modal par défaut */
     position: fixed;
-    z-index: 1000;
+    z-index: 1;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    align-items: center;
-    justify-content: center;
+    overflow: auto;
+    background-color: rgb(0, 0, 0); /* Fond noir avec transparence */
+    background-color: rgba(0, 0, 0, 0.4); /* Fond noir avec transparence */
+    border-radius: 10px; /* Ajout du rayon de bordure pour la modal */
 }
 
+/* Contenu de la modal */
 .modal-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 8px;
-    width: 50%;
-    max-width: 500px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    animation: fadeIn 0.3s ease-out; /* Appliquer l'animation ici */
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 420px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-radius: 10px; /* Arrondir les coins du contenu de la modal */
+}
+/* Title */
+.modal-content h2 {
+    font-size: 18px;
+    color: #222;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1.5px solid #ddd;
+    padding-bottom: 8px;
 }
 
-
-.close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.modal-body {
-    margin: 20px 0;
-    text-align: left;
-}
-
+/* Pied de la modal */
 .modal-footer {
-    text-align: right;
+    display: flex;
+    justify-content: space-between;
     margin-top: 20px;
+}
+
+/* Bouton de fermeture */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 /* Styles des boutons */
@@ -519,52 +597,22 @@
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s ease-in-out;
-}
-
-/* Bouton "Confirmer" (Rouge) */
-.btn-primary {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: #c82333;
-}
-
-/* Bouton "Annuler" (Blanc avec bordure grise) */
-.btn-secondary {
-    background-color: white;
-    color: black;
-    border: 1px solid #ccc;
-}
-
-.btn-secondary:hover {
+    border: 1px solid #ddd;
     background-color: #f8f9fa;
 }
 
-/* Formulaires et champs */
-.form-group {
-    margin-bottom: 15px;
+.btn-primary {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
 }
 
-.form-control {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-select[multiple] {
-    height: 120px;
-}
-
-/* Animation d'apparition */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+.btn-danger {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
 }
 
 

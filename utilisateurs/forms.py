@@ -155,7 +155,47 @@ class CreationUserForm(UserCreationForm):
             "is_active": forms.CheckboxInput(),
         }
 
+    
+    # ✅ Validation personnalisée par champ
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("Ce nom d'utilisateur est déjà utilisé.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Un utilisateur avec cet email existe déjà.")
+        return email
+
+    def clean_telephone(self):
+        telephone = self.cleaned_data.get('telephone')
+        if not telephone.isdigit():
+            raise ValidationError("Le numéro de téléphone doit contenir uniquement des chiffres.")
+        if len(telephone) < 8:
+            raise ValidationError("Le numéro de téléphone est trop court.")
+        return telephone
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if first_name and any(char.isdigit() for char in first_name):
+            raise ValidationError("Le prénom ne doit pas contenir de chiffres.")
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if last_name and any(char.isdigit() for char in last_name):
+            raise ValidationError("Le nom ne doit pas contenir de chiffres.")
+        return last_name
+
+    def clean_groupe(self):
+        groupe = self.cleaned_data.get('groupe')
+        # Exemple de validation : le groupe est requis si l'utilisateur n'est pas superadmin
+        if not self.cleaned_data.get('is_superuser') and not groupe:
+            raise ValidationError("Vous devez sélectionner un groupe.")
+        return groupe
 
 
 
@@ -182,25 +222,63 @@ from django import forms
 from django.contrib.auth.models import Group
 from .models import User
 
+
+
 class CreateOrUpdateUserForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(
-        queryset=Group.objects.all(),  # Liste des groupes disponibles
-        required=False,  # Permet de ne pas forcer un choix
-        widget=forms.CheckboxSelectMultiple  # Affiche des cases à cocher dans le formulaire
+        queryset=Group.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
     )
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'telephone', 'password', 'is_active', 'groups']
         widgets = {
-            'password': forms.PasswordInput(),  # Pour sécuriser le champ du mot de passe
+            'password': forms.PasswordInput(),
         }
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Ce nom d'utilisateur est déjà utilisé.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Un utilisateur avec cet email existe déjà.")
+        return email
+
+    def clean_telephone(self):
+        telephone = self.cleaned_data.get('telephone')
+        if not telephone.isdigit():
+            raise ValidationError("Le numéro de téléphone doit contenir uniquement des chiffres.")
+        if len(telephone) < 8:
+            raise ValidationError("Le numéro de téléphone est trop court (minimum 8 chiffres).")
+        if User.objects.filter(telephone=telephone).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Ce numéro de téléphone est déjà utilisé par un autre utilisateur.")
+        return telephone
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if first_name and any(char.isdigit() for char in first_name):
+            raise ValidationError("Le prénom ne doit pas contenir de chiffres.")
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if last_name and any(char.isdigit() for char in last_name):
+            raise ValidationError("Le nom ne doit pas contenir de chiffres.")
+        return last_name
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        if self.cleaned_data['password']:  # Si un mot de passe est fourni
-            user.set_password(self.cleaned_data['password'])  # Hachage du mot de passe
+        if self.cleaned_data['password']:
+            user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
-            user.groups.set(self.cleaned_data['groups'])  # Assigne directement les groupes
+            self.save_m2m()
+            user.groups.set(self.cleaned_data['groups'])
         return user
+
