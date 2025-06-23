@@ -421,7 +421,7 @@
                         <div class="icon-container">
                             <img src="{% static 'images/zone.png' %}" alt="Localisation">
                         </div>
-                        <span class="nav-text">Zone de securite </span>
+                        <span class="nav-text">Zone de pâcturage </span>
                     </a>
                     {% endif %}
 
@@ -467,9 +467,15 @@
                         setInterval(updateUnreadMessagesCount, 10000);  // Rafraîchir toutes les 10 secondes
                     </script>
              
-                
-                    
-                      
+                    {% if not request.user.owner %}
+                    <!-- Capteurs -->
+                    <a href="{% url 'zonesaveccapteurs' %}" class="nav-link {% if request.resolver_match.url_name == 'zonesaveccapteurs' %}active{% endif %}" id="capteurs-link">
+                        <div class="icon-container">
+                            <img src="{% static 'images/outil.png' %}" alt="Capteurs">
+                        </div>
+                        <span class="nav-text">Appareils et Zones</span>
+                    </a>
+                    {% endif %}
 
                             {% if not request.user.owner %}
                             <a href="{% url 'liste_des_utilisateurs' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_utilisateurs' %}active{% endif %}">

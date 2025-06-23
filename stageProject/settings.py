@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "triple-stereo-dealtime-asylum.trycloudflare.com"
+MY_GLOBAL_VARIABLE = "gently-mini-hint-happens.trycloudflare.com"
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct

@@ -34,6 +34,7 @@ class CapteursListView(PermissionRequiredMixin, ListView):
         return super().handle_no_permission()
 
 
+
 from django.views.generic import FormView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -225,6 +226,7 @@ def supprimer_capteur(request, capteur_id):
         try:
             capteur = Capteur.objects.get(id=capteur_id)
             capteur.delete()
+            #messages.success(request,f"Zone creé avec succès.")
             return JsonResponse({"success": True})
         except Capteur.DoesNotExist:
             return JsonResponse({"success": False, "error": "Capteur introuvable"})
@@ -309,6 +311,28 @@ def supprimer_message(request, message_id):
         return redirect('notifications')  # on redirige au lieu de renvoyer une erreur brute
 
 
+
+@login_required
+def supprimer_tout_les_messages(request):
+    user = request.user
+
+    if user.owner is None:
+        # ✅ Cas d’un parent : ne prendre que les zones des sous-utilisateurs
+        sous_utilisateurs = user.sub_users.all()
+        zones = ZoneSecurite.objects.filter(user__in=sous_utilisateurs)
+    else:
+        # ✅ Cas d’un sous-utilisateur : ses propres zones
+        zones = ZoneSecurite.objects.filter(user=user)
+
+    # Supprime tous les messages liés à ces zones
+    messages_supprimes = Message.objects.filter(zone__in=zones)
+    count = messages_supprimes.count()
+    messages_supprimes.delete()
+
+    messages.success(request, f"{count} message(s) supprimé(s) avec succès.")
+    return redirect('notifications')  # Adapte selon le nom réel de ta vue
+
+
 class MarquerCommeLuView(View):
     def get(self, request, message_id):
         # Récupérer le message par son ID
@@ -370,15 +394,17 @@ from django.views.generic import ListView
 from .models import ZoneSecurite
 from utilisateurs.models import User  # Utilise ton modèle utilisateur personnalisé
 
+from django.db.models import Count  # ⬅️ Ajoute cette ligne
+
 class ListeDesZones(PermissionRequiredMixin, ListView):    
     template_name = 'capteurs/liste_des_zones.html'
     context_object_name = 'zones'
-    permission_required = 'capteurs.view_zonesecurite'  # Spécifie la permission requise
+    permission_required = 'capteurs.view_zonesecurite'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.has_perm(self.permission_required):
             messages.error(request, "Vous n'avez pas la permission d'accéder à cette page.")
-            return redirect('homePage')  # Redirection personnalisée
+            return redirect('homePage')
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -387,25 +413,26 @@ class ListeDesZones(PermissionRequiredMixin, ListView):
         if not user.is_authenticated:
             return ZoneSecurite.objects.none()
 
-        # Si c'est un fils, récupérer son parent et les frères
         if user.owner:
             parent = user.owner
             related_users = [parent] + list(parent.sub_users.all())
         else:
-            # Si c'est un parent, lui et ses fils
             related_users = [user] + list(user.sub_users.all())
 
-        return ZoneSecurite.objects.filter(user__in=related_users).select_related('user').only('nom', 'description', 'user')
+        # Annotation du nombre de capteurs associés à chaque zone
+        return ZoneSecurite.objects.filter(user__in=related_users)\
+            .select_related('user')\
+            .only('nom', 'description', 'user')\
+            .annotate(nb_capteurs=Count('capteur'))  # ⬅️ Annoter ici
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
         if user.is_authenticated:
-            # On peut aussi afficher les utilisateurs liés
             utilisateurs = user.get_all_related_users()
             context['utilisateurs'] = utilisateurs
-            context['utilisateurs_ids'] = [utilisateur.id for utilisateur in utilisateurs]  # Récupère les IDs
+            context['utilisateurs_ids'] = [utilisateur.id for utilisateur in utilisateurs]
         else:
             context['utilisateurs'] = User.objects.none()
             context['utilisateurs_ids'] = []
@@ -413,7 +440,48 @@ class ListeDesZones(PermissionRequiredMixin, ListView):
         return context
 
 
+class ListeDesZonesAvecCapteurs(PermissionRequiredMixin, ListView):    
+    template_name = 'capteurs/liste_zones_avec_capteurs.html'
+    context_object_name = 'zones'
+    permission_required = 'capteurs.view_zonesecurite'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm(self.permission_required):
+            messages.error(request, "Vous n'avez pas la permission d'accéder à cette page.")
+            return redirect('homePage')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return ZoneSecurite.objects.none()
+
+        if user.owner:
+            parent = user.owner
+            related_users = [parent] + list(parent.sub_users.all())
+        else:
+            related_users = [user] + list(user.sub_users.all())
+
+        # Annotation du nombre de capteurs associés à chaque zone
+        return ZoneSecurite.objects.filter(user__in=related_users)\
+            .select_related('user')\
+            .only('nom', 'description', 'user')\
+            .annotate(nb_capteurs=Count('capteur'))  # ⬅️ Annoter ici
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        if user.is_authenticated:
+            utilisateurs = user.get_all_related_users()
+            context['utilisateurs'] = utilisateurs
+            context['utilisateurs_ids'] = [utilisateur.id for utilisateur in utilisateurs]
+        else:
+            context['utilisateurs'] = User.objects.none()
+            context['utilisateurs_ids'] = []
+
+        return context
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -461,6 +529,7 @@ from django.views.generic import ListView
 from .models import ZoneSecurite, User
 import json
 
+
 class ZoneSecuriteView(ListView):
     model = ZoneSecurite
     template_name = 'capteurs/modifier_zone.html'
@@ -496,9 +565,9 @@ class ZoneSecuriteView(ListView):
         context['zone_data_json'] = json.dumps(zone_data)
 
         # Récupérer la liste des utilisateurs liés à la zone (ajuster selon ton modèle)
-        utilisateurs = self.request.user.get_all_related_users()
+        #utilisateurs = self.request.user.get_all_related_users()
+        utilisateurs = self.request.user.get_all_related_users().exclude(id=self.request.user.id)
         context['utilisateurs'] = utilisateurs
-
         return context
 
 
@@ -519,7 +588,8 @@ from .models import ZoneSecurite, User
 @login_required
 def creer_zone(request):
     # Récupération des utilisateurs liés à l'utilisateur connecté
-    utilisateurs = request.user.get_all_related_users()
+    utilisateurs = request.user.get_all_related_users().exclude(id=request.user.id)
+
     
     if request.method == 'POST':
         try:
@@ -599,7 +669,6 @@ def creer_zone(request):
             return JsonResponse({'error': 'Utilisateur introuvable'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-
     return render(request, 'capteurs/creer_zone.html', {'utilisateurs': utilisateurs})
 
 
@@ -681,6 +750,7 @@ def update_position(request, zone_id):
                 zone.longitude = data.get('longitude')
             
             zone.save()
+            messages.success(request, f"Zone creé avec succès.")
             return JsonResponse({'message': 'Zone mise à jour avec succès !'}, status=200)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON invalide'}, status=400)
@@ -693,7 +763,603 @@ def update_position(request, zone_id):
 def supprimer_zone(request, zone_id):
     zone = get_object_or_404(ZoneSecurite, id=zone_id)
     zone.delete()
+    messages.success(request, f"Zone supprimé avec succès.")
     return redirect('liste_des_zones')
+
+
+#Suppression des capteurs lié à la zone
+@login_required
+def supprimer_capteurs_zone(request, zone_id):
+    zone = get_object_or_404(ZoneSecurite, id=zone_id)
+
+    # Supprimer uniquement les capteurs liés à cette zone
+    capteurs_associes = Capteur.objects.filter(zone_securite=zone)
+    nb = capteurs_associes.count()
+    capteurs_associes.delete()
+
+    messages.success(request, f"{nb} capteur(s) associés à la zone {zone.nom} ont été supprimés.")
+    return redirect('liste_des_zones')
+
+
+
+from django.db import transaction
+
+def get_related_users(user):
+    """Retourne l'utilisateur + ses sub-users (ou owner et ses sub-users)."""
+    if user.owner:
+        parent = user.owner
+        return [parent] + list(parent.sub_users.all())
+    else:
+        return [user] + list(user.sub_users.all())
+
+@login_required
+def transferer_zone_capteurs(request):
+    related_users = get_related_users(request.user)
+    zones = ZoneSecurite.objects.filter(user__in=related_users)
+
+    if request.method == "POST":
+        ancienne_zone_id = request.POST.get("ancienne_zone_id")
+        nouvelle_zone_id = request.POST.get("nouvelle_zone_id")
+
+        if not ancienne_zone_id or not nouvelle_zone_id:
+            messages.error(request, "Veuillez sélectionner les deux zones.")
+            return redirect("zonesaveccapteurs")
+
+        if ancienne_zone_id == nouvelle_zone_id:
+            messages.error(request, "La zone source et la zone destination doivent être différentes.")
+            return redirect("zonesaveccapteurs")
+
+        try:
+            ancienne_zone = get_object_or_404(ZoneSecurite, id=int(ancienne_zone_id), user__in=related_users)
+            nouvelle_zone = get_object_or_404(ZoneSecurite, id=int(nouvelle_zone_id), user__in=related_users)
+
+            capteurs = Capteur.objects.filter(zone_securite=ancienne_zone, user__in=related_users)
+            nb_capteurs = capteurs.count()
+
+            if nb_capteurs == 0:
+                messages.error(request, f"Aucun capteur trouvé dans la zone '{ancienne_zone.nom}'.")
+                return redirect("zonesaveccapteurs")
+
+            with transaction.atomic():
+                capteurs.update(zone_securite=nouvelle_zone)
+                # Pas besoin de mettre à jour `nb_capteurs` si c’est juste pour le front, car annoté dynamiquement
+
+            messages.success(
+                request,
+                f"{nb_capteurs} capteur(s) transféré(s) de la zone {ancienne_zone.nom} vers '{nouvelle_zone.nom}'."
+            )
+
+        except ZoneSecurite.DoesNotExist:
+            messages.error(request, "Une des zones sélectionnées n'existe pas ou ne vous appartient pas.")
+        except Exception as e:
+            messages.error(request, f"Erreur lors du transfert : {str(e)}")
+
+        return redirect("zonesaveccapteurs")
+
+    return render(request, "capteurs/liste_zones_avec_capteurs.html", {"zones": zones})
+
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from .models import ZoneSecurite, Capteur
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from .models import ZoneSecurite, Capteur
+
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from datetime import datetime
+from .models import ZoneSecurite, Capteur
+
+class ElegantHeaderCanvas(canvas.Canvas):
+    """Canvas personnalisé pour ajouter un en-tête et pied de page élégant"""
+    
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self.pages = []
+        
+    def showPage(self):
+        self.pages.append(dict(self.__dict__))
+        self._startPage()
+        
+    def save(self):
+        page_count = len(self.pages)
+        for page_num, page in enumerate(self.pages, 1):
+            self.__dict__.update(page)
+            self.draw_page_template(page_num, page_count)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+        
+    def draw_page_template(self, page_num, page_count):
+        """Dessine l'en-tête et le pied de page"""
+        # En-tête avec dégradé simulé
+        self.setFillColor(colors.HexColor("#2C3E50"))
+        self.rect(0, A4[1] - 80, A4[0], 80, fill=1, stroke=0)
+        
+        # Ligne décorative
+        self.setFillColor(colors.HexColor("#3498DB"))
+        self.rect(0, A4[1] - 85, A4[0], 5, fill=1, stroke=0)
+        
+        # Titre dans l'en-tête
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica-Bold", 20)
+        self.drawCentredText(A4[0]/2, A4[1] - 40, "RAPPORT DE CAPTEURS PAR ZONE")
+        
+        # Date et heure
+        self.setFont("Helvetica", 10)
+        now = datetime.now()
+        date_str = now.strftime("%d/%m/%Y à %H:%M")
+        self.drawRightString(A4[0] - 30, A4[1] - 60, f"Généré le {date_str}")
+        
+        # Pied de page
+        self.setFillColor(colors.HexColor("#34495E"))
+        self.rect(0, 0, A4[0], 30, fill=1, stroke=0)
+        
+        # Numéro de page
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica", 9)
+        self.drawCentredText(A4[0]/2, 15, f"Page {page_num} sur {page_count}")
+        
+        # Ligne décorative en bas
+        self.setFillColor(colors.HexColor("#3498DB"))
+        self.rect(0, 30, A4[0], 3, fill=1, stroke=0)
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from datetime import datetime
+from .models import ZoneSecurite, Capteur
+
+class ElegantHeaderCanvas(canvas.Canvas):
+    """Canvas personnalisé pour ajouter un en-tête et pied de page élégant"""
+    
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self.pages = []
+        
+    def showPage(self):
+        self.pages.append(dict(self.__dict__))
+        self._startPage()
+        
+    def save(self):
+        page_count = len(self.pages)
+        for page_num, page in enumerate(self.pages, 1):
+            self.__dict__.update(page)
+            self.draw_page_template(page_num, page_count)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+        
+    def draw_page_template(self, page_num, page_count):
+        """Dessine l'en-tête et le pied de page"""
+        # En-tête avec couleur verte
+        self.setFillColor(colors.HexColor("#2E7D32"))  # Vert foncé
+        self.rect(0, A4[1] - 80, A4[0], 80, fill=1, stroke=0)
+        
+        # Ligne décorative verte
+        self.setFillColor(colors.HexColor("#4CAF50"))  # Vert plus clair
+        self.rect(0, A4[1] - 85, A4[0], 5, fill=1, stroke=0)
+        
+        # Titre dans l'en-tête
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica-Bold", 20)
+        self.drawCentredText(A4[0]/2, A4[1] - 40, "RAPPORT DE CAPTEURS PAR ZONE")
+        
+        # Pied de page avec couleur verte
+        self.setFillColor(colors.HexColor("#388E3C"))  # Vert moyen
+        self.rect(0, 0, A4[0], 50, fill=1, stroke=0)
+        
+        # Date et heure en bas
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica", 10)
+        now = datetime.now()
+        date_str = now.strftime("%d/%m/%Y à %H:%M")
+        self.drawCentredText(A4[0]/2, 35, f"Généré le {date_str}")
+        
+        # Numéro de page en bas
+        self.setFont("Helvetica", 9)
+        self.drawCentredText(A4[0]/2, 20, f"Page {page_num} sur {page_count}")
+        
+        # Ligne décorative en bas
+        self.setFillColor(colors.HexColor("#4CAF50"))
+        self.rect(0, 50, A4[0], 3, fill=1, stroke=0)
+
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from datetime import datetime
+from .models import ZoneSecurite, Capteur
+
+class ElegantHeaderCanvas(canvas.Canvas):
+    """Canvas personnalisé pour ajouter un en-tête et pied de page élégant"""
+    
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self.pages = []
+        
+    def showPage(self):
+        self.pages.append(dict(self.__dict__))
+        self._startPage()
+        
+    def save(self):
+        page_count = len(self.pages)
+        for page_num, page in enumerate(self.pages, 1):
+            self.__dict__.update(page)
+            self.draw_page_template(page_num, page_count)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+        
+    def draw_page_template(self, page_num, page_count):
+        """Dessine l'en-tête et le pied de page"""
+        # En-tête avec couleur verte
+        self.setFillColor(colors.HexColor("#2E7D32"))  # Vert foncé
+        self.rect(0, A4[1] - 80, A4[0], 80, fill=1, stroke=0)
+        
+        # Ligne décorative verte
+        self.setFillColor(colors.HexColor("#4CAF50"))  # Vert plus clair
+        self.rect(0, A4[1] - 85, A4[0], 5, fill=1, stroke=0)
+        
+        # Titre dans l'en-tête
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica-Bold", 20)
+        self.drawCentredText(A4[0]/2, A4[1] - 40, "RAPPORT DE CAPTEURS PAR ZONE")
+        
+        # Pied de page avec couleur verte
+        self.setFillColor(colors.HexColor("#388E3C"))  # Vert moyen
+        self.rect(0, 0, A4[0], 50, fill=1, stroke=0)
+        
+        # Date et heure d'impression en bas
+        self.setFillColor(colors.white)
+        self.setFont("Helvetica", 10)
+        now = datetime.now()
+        date_str = now.strftime("%d/%m/%Y")
+        heure_str = now.strftime("%H:%M:%S")
+        self.drawCentredText(A4[0]/2, 35, f"Imprimé le {date_str} à {heure_str}")
+        
+        # Numéro de page en bas
+        self.setFont("Helvetica", 9)
+        self.drawCentredText(A4[0]/2, 20, f"Page {page_num} sur {page_count}")
+        
+        # Ligne décorative en bas
+        self.setFillColor(colors.HexColor("#4CAF50"))
+        self.rect(0, 50, A4[0], 3, fill=1, stroke=0)
+
+
+
+@login_required
+def exporter_capteurs_par_zone_pdf(request):
+    """Export PDF élégant des capteurs par zone sans la colonne 'Statut'"""
+    
+    related_users = get_related_users(request.user)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="capteurs_par_zone_rapport.pdf"'
+    
+    doc = SimpleDocTemplate(
+        response, 
+        pagesize=A4,
+        topMargin=100,
+        bottomMargin=60,
+        leftMargin=50,
+        rightMargin=50,
+        canvasmaker=ElegantHeaderCanvas
+    )
+    
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=24,
+        textColor=colors.HexColor("#2E7D32"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    
+    zone_title_style = ParagraphStyle(
+        'ZoneTitle',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor("#1B5E20"),
+        spaceAfter=15,
+        spaceBefore=20,
+        fontName='Helvetica-Bold',
+        borderWidth=1,
+        borderColor=colors.HexColor("#4CAF50"),
+        borderPadding=10,
+        backColor=colors.HexColor("#E8F5E8"),
+        borderRadius=5
+    )
+    
+    stats_style = ParagraphStyle(
+        'Stats',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.HexColor("#7F8C8D"),
+        spaceAfter=10,
+        alignment=TA_RIGHT,
+        fontName='Helvetica-Oblique'
+    )
+    
+    no_data_style = ParagraphStyle(
+        'NoData',
+        parent=styles['Normal'],
+        fontSize=12,
+        textColor=colors.HexColor("#E74C3C"),
+        spaceAfter=15,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Oblique',
+        backColor=colors.HexColor("#FADBD8"),
+        borderWidth=1,
+        borderColor=colors.HexColor("#E74C3C"),
+        borderPadding=8
+    )
+    
+    elements = []
+    zones = ZoneSecurite.objects.select_related('user').filter(user__in=related_users)
+    total_zones = zones.count()
+    total_capteurs = sum(Capteur.objects.filter(zone_securite=zone).count() for zone in zones)
+
+    elements.append(Spacer(1, 20))
+    stats_text = f"<b>Résumé :</b> {total_zones} zone(s) • {total_capteurs} capteur(s) au total"
+    elements.append(Paragraph(stats_text, stats_style))
+    elements.append(Spacer(1, 30))
+
+    for zone_index, zone in enumerate(zones, 1):
+        zone_info = f"""
+        <b>🏢 Zone {zone_index}/{total_zones} :</b> {zone.nom}<br/>
+        <font size="10" color="#7F8C8D">👤 Utilisateur : {zone.user.username}</font>
+        """
+        elements.append(Paragraph(zone_info, zone_title_style))
+        elements.append(Spacer(1, 10))
+        
+        capteurs = Capteur.objects.filter(zone_securite=zone)
+        nb_capteurs = capteurs.count()
+
+        if capteurs.exists():
+            types_animals = capteurs.values_list('type_animal__type_animal', flat=True).distinct()
+            stats_zone = f"📊 {nb_capteurs} capteur(s) • {len(types_animals)} type(s) d'animaux différents"
+            elements.append(Paragraph(stats_zone, stats_style))
+            elements.append(Spacer(1, 8))
+            
+            data = [['🔍 Identifiant', '🐾 Type d\'animal']]
+
+            for capteur in capteurs:
+                data.append([
+                    str(capteur.identifiant),
+                    capteur.type_animal.type_animal
+                ])
+
+            table = Table(data, colWidths=[180, 220])
+            table_style = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#4CAF50")),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#81C784")),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1),
+                 [colors.white, colors.HexColor("#F1F8E9")]),
+                ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor("#E8F5E8")),
+            ])
+
+            for i in range(1, len(data)):
+                bg_color = "#F1F8E9" if i % 2 == 0 else "#FFFFFF"
+                table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor(bg_color))
+
+            table.setStyle(table_style)
+            elements.append(table)
+            elements.append(Spacer(1, 20))
+        else:
+            no_data_msg = "⚠️ Aucun capteur n'est associé à cette zone"
+            elements.append(Paragraph(no_data_msg, no_data_style))
+            elements.append(Spacer(1, 15))
+
+        if zone_index < total_zones:
+            elements.append(Spacer(1, 10))
+            separator = Table([['']], colWidths=[500])
+            separator.setStyle(TableStyle([
+                ('LINEBELOW', (0, 0), (-1, -1), 2, colors.HexColor("#4CAF50")),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ]))
+            elements.append(separator)
+            elements.append(Spacer(1, 20))
+
+    elements.append(Spacer(1, 30))
+    footer_text = """
+    <font size="9" color="#7F8C8D">
+    <i>Ce rapport a été généré automatiquement par le système de gestion des capteurs.<br/>
+    Pour toute question, veuillez contacter l'administrateur système.</i>
+    </font>
+    """
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        alignment=TA_CENTER,
+        spaceAfter=20
+    )
+    elements.append(Paragraph(footer_text, footer_style))
+    
+    doc.build(elements)
+    return response
+
+
+
+@login_required
+def exporter_capteurs_zone_pdf(request, zone_id):
+    """Export PDF élégant des capteurs d'une zone de sécurité précise identifiée par zone_id"""
+
+    # Vérifier que la zone appartient à un utilisateur accessible par le user connecté
+    zone = get_object_or_404(ZoneSecurite, id=zone_id)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="capteurs_zone_{zone.nom}.pdf"'
+
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=A4,
+        topMargin=100,
+        bottomMargin=60,
+        leftMargin=50,
+        rightMargin=50,
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=24,
+        textColor=colors.HexColor("#2E7D32"),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+
+    zone_title_style = ParagraphStyle(
+        'ZoneTitle',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor("#1B5E20"),
+        spaceAfter=15,
+        spaceBefore=20,
+        fontName='Helvetica-Bold',
+        borderWidth=1,
+        borderColor=colors.HexColor("#4CAF50"),
+        borderPadding=10,
+        backColor=colors.HexColor("#E8F5E8"),
+        borderRadius=5
+    )
+
+    stats_style = ParagraphStyle(
+        'Stats',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.HexColor("#7F8C8D"),
+        spaceAfter=10,
+        alignment=TA_RIGHT,
+        fontName='Helvetica-Oblique'
+    )
+
+    no_data_style = ParagraphStyle(
+        'NoData',
+        parent=styles['Normal'],
+        fontSize=12,
+        textColor=colors.HexColor("#E74C3C"),
+        spaceAfter=15,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Oblique',
+        backColor=colors.HexColor("#FADBD8"),
+        borderWidth=1,
+        borderColor=colors.HexColor("#E74C3C"),
+        borderPadding=8
+    )
+
+    elements = []
+    elements.append(Spacer(1, 20))
+
+    # Titre
+    elements.append(Paragraph(f"Rapport des capteurs - Zone : {zone.nom}", title_style))
+    elements.append(Spacer(1, 20))
+
+    capteurs = Capteur.objects.filter(zone_securite=zone)
+    nb_capteurs = capteurs.count()
+
+    if capteurs.exists():
+        types_animals = capteurs.values_list('type_animal__type_animal', flat=True).distinct()
+        stats_zone = f"📊 {nb_capteurs} capteur(s) • {len(types_animals)} type(s) d'animaux différents"
+        elements.append(Paragraph(stats_zone, stats_style))
+        elements.append(Spacer(1, 8))
+
+        data = [['🔍 Identifiant', '🐾 Type d\'animal']]
+
+        for capteur in capteurs:
+            data.append([
+                str(capteur.identifiant),
+                capteur.type_animal.type_animal
+            ])
+
+        table = Table(data, colWidths=[180, 220])
+        table_style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#4CAF50")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('TOPPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#81C784")),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1),
+             [colors.white, colors.HexColor("#F1F8E9")]),
+            ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor("#E8F5E8")),
+        ])
+
+        for i in range(1, len(data)):
+            bg_color = "#F1F8E9" if i % 2 == 0 else "#FFFFFF"
+            table_style.add('BACKGROUND', (0, i), (-1, i), colors.HexColor(bg_color))
+
+        table.setStyle(table_style)
+        elements.append(table)
+        elements.append(Spacer(1, 20))
+    else:
+        no_data_msg = "⚠️ Aucun capteur n'est associé à cette zone"
+        elements.append(Paragraph(no_data_msg, no_data_style))
+        elements.append(Spacer(1, 15))
+
+    footer_text = """
+    <font size="9" color="#7F8C8D">
+    <i>Ce rapport a été généré automatiquement par le système de gestion des capteurs.<br/>
+    Pour toute question, veuillez contacter l'administrateur système.</i>
+    </font>
+    """
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        alignment=TA_CENTER,
+        spaceAfter=20
+    )
+    elements.append(Paragraph(footer_text, footer_style))
+
+    doc.build(elements)
+    return response
 
 
 
@@ -739,7 +1405,7 @@ def suivreBetail(request, user_id=None):
     except User.DoesNotExist:
         raise Http404("Utilisateur non trouvé")
 
-    # 🔒 Ne récupérer que les zones de CET utilisateur
+    #🔒Ne récupérer que les zones de CET utilisateur
     zones = ZoneSecurite.objects.filter(user=user)
 
     zones_data = []

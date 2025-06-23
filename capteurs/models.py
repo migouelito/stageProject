@@ -12,7 +12,7 @@ from shapely.geometry import Point, Polygon
 from geopy.distance import geodesic  # ✅ Pour le calcul réel de distance
 import json
 from  django.db.models import PROTECT
-
+from django.db.models.functions import Lower
 
 class ZoneSecurite(models.Model):
     FORMES_CHOICES = [
@@ -48,7 +48,10 @@ class ZoneSecurite(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'nom'], name='unique_nom_par_utilisateur')
+            models.UniqueConstraint(
+                Lower('nom'),
+                name='unique_nom_insensible_casse'
+            )
         ]
     # Pour les polygones génériques
     coins = models.JSONField(null=True, blank=True)  # Liste [(lat, lon), ...]

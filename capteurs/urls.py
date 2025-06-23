@@ -21,11 +21,18 @@ urlpatterns = [
     path('capteurs/marquer_comme_lu/<int:message_id>/', MarquerCommeLuView.as_view(), name='marquer_comme_lu'),
     path('capteurs/marquer_tout_comme_lu/', MarquerTousCommeLuView.as_view(), name='marquer_tout_comme_lu'),
     path('capteurs/delete_message/<int:message_id>/',supprimer_message, name='supprimer_message'),
+    path('messages/supprimer_tout_les_messages/', supprimer_tout_les_messages,name='supprimer_tout_les_messages'),
 
     path('zone/liste_des_zones', ListeDesZones.as_view(),name="liste_des_zones"),
+    path("zones/zone_avec_capteurs/",ListeDesZonesAvecCapteurs.as_view(),name="zonesaveccapteurs"),
     path("zone/creer_zone", creer_zone, name="creer_zone"),
-      path('zones/modifier_zone/<int:pk>/', modifier_zone, name='modifier_zone'),
+    path('zones/modifier_zone/<int:pk>/', modifier_zone, name='modifier_zone'),
+    path("transferer-zones/", transferer_zone_capteurs, name="transferer_zone_capteurs"),
+    path('export/capteurs_zone/pdf/', exporter_capteurs_par_zone_pdf, name='export_tout_appareils_pdf'),
+    path('export/capteurs_par_zone/pdf/<int:zone_id>/', exporter_capteurs_zone_pdf, name='exporter_appareils_par_zone_pdf'),
     path('zones/supprimer/<int:zone_id>/', supprimer_zone, name='supprimer_zone'),
+    path('zones/supprimertoutcapteurs/<int:zone_id>/', supprimer_capteurs_zone, name='supprimer_tout_capteur'),
+
 
 
      # urls.py

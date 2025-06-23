@@ -84,14 +84,16 @@
     }
 
     .btn-action {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+   background: linear-gradient(145deg, #4CAF50, #3d8b40);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 1000;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
     }
 
     .btn-action:hover {
@@ -172,6 +174,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
 <script>
     const userId = "{{ user_id }}";
     const zoneId = "{{ zone_id }}";
@@ -346,12 +349,16 @@ if (zoneData) {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.message) {
-                alert(data.message);
-            } else {
-                alert(data.error || "Erreur inconnue");
-            }
-        })
+        if (data.message) {
+            // Optionnel : afficher un message de succès
+            //alert(data.message);
+            // Redirection vers la liste des zones
+            window.location.href = '/zone/liste_des_zones';
+        } else {
+            alert(data.error || "Erreur inconnue");
+        }
+    })
+
         .catch(error => {
             console.error("Erreur:", error);
             alert("Erreur de communication avec le serveur.");

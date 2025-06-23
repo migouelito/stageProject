@@ -334,7 +334,15 @@ select[multiple] {
   opacity: 1;
 }
 
- 
+
+    input:focus,
+    select:focus {
+        border-color: #28a745 !important; /* Vert */
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Halo vert */
+        outline: none;
+    }
+
+
 </style>
 
    
@@ -348,7 +356,7 @@ select[multiple] {
 
      <!-- Barre de recherche centrée -->
      <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Rechercher un capteur..." onkeyup="searchCapteurs()">
+        <input type="text" id="searchInput" placeholder="Rechercher un appareil..." onkeyup="searchCapteurs()">
     </div>
 
     <script>

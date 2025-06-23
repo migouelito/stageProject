@@ -68,7 +68,7 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 1000;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
@@ -247,7 +247,10 @@
             }
         }
         
+        
     </style>
+
+    
 
 <div class="page-container">
     <div class="loading-indicator" id="loading">
@@ -259,13 +262,7 @@
         <button type="submit" form="zoneForm" class="btn-valider-header" id="btnValider">Valider</button>
     </div>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
+
 
     <div class="form-container">
         <form method="POST" id="zoneForm">
@@ -284,6 +281,8 @@
                     {% endfor %}
                 </select>
             </div>
+            
+
             <div class="input-group">
                 <label>Description :</label>
                 <textarea name="description" rows="4" required placeholder="Décrivez cette zone de pâturage"></textarea>

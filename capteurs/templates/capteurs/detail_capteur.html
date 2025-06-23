@@ -114,17 +114,14 @@ body {
 {% block content %}
 <div class="capteur-details">
   <!-- Image de l'animal -->
-  <div class="animal-image">
-    {% if capteur.type_animal == 'boeuf' %}
-      <img src="{% static 'utilisateurs/images/bouef.jpg' %}" alt="Boeuf">
-    {% elif capteur.type_animal == 'Mouton' %}
-      <img src="{% static 'images/mouton.png' %}" alt="Mouton">
-    {% elif capteur.type_animal == 'Âne' %}
-      <img src="{% static 'images/ane.png' %}" alt="Âne">
-    {% else %}
-      <img src="{% static 'images/animal_inconnu.png' %}" alt="Animal Inconnu">
-    {% endif %}
-  </div>
+<div class="animal-image">
+  {% if capteur.type_animal.image %}
+    <img src="{{ capteur.type_animal.image.url }}" alt="{{ capteur.type_animal }}">
+  {% else %}
+    <img src="{% static 'images/animal_inconnu.png' %}" alt="Animal inconnu">
+  {% endif %}
+</div>
+
 
   <table class="info-table">
     <tr>

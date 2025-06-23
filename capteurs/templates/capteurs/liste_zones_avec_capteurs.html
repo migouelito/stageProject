@@ -310,37 +310,37 @@
 
 
 <div class="container-header">
-    <h1>Mes zones de pâturages</h1>
+    <h1>Appareils et Zones</h1>
 
-   <!-- Barre de recherche centrée -->
-   <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
+    <!-- Barre de recherche centrée -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
+    </div>
+
+    <a href="{% url 'export_tout_appareils_pdf' %}" class="add-btn" target="_blank">
+    <img src="{% static 'images/telechager.png' %}" alt="Télécharger tout les appareils" class="icon">
+    Télécharger tous les appareils
+    </a>
+
 </div>
 
 <script>
     function searchZone() {
-        let input = document.getElementById("searchInput").value.toLowerCase();  // Récupérer l'entrée de recherche
-        let rows = document.querySelectorAll(".users-table tbody tr");  // Sélectionner toutes les lignes de la table
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll(".users-table tbody tr");
 
         rows.forEach(row => {
-            let zoneNom = row.cells[0].innerText.toLowerCase();  // Récupérer le nom de la zone (1ère colonne)
-            let utilisateur = row.cells[2].innerText.toLowerCase();  // Récupérer le nom de l'utilisateur (3ème colonne)
+            let zoneNom = row.cells[0].innerText.toLowerCase();
+            let utilisateur = row.cells[2]?.innerText?.toLowerCase() || "";
 
-            // Comparer la recherche avec les deux colonnes (nom de la zone et utilisateur)
             if (zoneNom.includes(input) || utilisateur.includes(input)) {
-                row.style.display = "";  // Afficher la ligne si le nom de la zone ou l'utilisateur correspond
+                row.style.display = "";
             } else {
-                row.style.display = "none";  // Cacher la ligne si aucun nom de zone ou utilisateur ne correspond
+                row.style.display = "none";
             }
         });
     }
 </script>
-
-
-    <a href="{% url 'creer_zone' %}" class="add-btn" onclick="ouvrirModalZone(false)">
-        <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter une zone" class="icon"> Ajouter une zone
-    </a>
-</div>
 
 <div class="table-responsive">
     <table class="users-table">
@@ -348,9 +348,7 @@
             <tr>
                 <th>Nom de la zone</th>
                 <th>Description</th>
-               <!-- <th>Nombre appareils </th> -->
-                <th>Etat de la secuité</th>
-                <th>eleveur</th>
+                <th>Nombre appareils</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -359,54 +357,35 @@
                 <tr>
                     <td>{{ zone.nom }}</td>
                     <td>{{ zone.description }}</td>
-                 <!--   <td>{{ zone.nb_capteurs }}</td> -->
-                    <td>
-                        {% if zone.active_securite %}
-                            <span style="display: flex; align-items: center;">
-                                <span style="width: 20px; height: 20px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
-                                Activée
-                            </span>
-                        {% else %}
-                            <span style="display: flex; align-items: center;">
-                                <span style="width:20px; height: 20px; background-color: #ff0000; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
-                                Désactivée
-                            </span>
-                        {% endif %}
-                    </td>
-                         <td>   <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="20" height="20" fill="currentColor" 
-                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
-                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
-                     </svg>
-                        {{ zone.user.username }}</td>
-                    
-                    <td>
-                 <div class="actions">
-                    <!-- Voir ce que se passe dans la zone -->
+                    <td>{{ zone.nb_capteurs }}</td>
+                    <td class="actions">
+                <!-- Voir ce que se passe dans la zone -->
                 <div class="tooltip">
-                    <a href="{% url 'suivrebetail' user_id=zone.user.id %}" onclick="ouvrirModalZone(true, {{ zone.id }}, '{{ zone.nom }}', '{{ zone.description }}', '{{ zone.user.id }}')">
-                    <img src="{% static 'images/zone.png' %}" alt="Voir la zone">
+                    <a href="{% url 'exporter_appareils_par_zone_pdf' zone_id=zone.id %}" target="_blank" title="Télécharger la liste des appareils">
+                        <img src="{% static 'images/telechager.png' %}" alt="Télécharger la liste des appareils">
                     </a>
-                    <div class="tooltiptext">Suivre en direct le  bétail</div>
+                    <div class="tooltiptext">Télécharger la liste des appareils</div>
                 </div>
 
-                <!-- Modifier la zone -->
-                <div class="tooltip">
-                    <a href="{% url 'zone_securite' user_id=zone.user.id zone_id=zone.id %}">
-                    <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier la zone">
-                    </a>
-                    <div class="tooltiptext">Modifier cette zone</div>
-                </div>
 
-                <!-- Supprimer la zone -->
-                <div class="tooltip">
-                    <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
-                    <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer la zone">
-                    </a>
-                    <div class="tooltiptext">Supprimer cette zone</div>
-                </div>
-                </div>
 
+                      <!-- Transférer les capteurs -->
+                        <div class="tooltip">
+                            <a href="javascript:void(0);" onclick="ouvrirModalTransfert({{ zone.id }}, '{{ zone.nom }}')">
+                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Transférer les capteurs">
+                            </a>
+                            <div class="tooltiptext">Transférer les capteurs vers une autre zone</div>
+                        </div>
+
+                        <!-- Supprimer la zone -->
+                        <div class="tooltip">
+                            <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
+                                <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer la zone">
+                            </a>
+                            <div class="tooltiptext">supprimer tout les appareils</div>
+                        </div>
+
+                      
                     </td>
                 </tr>
             {% empty %}
@@ -418,15 +397,13 @@
     </table>
 </div>
 
-
-
 <!-- Modal de suppression -->
 <div id="suppressionModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Confirmer la suppression</h2>
         <div class="modal-body">
-            <p>Êtes-vous sûr de vouloir supprimer cette zone ?</p>
+            <p>Êtes-vous sûr de vouloir supprimer tous les appareils associés à cette zone ?</p>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn" id="btnAnnulerSuppression">Annuler</button>
@@ -435,34 +412,45 @@
     </div>
 </div>
 
-<!--  Script JavaScript -->
+<!-- Modal Transfert des capteurs -->
+<div id="transfertModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeTransfert">&times;</span>
+        <h2>Transférer les capteurs</h2>
+        <form id="formTransfert" method="POST" action="{% url 'transferer_zone_capteurs' %}">
+            {% csrf_token %}
+            <input type="hidden" name="ancienne_zone_id" id="ancienne_zone_id" value="">
+            <label for="nouvelle_zone_id">Choisir la nouvelle zone :</label>
+            <select name="nouvelle_zone_id" id="nouvelle_zone_id" required>
+                <option value="" disabled selected>-- Sélectionner une zone --</option>
+                {% for zone_option in zones %}
+                    <option value="{{ zone_option.id }}">{{ zone_option.nom }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+            <div style="text-align: center;">
+                <button type="submit" class="btn btn-primary">Transférer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    // Modal Création/Modification
-    function ouvrirModalZone(estModification = false, id = null, nom = '', description = '', userId = '') {
-        const modal = document.getElementById("zoneModal");
-        const titre = document.getElementById("zoneModalTitre");
-        const bouton = document.getElementById("zoneModalBouton");
-        const form = document.getElementById("formZone");
+    // Recherche de zones
+    function searchZone() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll(".users-table tbody tr");
 
-        document.getElementById("zone_nom").value = nom;
-        document.getElementById("zone_description").value = description;
-        document.getElementById("zone_utilisateur").value = userId;
+        rows.forEach(row => {
+            let zoneNom = row.cells[0].innerText.toLowerCase();
+            let utilisateur = row.cells[2]?.innerText?.toLowerCase() || "";
 
-        if (estModification) {
-            titre.innerText = "Modifier la zone de pâturage";
-            bouton.innerText = "Modifier";
-            form.action = `/zones/modifier_zone/${id}/`;
-        } else {
-            titre.innerText = "Créer une zone de pâturage";
-            bouton.innerText = "Créer";
-            form.action = `{% url 'creer_zone' %}`;
-        }
-
-        modal.style.display = "block";
-    }
-
-    function fermerModalZone() {
-        document.getElementById("zoneModal").style.display = "none";
+            if (zoneNom.includes(input) || utilisateur.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
     }
 
     // Modal Suppression
@@ -473,7 +461,6 @@
         document.getElementById("suppressionModal").style.display = "block";
     }
 
-    // Évènements de fermeture et suppression
     document.addEventListener('DOMContentLoaded', function () {
         const suppressionModal = document.getElementById("suppressionModal");
         const closeSupp = suppressionModal.querySelector(".close");
@@ -485,21 +472,105 @@
 
         btnConfirmer.onclick = function () {
             if (zoneIdToDelete) {
-                window.location.href = "{% url 'supprimer_zone' 999 %}".replace('999', zoneIdToDelete);
+                window.location.href = "{% url 'supprimer_tout_capteur' 999 %}".replace('999', zoneIdToDelete);
             }
         };
 
-        // Clic en dehors des modals pour fermer
+        // Clic en dehors des modals pour les fermer
         window.onclick = function (event) {
-            if (event.target === document.getElementById("suppressionModal")) {
+            if (event.target === suppressionModal) {
                 suppressionModal.style.display = "none";
+            }
+            if (event.target === document.getElementById("transfertModal")) {
+                fermerModalTransfert();
             }
             if (event.target === document.getElementById("zoneModal")) {
                 fermerModalZone();
             }
-        }
+        };
     });
+
+    // Modal Transfert
+    function ouvrirModalTransfert(ancienneZoneId, ancienneZoneNom) {
+        document.getElementById("ancienne_zone_id").value = ancienneZoneId;
+        document.getElementById("transfertModal").style.display = "block";
+    }
+
+    function fermerModalTransfert() {
+        document.getElementById("transfertModal").style.display = "none";
+        document.getElementById("nouvelle_zone_id").value = "";
+    }
+
+    document.getElementById("closeTransfert").onclick = function () {
+        fermerModalTransfert();
+    };
 </script>
+
+<style>
+    /* Modal général */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0 0 0 / 0.6);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color:#28a745; /* Vert Bootstrap */;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #ff0000;
+        color: white;
+    }
+
+    /* Style du formulaire dans modal transfert */
+    #formTransfert select {
+        width: 100%;
+        padding: 8px;
+        font-size: 1em;
+    }
+</style>
+
+
 
 
 {% endblock %}
