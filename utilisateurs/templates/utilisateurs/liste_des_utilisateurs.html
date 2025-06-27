@@ -1,19 +1,36 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
 <style>
     * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
     body {
-        font-family: 'Segoe UI', sans-serif;
+ 
         background-color: #f8f9fa;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+        width: 100% !important;
+    }
+
+    .container-fluid {
+        width: 100%;
+        padding: 0 20px;
+        max-width: none;
     }
 
     .container-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
         position: relative;
+        flex-wrap: wrap;
     }
 
     .container-header::before {
@@ -23,355 +40,510 @@
         left: 0;
         width: 0%;
         height: 6px;
-        background-color: black;
+        background: linear-gradient(90deg, #000000, #000000);
         animation: loadBar 1s forwards;
     }
-    .container-header h1 {
-        font-weight: 1000;
-        color: #008000;
-        margin: 0 0 15px 0;
-        padding-left: 0;
-    }
+
     @keyframes loadBar {
         0% { width: 0%; }
         100% { width: 100%; }
     }
 
-    .users-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 10px;
-        overflow: hidden;
-        background-color: white;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    .container-header h1 {
+        font-size: 30px;
+        font-weight: 1000;
+        color: #008000;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 0 0 10px 0;
     }
-
-   .users-table thead th {
-    background-color: #008000;
-    color: #fff;
-    padding: 14px;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    text-align: left;         /* Aligné à gauche */
-    vertical-align: bottom;   /* Aligné en bas */
-}
-
-
-    .users-table tbody td {
-        padding: 14px;
-        font-size: 13px;
-        border-bottom: 1px solid #eee;
-        font-weight: bold;
-        
-    }
-    
-
-    .users-table tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-        
-    }
-
-    .users-table tbody tr:hover {
-        background-color: #90EE90;
-        transition: background-color 0.3s ease;
-    }
-
-    .users-table td.actions {
-        display: flex;
-
-        gap: 10px;
-    }
-
-    .users-table td.actions a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-
-    .users-table td.actions a:hover {
-        transform: scale(1.2);
-        background-color: rgba(0, 0, 0, 0.05);
-        
-        
-    }
-
-    .actions img {
-        width: 22px;
-        height: 22px;
-    }
-  .add-btn {
-            background-color: transparent;
-            color: #008000; /* Texte vert */
-            padding: 8px 16px;
-            border: 2px solid #008000; /* Bordure verte */
-            border-radius: 10px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-        }
-
-        .add-btn:hover {
-            background-color: #008000; /* Fond vert au survol */
-            color: white; /* Texte blanc au survol */
-            box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
-        }
-
-        .add-btn .icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 8px;
-            fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
-        }
-    
- 
-    
-    .add-btn:hover {
-        background-color: #008000; /* Fond vert au survol */
-        color: white; /* Texte blanc au survol */
-    }
-    
-    .add-btn .icon {
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-    }
-
-    
 
     .search-container {
         flex-grow: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        position: relative;
         padding: 10px;
     }
-    
+
     #searchInput {
         width: 100%;
-        max-width: 400px;
-        padding: 10px 40px 10px 15px; /* Espace à droite pour l'icône */
+        max-width: 500px;
+        padding: 12px 40px 12px 15px;
         border: 1px solid #ccc;
-        border-radius: 8px;
+        border-radius: 10px;
         outline: none;
-        font-weight: bold; /* Texte en gras */
-        color: #000; /* Texte noir */
-        font-size: 12px;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #000;
         background-color: #fff;
-        transition: all 0.3s ease-in-out;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 20px;
+        background-position: right 15px center;
+        background-size: 22px;
+        transition: all 0.3s ease-in-out;
     }
-    
+
     #searchInput::placeholder {
         color: #aaa;
         font-style: italic;
     }
-    
+
     #searchInput:focus {
         border-color: #008000;
         box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
     }
-    /*style  indicateurs */
+
+    .add-btn {
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        color: #008000;
+        padding: 10px 20px;
+        border: 2px solid #008000;
+        border-radius: 12px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .add-btn:hover {
+        background: linear-gradient(145deg, #005500, #008000);
+        color: white;
+        box-shadow: 0 6px 16px rgba(0, 128, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .add-btn .icon {
+        width: 22px;
+        height: 22px;
+        margin-right: 10px;
+        fill: currentColor;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .users-table th, .users-table td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+
+    .users-table th {
+        background: linear-gradient(145deg, #005500, #008000);
+        color: #ffffff;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .users-table tr:first-child th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    .users-table tr:first-child th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .users-table tr:last-child td:first-child {
+        border-bottom-left-radius: 12px;
+    }
+
+    .users-table tr:last-child td:last-child {
+        border-bottom-right-radius: 12px;
+    }
+
+    .users-table tr {
+        background: linear-gradient(145deg, #ffffff, #f6f8fa);
+        font-weight: 600;
+    }
+
+    .users-table tr:nth-child(even) {
+        background: linear-gradient(145deg, #f9f9f9, #f6f8fa);
+    }
+
+    .users-table tr:hover {
+        background: linear-gradient(145deg, #90EE90, #a8f0a8);
+        transition: background 0.3s ease;
+    }
+
+    .users-table td.actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .users-table td.actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .users-table td.actions a:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 128, 0, 0.1);
+    }
+
+    .actions img {
+        width: 24px;
+        height: 24px;
+    }
 
     .tooltip {
-  position: relative;
-  display: inline-block;
-  margin: 0 5px;
-}
+        position: relative;
+        display: inline-block;
+        margin: 0 5px;
+    }
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: max-content;
-  max-width: 220px;
-  background-color: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  text-align: center;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: max-content;
+        max-width: 220px;
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        text-align: center;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+    }
 
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
-}
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
 
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        z-index: 10000 !important;
+        justify-content: center !important;
+        align-items: center !important;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
 
-  
+    .modal[style*="block"] {
+        display: flex !important;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background: linear-gradient(145deg, #ffffff, #f6f8fa);
+        padding: 30px;
+        border-radius: 14px;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        font-family: 'Segoe UI', sans-serif;
+        border: 1px solid rgba(0, 100, 0, 0.15);
+        margin: 0 auto;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal[style*="block"] .modal-content {
+        opacity: 1;
+    }
+
+    .modal-content h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #005500;
+        padding-bottom: 10px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .modal-content .modal-body {
+        width: 100%;
+        text-align: center;
+    }
+
+    .modal-content .modal-body p {
+        font-size: 15px;
+        color: #444;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 22px;
+        background: rgba(0, 0, 0, 0.05);
+        border: none;
+        color: #666;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .close:hover {
+        background: rgba(0, 100, 0, 0.2);
+        color: #005500;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+        min-width: 120px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-cancel {
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        color: #333;
+        border: 1.5px solid #b0b0b0;
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+        color: #1a1a1a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: linear-gradient(145deg, #ff0000, #cc0000);
+        color: #ffffff;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(145deg, #cc0000, #b30000);
+        box-shadow: 0 6px 16px rgba(204, 0, 0, 0.5);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 768px) {
+        .container-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .container-header h1 {
+            font-size: 28px;
+        }
+
+        .search-container {
+            width: 100%;
+            padding: 5px;
+        }
+
+        #searchInput {
+            max-width: none;
+            font-size: 13px;
+            padding: 10px 35px 10px 12px;
+        }
+
+        .add-btn {
+            width: 100%;
+            justify-content: center;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+
+        .users-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .users-table th, .users-table td {
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .actions img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-content {
+            padding: 20px;
+            max-width: 90%;
+        }
+
+        .modal-content h2 {
+            font-size: 18px;
+        }
+
+        .modal-content .modal-body p {
+            font-size: 14px;
+        }
+
+        .btn, .btn-cancel, .btn-danger {
+            min-width: 100px;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
+    }
 </style>
 
-
-{% extends 'base/base.html' %}
-{% load static %}
-
-{% block content %}
-
-
-
-<div class="container-header">
-    <h1>Liste de mes éleveurs
-    </h1>
-
-         <!-- Barre de recherche centrée -->
-         <div class="search-container">
+<div class="container-fluid">
+    <div class="container-header">
+        <h1>Liste de mes employés</h1>
+        <div class="search-container">
             <input type="text" id="searchInput" placeholder="Rechercher un utilisateur..." onkeyup="searchCapteurs()">
         </div>
-
-        <script>
-
-            function searchCapteurs() {
-                let input = document.getElementById("searchInput").value.toLowerCase();
-                let rows = document.querySelectorAll(".users-table tbody tr");
-            
-                rows.forEach(row => {
-                    let username = row.cells[0].innerText.toLowerCase(); // Nom d'utilisateur
-                    let lastName = row.cells[1].innerText.toLowerCase(); // Nom
-                    let firstName = row.cells[2].innerText.toLowerCase(); // Prénom
-                    let telephone = row.cells[3].innerText.toLowerCase(); // Téléphone
-                    let email = row.cells[4].innerText.toLowerCase(); // Email
-                    let role = row.cells[5].innerText.toLowerCase(); // Rôle
-            
-                    if (
-                        username.includes(input) ||
-                        lastName.includes(input) ||
-                        firstName.includes(input) ||
-                        telephone.includes(input) ||
-                        email.includes(input) ||
-                        role.includes(input) //  Recherche aussi dans les rôles
-                    ) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            }
-            
-            
-        </script>
-
-        <a href="{% url 'ajouter_utilisateur' %}" class="add-btn" >
-            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un utilisateur" class="icon"> Ajouter un éleveur
+        <a href="{% url 'ajouter_utilisateur' %}" class="add-btn">
+            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un utilisateur" class="icon"> Ajouter un employé
         </a>
-        
+    </div>
+
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for utilisateur in users %}
+                <tr>
+                    <td>
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                             width="20" height="20" fill="currentColor" 
+                             viewBox="0 0 16 16" style="margin-right: 8px; vertical-align: middle;">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
+                        </svg>
+                        {{ utilisateur.username }}
+                    </td>
+                    <td>{{ utilisateur.last_name }}</td>
+                    <td>{{ utilisateur.first_name }}</td>
+                    <td>{{ utilisateur.telephone }}</td>
+                    <td>{{ utilisateur.email }}</td>
+                    <td>
+                        {% if utilisateur.is_active %}
+                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#28a745;"></span>
+                        {% else %}
+                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#dc3545;"></span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <div class="tooltip">
+                            <a href="#" class="detail-btn" data-role-id="{{ utilisateur.id }}">
+                                <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Détails">
+                            </a>
+                            <div class="tooltiptext">Voir les détails de l'employé</div>
+                        </div>
+                        <div class="tooltip">
+                            <a href="{% url 'modifier_utilisateur' utilisateur.id %}" class="modify-btn">
+                                <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
+                            </a>
+                            <div class="tooltiptext">Modifier cet employé</div>
+                        </div>
+                        <div class="tooltip">
+                            <a href="#" class="delete-btn" data-user-id="{{ utilisateur.id }}" data-user-name="{{ utilisateur.username }}">
+                                <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
+                            </a>
+                            <div class="tooltiptext">Supprimer cet employé</div>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+                        Aucun utilisateur trouvé.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-<table class="users-table">
-    <thead>
-        <tr>
-            <th>Nom </th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Téléphone</th>
-            <th>Email</th>
-            <th>Statut</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for utilisateur in users %}
-            <tr>
-                <td>
-                     <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="20" height="20" fill="currentColor" 
-                        viewBox="0 0 16 16" style="margin-left: 6px; vertical-align: middle;">
-                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
-                     </svg>
-                    {{ utilisateur.username }}</td>
-                <td>{{ utilisateur.last_name }}</td>
-                <td>{{ utilisateur.first_name }}</td>
-                <td>{{ utilisateur.telephone }}</td>
-                <td>{{ utilisateur.email }}</td>
-              <td>
-                {% if utilisateur.is_active %}
-                    <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#28a745;"></span>
-                {% else %}
-                    <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#dc3545;"></span>
-                {% endif %}
-              </td>
 
-             <td class="actions">
-                <!-- Bouton Détails -->
-                <div class="tooltip">
-                    <a href="#" class="detail-btn" data-role-id="{{ utilisateur.id }}">
-                        <img src="{% static 'utilisateurs/images/iconsinfo.png' %}" alt="Détails">
-                    </a>
-                    <div class="tooltiptext">Voir les détails de l'éleveur</div>
-                </div>
-
-                <!-- Bouton Modifier -->
-                <div class="tooltip">
-                    <a href="{% url 'modifier_utilisateur' utilisateur.id %}" class="modify-btn">
-                        <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Modifier">
-                    </a>
-                    <div class="tooltiptext">Modifier cet l'éleveur</div>
-                </div>
-
-                <!-- Bouton Supprimer -->
-                <div class="tooltip">
-                    <a href="#" class="delete-btn" data-user-id="{{ utilisateur.id }}" data-user-name="{{ utilisateur.username }}">
-                        <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer">
-                    </a>
-                    <div class="tooltiptext">Supprimer cet l'éleveur</div>
-                </div>
-            </td>
-
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="8">Aucun utilisateur trouvé.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-
-
-<!-- Modal unique pour toutes les actions -->
 <div id="actionModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close">×</span>
         <h2 id="modalTitle">Titre du Modal</h2>
         <div id="modalBody" class="modal-body">
             <!-- Contenu dynamique -->
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn" id="modalCancelBtn">Annuler</button>
-            <button type="button" class="btn btn-primary" id="modalActionBtn">Valider</button>
-
+            <button type="button" class="btn btn-cancel" id="modalCancelBtn">Annuler</button>
+            <button type="button" class="btn btn-danger" id="modalActionBtn">Confirmer</button>
         </div>
     </div>
 </div>
@@ -384,14 +556,14 @@
             const modalBody = document.getElementById("modalBody");
             const modalActionBtn = document.getElementById("modalActionBtn");
             const modalCancelBtn = document.getElementById("modalCancelBtn");
-        
+
             modalTitle.textContent = title;
             modalBody.innerHTML = content;
-        
+
             if (actionText && actionCallback) {
                 modalActionBtn.textContent = actionText;
                 modalActionBtn.style.display = "inline-block";
-                modalActionBtn.onclick = function () {
+                modalActionBtn.onclick = function() {
                     actionCallback();
                     modal.style.display = "none";
                 };
@@ -399,18 +571,12 @@
                 modalActionBtn.style.display = "none";
                 modalActionBtn.onclick = null;
             }
-        
-            // Contrôle du bouton "Annuler"
-            if (showCancel) {
-                modalCancelBtn.style.display = "inline-block";
-            } else {
-                modalCancelBtn.style.display = "none";
-            }
-        
-            modal.style.display = "flex";
+
+            modalCancelBtn.style.display = showCancel ? "inline-block" : "none";
+
+            modal.style.display = "block";
         }
 
-        // Détails utilisateur (sans bouton action)
         document.querySelectorAll(".detail-btn").forEach(btn => {
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
@@ -427,7 +593,6 @@
             });
         });
 
-        // Suppression
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.addEventListener("click", function(e) {
                 e.preventDefault();
@@ -436,21 +601,20 @@
 
                 const content = `
                     <div class="delete-confirmation">
-                        <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>${userName}</strong> ?</p>
+                        <p>Êtes-vous sûr de vouloir supprimer l'employé <strong>${userName}</strong> ?</p>
                         <form id="deleteUserForm" method="POST">
                             {% csrf_token %}
                         </form>
                     </div>
                 `;
 
-                openModal(`Confirmation de suppression `, content, "Confirmer", function() {
+                openModal("Confirmation de Suppression", content, "Confirmer", function() {
                     document.getElementById("deleteUserForm").action = `/utilisateurs/supprimer_utilisateur/${userId}/`;
                     document.getElementById("deleteUserForm").submit();
                 });
             });
         });
 
-        // Fermeture du modal
         const closeBtn = document.querySelector(".close");
         if (closeBtn) {
             closeBtn.onclick = function() {
@@ -473,149 +637,29 @@
         };
     });
 
+    function searchCapteurs() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll(".users-table tbody tr");
 
-       
+        rows.forEach(row => {
+            let username = row.cells[0].innerText.toLowerCase();
+            let lastName = row.cells[1].innerText.toLowerCase();
+            let firstName = row.cells[2].innerText.toLowerCase();
+            let telephone = row.cells[3].innerText.toLowerCase();
+            let email = row.cells[4].innerText.toLowerCase();
+
+            if (
+                username.includes(input) ||
+                lastName.includes(input) ||
+                firstName.includes(input) ||
+                telephone.includes(input) ||
+                email.includes(input)
+            ) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
 </script>
-
-
-<style>
-    /* Style général du modal */
-    .modal {
-        display: none; /* Masqué par défaut */
-        position: fixed; /* Positionné par rapport à la fenêtre */
-        z-index: 1; /* Met le modal au-dessus des autres éléments */
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.4); /* Fond semi-transparent */
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-content {
-        background-color: white;
-        margin: 10% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 600px;
-        max-height: 80vh; /* Limite la hauteur du modal à 80% de la hauteur de l'écran */
-        overflow-y: auto; /* Permet le défilement vertical si le contenu dépasse */
-        position: relative;
-    }
-
-    .close {
-        color: #aaa;
-        font-size: 28px;
-        font-weight: bold;
-        position: absolute;
-        top: 10px;
-        right: 25px;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .modal-footer {
-        text-align: right;
-    }
-
-    /* Boutons */
-    .btn {
-        padding: 10px 20px;
-        font-size: 14px;
-        cursor: pointer;
-    }
-</style>
-
-<style>
- /* Styles de la modal */
- .modal {
-    display: none; /* Cacher la modal par défaut */
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0, 0, 0); /* Fond noir avec transparence */
-    background-color: rgba(0, 0, 0, 0.4); /* Fond noir avec transparence */
-    border-radius: 10px; /* Ajout du rayon de bordure pour la modal */
-}
-
-/* Contenu de la modal */
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%;
-    max-width: 420px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border-radius: 10px; /* Arrondir les coins du contenu de la modal */
-}
-/* Title */
-.modal-content h2 {
-    font-size: 18px;
-    color: #222;
-    font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 1.5px solid #ddd;
-    padding-bottom: 8px;
-}
-
-/* Pied de la modal */
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-/* Bouton de fermeture */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Styles des boutons */
-.btn {
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-}
-
-.btn-primary {
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
-}
-
-.btn-danger {
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
-}
-
-
-
-</style>
 {% endblock %}

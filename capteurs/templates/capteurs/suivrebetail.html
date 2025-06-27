@@ -77,9 +77,9 @@
 
 <div class="container-header">
     <h1>Suivez en temps réel votre bétail</h1>
-    {% if not request.user.owner %}
+
     <a href="{% url 'liste_des_zones' %}" class="btn-retour">Retour à la liste des zones</a>
-    {% endif %}
+ 
 </div>
 
 <div id="map" style="width: 100%; height: 500px;"></div>

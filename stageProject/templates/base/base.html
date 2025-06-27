@@ -275,7 +275,7 @@
                 color: var(--dark-color);
                 font-weight: 600;
                 margin: 0;
-                font-size: 28px;
+                font-size: 40px;
             }
     
             /* Ripple effect */
@@ -400,7 +400,7 @@
                         <div class="icon-container">
                             <img src="{% static 'images/betail.png' %}" alt="Accueil">
                         </div>
-                        <span class="nav-text">Catégorie bétail</span>
+                        <span class="nav-text">Catégorie </span>
                     </a>
                     {% endif %}
 
@@ -414,8 +414,8 @@
                 
                 
                 
-                    
-                    {% if not request.user.owner %}
+
+           
                     <!-- Localisation -->
                     <a href="{% url 'liste_des_zones' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_des_zones' %}active{% endif %}" id="localisation-link">
                         <div class="icon-container">
@@ -423,18 +423,8 @@
                         </div>
                         <span class="nav-text">Zone de pâcturage </span>
                     </a>
-                    {% endif %}
+                  
 
-                    {% if request.user.owner  %}
-                      <!-- Localisation -->
-                      <a href="{% url 'suivrebetail' request.user.id %}" class="nav-link {% if request.resolver_match.url_name == 'suivrebetail' %}active{% endif %}" id="localisation-link">
-                        <div class="icon-container">
-                            <img src="{% static 'images/localisation.png' %}" alt="Localisation">
-                        </div>
-                        <span class="nav-text">Suivre le betail </span>
-                        </a>
-                    {% endif %}
-          
                            
                
                     <script>
@@ -482,7 +472,7 @@
                                 <div class="icon-container">
                                     <img src="{% static 'images/users.png' %}" alt="Liste d'Utilisateurs">
                                 </div>
-                                <span class="nav-text">Mes éleveurs</span>
+                                <span class="nav-text">Mes employés</span>
                             </a>
                             {% endif %}
                         

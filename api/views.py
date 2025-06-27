@@ -258,7 +258,9 @@ def suivre_betail_api(request):
 
         zones_data.append({
             'id': zone.id,
+            'nom':zone.nom,
             'forme': zone.forme,
+            'statut':zone.active_securite,
             'latitude': zone.latitude,
             'longitude': zone.longitude,
             'rayon': zone.rayon,

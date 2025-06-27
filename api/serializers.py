@@ -120,16 +120,17 @@ class ZoneSecuriteStatistiquesSerializer(serializers.ModelSerializer):
 
 
 from rest_framework import serializers
-from capteurs.models import Capteur, Animal
+from capteurs.models import Capteur, Animal, ZoneSecurite
+from django.contrib.auth.models import User
 
 class CapteurSerializer(serializers.ModelSerializer):
-    # Renvoyer le nom de l'animal (pas son ID)
     type_animal = serializers.CharField(source='type_animal.type_animal', read_only=True)
+    zone_securite = serializers.CharField(source='zone_securite.nom', read_only=True, allow_null=True)
+    user = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Capteur
-        fields = ['id', 'identifiant', 'type_animal', 'actif']
-# Inclut l'identifiant, le type d'animal (nom), et l'actif
+        fields = ['id', 'identifiant','last_seen', 'type_animal', 'actif', 'zone_securite', 'user']
 
 from rest_framework import serializers
 from capteurs.models import Message

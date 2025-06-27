@@ -6,8 +6,11 @@
 <style>
     * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
+    /* Container */
     .container-header {
         display: flex;
         justify-content: space-between;
@@ -27,38 +30,121 @@
         height: 6px;
         background-color: black;
         animation: loadBar 1s forwards;
-
     }
 
     @keyframes loadBar {
         0% { width: 0%; }
         100% { width: 100%; }
     }
-    
+
     .container-header h1 {
+
+        font-size: 34px;
         font-weight: 1000;
         color: #008000;
+        letter-spacing: 1px;
+
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         margin: 0 0 15px 0;
-        padding-left: 0;
+    }
+
+    /* Search Bar */
+    .search-container {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+
+    #searchInput {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px 40px 10px 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        color: #000;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    #searchInput::placeholder {
+        color: #aaa;
+        font-style: italic;
+    }
+
+    #searchInput:focus {
+        border-color: #008000;
+        box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+    }
+
+    /* Add Button */
+    .add-btn {
+        background-color: transparent;
+        color: #008000;
+        padding: 8px 16px;
+        border: 2px solid #008000;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .add-btn:hover {
+        background-color: #008000;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2);
+    }
+
+    .add-btn .icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        fill: currentColor;
+    }
+
+    /* Table */
+    .table-responsive {
+        overflow-x: auto;
+        margin-top: 20px;
     }
 
     .users-table {
         width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        font-family: 'Segoe UI', sans-serif;
     }
 
     .users-table th, .users-table td {
         padding: 10px;
         text-align: left;
         border-bottom: 1px solid #ddd;
+        font-size: 13px;
     }
 
     .users-table th {
-        background-color: green;
-        color: #fff;
+        background: linear-gradient(145deg, #005500, #008000);
+        color: #ffffff;
         text-transform: uppercase;
-        font-size: 13px;
+        font-weight: 700;
         letter-spacing: 0.5px;
     }
 
@@ -79,21 +165,22 @@
     }
 
     .users-table tr {
-        background-color: white;
+        background: linear-gradient(145deg, #ffffff, #f6f8fa);
         font-weight: bold;
-        font-size:13px;
+        transition: background 0.3s ease;
     }
 
-       .users-table tr:hover {
-        background-color: #90EE90;
-        transition: background-color 0.3s ease;
+    .users-table tr:hover {
+        background: linear-gradient(145deg, #90EE90, #a8f0a8);
     }
+
     .users-table td:last-child,
     .users-table th:last-child {
         text-align: right;
         white-space: nowrap;
     }
 
+    /* Actions */
     .actions {
         display: flex;
         justify-content: flex-end;
@@ -103,244 +190,296 @@
     .actions a img {
         width: 22px;
         height: 22px;
-        transition: transform 0.2s;
+        transition: transform 0.2s ease;
     }
 
-    .actions a img:hover {
+    .actions a:hover img {
         transform: scale(1.1);
     }
 
-    .add-btn {
-        background-color: transparent;
-        color: #008000; /* Texte vert */
-        padding: 8px 16px;
-        border: 2px solid #008000; /* Bordure verte */
-        border-radius: 10px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        font-weight: bold;
-        transition: all 0.3s ease;
+    /* Tooltips */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: max-content;
+        max-width: 220px;
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        text-align: center;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        z-index: 10000 !important;
+        justify-content: center !important;
+        align-items: center !important;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal[style*="block"] {
+        display: flex !important;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background: linear-gradient(145deg, #ffffff, #f6f8fa);
+        padding: 30px;
+        border-radius: 14px;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        font-family: 'Segoe UI', sans-serif;
+        border: 1px solid rgba(0, 100, 0, 0.15);
+        margin: 0 auto;
+        transform: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal[style*="block"] .modal-content {
+        opacity: 1;
+    }
+
+    .modal-content h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #005500;
+        padding-bottom: 10px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .modal-content .modal-body {
+        width: 100%;
+        text-align: center;
+    }
+
+    .modal-content .modal-body p {
+        font-size: 15px;
+        color: #444;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    .close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 22px;
+        background: rgba(0, 0, 0, 0.05);
+        border: none;
+        color: #666;
         cursor: pointer;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .add-btn:hover {
-        background-color: #008000; /* Fond vert au survol */
-        color: white; /* Texte blanc au survol */
-        box-shadow: 0 2px 8px rgba(0, 128, 0, 0.2); /* Ombre légère */
+    .close:hover {
+        background: rgba(0, 100, 0, 0.2);
+        color: #005500;
     }
 
-    .add-btn .icon {
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-        fill: currentColor; /* Permet à l'icône de changer de couleur avec le texte */
+    /* Modal Footer */
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        gap: 15px;
+        width: 100%;
     }
-    
-    /* Styles de la modal */
-.modal {
-    display: none; /* Cacher la modal par défaut */
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0, 0, 0); /* Fond noir avec transparence */
-    background-color: rgba(0, 0, 0, 0.4); /* Fond noir avec transparence */
-    border-radius: 10px; /* Ajout du rayon de bordure pour la modal */
-}
 
-/* Contenu de la modal */
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%;
-    max-width: 420px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border-radius: 10px; /* Arrondir les coins du contenu de la modal */
-}
-/* Title */
-.modal-content h2 {
-    font-size: 18px;
-    color: #222;
-    font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 1.5px solid #ddd;
-    padding-bottom: 8px;
-}
+    /* Buttons */
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+        min-width: 120px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
 
-/* Pied de la modal */
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
+    .btn-primary {
+        background: linear-gradient(145deg, #28a745, #218838);
+        color: #ffffff;
+    }
 
-/* Bouton de fermeture */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
+    .btn-primary:hover {
+        background: linear-gradient(145deg, #218838, #1e7e34);
+        box-shadow: 0 6px 16px rgba(33, 136, 56, 0.5);
+        transform: translateY(-2px);
+    }
 
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
+    .btn-danger {
+        background: linear-gradient(145deg, #ff0000, #cc0000);
+        color: #ffffff;
+    }
 
-/* Styles des boutons */
-.btn {
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-}
+    .btn-danger:hover {
+        background: linear-gradient(145deg, #cc0000, #b30000);
+        box-shadow: 0 6px 16px rgba(204, 0, 0, 0.5);
+        transform: translateY(-2px);
+    }
 
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
-}
+    #btnAnnulerSuppression {
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        color: #333;
+        border: 1.5px solid #b0b0b0;
+    }
 
-.btn-danger {
-    background-color: #ff0000;
-    color: white;
-    border: none;
-    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.4);
-}
+    #btnAnnulerSuppression:hover {
+        background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+        color: #1a1a1a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
 
+    /* Form in Transfert Modal */
+    #formTransfert select {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        font-family: 'Segoe UI', sans-serif;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
 
+    /* Responsive */
+    @media (max-width: 400px) {
+        .container-header {
+            padding: 15px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
 
-.search-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    padding: 10px;
-}
+        .container-header h1 {
+            font-size: 28px;
+        }
 
-#searchInput {
-    width: 100%;
-    max-width: 400px;
-    padding: 10px 40px 10px 15px; /* Espace à droite pour l'icône */
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    font-weight: bold; /* Texte en gras */
-    color: #000; /* Texte noir */
-    font-size: 12px;
-    background-color: #fff;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        .search-container {
+            padding: 5px;
+            width: 100%;
+        }
 
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px;
-}
+        #searchInput {
+            max-width: 100%;
+            font-size: 12px;
+            padding: 8px 35px 8px 12px;
+        }
 
-#searchInput::placeholder {
-    color: #aaa;
-    font-style: italic;
-}
+        .add-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
 
-#searchInput:focus {
-    border-color: #008000;
-    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
-}
+        .users-table th, .users-table td {
+            padding: 8px;
+            font-size: 12px;
+        }
 
+        .actions a img {
+            width: 20px;
+            height: 20px;
+        }
 
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
+        .modal-content {
+            padding: 20px;
+            max-width: 90%;
+        }
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: max-content;
-  max-width: 220px;
-  background-color: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  text-align: center;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: 'Segoe UI', sans-serif;
-  white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        .modal-content h2 {
+            font-size: 18px;
+        }
 
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
+        .modal-content .modal-body p {
+            font-size: 14px;
+        }
 
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
-}
+        .btn, #btnAnnulerSuppression, #btnConfirmerSuppression {
+            min-width: 100px;
+            font-size: 13px;
+            padding: 8px 16px;
+        }
 
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
-
-
+        #formTransfert select {
+            font-size: 13px;
+            padding: 6px;
+        }
+    }
 </style>
-
 
 <div class="container-header">
     <h1>Appareils et Zones</h1>
-
     <!-- Barre de recherche centrée -->
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Rechercher une zone..." onkeyup="searchZone()">
     </div>
-
     <a href="{% url 'export_tout_appareils_pdf' %}" class="add-btn" target="_blank">
-    <img src="{% static 'images/telechager.png' %}" alt="Télécharger tout les appareils" class="icon">
-    Télécharger tous les appareils
+        <img src="{% static 'images/telechager.png' %}" alt="Télécharger tous les appareils" class="icon">
+        Télécharger tous les appareils
     </a>
-
 </div>
-
-<script>
-    function searchZone() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        let rows = document.querySelectorAll(".users-table tbody tr");
-
-        rows.forEach(row => {
-            let zoneNom = row.cells[0].innerText.toLowerCase();
-            let utilisateur = row.cells[2]?.innerText?.toLowerCase() || "";
-
-            if (zoneNom.includes(input) || utilisateur.includes(input)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
-    }
-</script>
 
 <div class="table-responsive">
     <table class="users-table">
@@ -359,33 +498,27 @@
                     <td>{{ zone.description }}</td>
                     <td>{{ zone.nb_capteurs }}</td>
                     <td class="actions">
-                <!-- Voir ce que se passe dans la zone -->
-                <div class="tooltip">
-                    <a href="{% url 'exporter_appareils_par_zone_pdf' zone_id=zone.id %}" target="_blank" title="Télécharger la liste des appareils">
-                        <img src="{% static 'images/telechager.png' %}" alt="Télécharger la liste des appareils">
-                    </a>
-                    <div class="tooltiptext">Télécharger la liste des appareils</div>
-                </div>
-
-
-
-                      <!-- Transférer les capteurs -->
+                        <!-- Télécharger la liste des appareils -->
+                        <div class="tooltip">
+                            <a href="{% url 'exporter_appareils_par_zone_pdf' zone_id=zone.id %}" target="_blank" title="Télécharger la liste des appareils">
+                                <img src="{% static 'images/telechager.png' %}" alt="Télécharger la liste des appareils">
+                            </a>
+                            <div class="tooltiptext">Télécharger la liste des appareils</div>
+                        </div>
+                        <!-- Transférer les capteurs -->
                         <div class="tooltip">
                             <a href="javascript:void(0);" onclick="ouvrirModalTransfert({{ zone.id }}, '{{ zone.nom }}')">
                                 <img src="{% static 'utilisateurs/images/modify.png' %}" alt="Transférer les capteurs">
                             </a>
                             <div class="tooltiptext">Transférer les capteurs vers une autre zone</div>
                         </div>
-
                         <!-- Supprimer la zone -->
                         <div class="tooltip">
                             <a href="javascript:void(0);" onclick="ouvrirModalSuppression({{ zone.id }})">
                                 <img src="{% static 'utilisateurs/images/icons_delete.png' %}" alt="Supprimer la zone">
                             </a>
-                            <div class="tooltiptext">supprimer tout les appareils</div>
+                            <div class="tooltiptext">Supprimer tous les appareils</div>
                         </div>
-
-                      
                     </td>
                 </tr>
             {% empty %}
@@ -400,8 +533,8 @@
 <!-- Modal de suppression -->
 <div id="suppressionModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Confirmer la suppression</h2>
+        <span class="close">×</span>
+        <h2>Confirmer la Suppression</h2>
         <div class="modal-body">
             <p>Êtes-vous sûr de vouloir supprimer tous les appareils associés à cette zone ?</p>
         </div>
@@ -415,8 +548,8 @@
 <!-- Modal Transfert des capteurs -->
 <div id="transfertModal" class="modal">
     <div class="modal-content">
-        <span class="close" id="closeTransfert">&times;</span>
-        <h2>Transférer les capteurs</h2>
+        <span class="close">×</span>
+        <h2>Transférer les Capteurs</h2>
         <form id="formTransfert" method="POST" action="{% url 'transferer_zone_capteurs' %}">
             {% csrf_token %}
             <input type="hidden" name="ancienne_zone_id" id="ancienne_zone_id" value="">
@@ -427,8 +560,8 @@
                     <option value="{{ zone_option.id }}">{{ zone_option.nom }}</option>
                 {% endfor %}
             </select>
-            <br><br>
-            <div style="text-align: center;">
+            <div class="modal-footer">
+                <button type="button" class="btn" id="btnAnnulerTransfert">Annuler</button>
                 <button type="submit" class="btn btn-primary">Transférer</button>
             </div>
         </form>
@@ -436,7 +569,7 @@
 </div>
 
 <script>
-    // Recherche de zones
+    // Search Function
     function searchZone() {
         let input = document.getElementById("searchInput").value.toLowerCase();
         let rows = document.querySelectorAll(".users-table tbody tr");
@@ -444,7 +577,6 @@
         rows.forEach(row => {
             let zoneNom = row.cells[0].innerText.toLowerCase();
             let utilisateur = row.cells[2]?.innerText?.toLowerCase() || "";
-
             if (zoneNom.includes(input) || utilisateur.includes(input)) {
                 row.style.display = "";
             } else {
@@ -461,35 +593,6 @@
         document.getElementById("suppressionModal").style.display = "block";
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const suppressionModal = document.getElementById("suppressionModal");
-        const closeSupp = suppressionModal.querySelector(".close");
-        const btnConfirmer = document.getElementById("btnConfirmerSuppression");
-        const btnAnnuler = document.getElementById("btnAnnulerSuppression");
-
-        closeSupp.onclick = () => suppressionModal.style.display = "none";
-        btnAnnuler.onclick = () => suppressionModal.style.display = "none";
-
-        btnConfirmer.onclick = function () {
-            if (zoneIdToDelete) {
-                window.location.href = "{% url 'supprimer_tout_capteur' 999 %}".replace('999', zoneIdToDelete);
-            }
-        };
-
-        // Clic en dehors des modals pour les fermer
-        window.onclick = function (event) {
-            if (event.target === suppressionModal) {
-                suppressionModal.style.display = "none";
-            }
-            if (event.target === document.getElementById("transfertModal")) {
-                fermerModalTransfert();
-            }
-            if (event.target === document.getElementById("zoneModal")) {
-                fermerModalZone();
-            }
-        };
-    });
-
     // Modal Transfert
     function ouvrirModalTransfert(ancienneZoneId, ancienneZoneNom) {
         document.getElementById("ancienne_zone_id").value = ancienneZoneId;
@@ -501,76 +604,37 @@
         document.getElementById("nouvelle_zone_id").value = "";
     }
 
-    document.getElementById("closeTransfert").onclick = function () {
-        fermerModalTransfert();
-    };
+    document.addEventListener('DOMContentLoaded', function () {
+        const suppressionModal = document.getElementById("suppressionModal");
+        const transfertModal = document.getElementById("transfertModal");
+        const closeSupp = suppressionModal.querySelector(".close");
+        const closeTransfert = transfertModal.querySelector(".close");
+        const btnConfirmerSuppression = document.getElementById("btnConfirmerSuppression");
+        const btnAnnulerSuppression = document.getElementById("btnAnnulerSuppression");
+        const btnAnnulerTransfert = document.getElementById("btnAnnulerTransfert");
+
+        closeSupp.onclick = () => suppressionModal.style.display = "none";
+        btnAnnulerSuppression.onclick = () => suppressionModal.style.display = "none";
+
+        closeTransfert.onclick = () => fermerModalTransfert();
+        btnAnnulerTransfert.onclick = () => fermerModalTransfert();
+
+        btnConfirmerSuppression.onclick = function () {
+            if (zoneIdToDelete) {
+                window.location.href = "{% url 'supprimer_tout_capteur' 999 %}".replace('999', zoneIdToDelete);
+            }
+        };
+
+        // Close modals when clicking outside
+        window.onclick = function (event) {
+            if (event.target === suppressionModal) {
+                suppressionModal.style.display = "none";
+            }
+            if (event.target === transfertModal) {
+                fermerModalTransfert();
+            }
+        };
+    });
 </script>
-
-<style>
-    /* Modal général */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 999;
-        padding-top: 100px;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0 0 0 / 0.6);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        position: relative;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: black;
-    }
-
-    .btn {
-        padding: 10px 15px;
-        margin: 5px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color:#28a745; /* Vert Bootstrap */;
-        color: white;
-    }
-
-    .btn-danger {
-        background-color: #ff0000;
-        color: white;
-    }
-
-    /* Style du formulaire dans modal transfert */
-    #formTransfert select {
-        width: 100%;
-        padding: 8px;
-        font-size: 1em;
-    }
-</style>
-
-
-
 
 {% endblock %}

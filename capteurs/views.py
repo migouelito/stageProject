@@ -413,17 +413,18 @@ class ListeDesZones(PermissionRequiredMixin, ListView):
         if not user.is_authenticated:
             return ZoneSecurite.objects.none()
 
-        if user.owner:
-            parent = user.owner
-            related_users = [parent] + list(parent.sub_users.all())
-        else:
+        # Si l'utilisateur est un owner, il peut voir ses zones + celles de ses sub-users
+        if user.sub_users.exists():
             related_users = [user] + list(user.sub_users.all())
+        else:
+            # Sinon, uniquement ses propres zones
+            related_users = [user]
 
-        # Annotation du nombre de capteurs associés à chaque zone
         return ZoneSecurite.objects.filter(user__in=related_users)\
             .select_related('user')\
             .only('nom', 'description', 'user')\
-            .annotate(nb_capteurs=Count('capteur'))  # ⬅️ Annoter ici
+            .annotate(nb_capteurs=Count('capteur'))
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -513,14 +514,6 @@ def modifier_zone(request, pk):
         'utilisateurs': utilisateurs
     })
 
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
-from .models import ZoneSecurite
-
-class ZoneSecuriteView(ListView):
-    model = ZoneSecurite
-    template_name = 'capteurs/modifier_zone.html'
-    context_object_name = 'zones'
 
 
 
@@ -1395,49 +1388,52 @@ from django.contrib.auth.decorators import login_required
 from .models import ZoneSecurite
 from django.http import Http404
 
+
+
 @login_required
-def suivreBetail(request, user_id=None):
+def suivreBetail(request, user_id, zone_id):
+    # Vérifie si l'utilisateur existe
     try:
-        if user_id:
-            user = User.objects.get(id=user_id)
-        else:
-            user = request.user
+        user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         raise Http404("Utilisateur non trouvé")
 
-    #🔒Ne récupérer que les zones de CET utilisateur
-    zones = ZoneSecurite.objects.filter(user=user)
+    # Recherche la zone qui correspond à l'utilisateur ET à la zone demandée
+    try:
+        zone = ZoneSecurite.objects.get(user=user, id=zone_id)
+    except ZoneSecurite.DoesNotExist:
+        raise Http404("Zone non trouvée pour cet utilisateur")
 
-    zones_data = []
-    for zone in zones:
-        try:
-            coins = json.loads(zone.coins) if zone.coins else None
-        except json.JSONDecodeError:
-            coins = None
+    # Conversion des coordonnées "coins"
+    try:
+        coins = json.loads(zone.coins) if zone.coins else None
+    except json.JSONDecodeError:
+        coins = None
 
-        zones_data.append({
-            'id': zone.id,
-            'forme': zone.forme,
-            'latitude': zone.latitude,
-            'longitude': zone.longitude,
-            'rayon': zone.rayon,
-            'coin1_lat': zone.coin1_lat,
-            'coin1_lon': zone.coin1_lon,
-            'coin2_lat': zone.coin2_lat,
-            'coin2_lon': zone.coin2_lon,
-            'coin3_lat': zone.coin3_lat,
-            'coin3_lon': zone.coin3_lon,
-            'coin4_lat': zone.coin4_lat,
-            'coin4_lon': zone.coin4_lon,
-            'coins': coins,
-        })
+    zone_data = {
+        'id': zone.id,
+        'forme': zone.forme,
+        'latitude': zone.latitude,
+        'longitude': zone.longitude,
+        'rayon': zone.rayon,
+        'coin1_lat': zone.coin1_lat,
+        'coin1_lon': zone.coin1_lon,
+        'coin2_lat': zone.coin2_lat,
+        'coin2_lon': zone.coin2_lon,
+        'coin3_lat': zone.coin3_lat,
+        'coin3_lon': zone.coin3_lon,
+        'coin4_lat': zone.coin4_lat,
+        'coin4_lon': zone.coin4_lon,
+        'coins': coins,
+    }
 
-    zones_data_json = json.dumps(zones_data)
+    zone_data_json = json.dumps([zone_data])  # on envoie comme une liste (si le template attend plusieurs zones)
 
     return render(request, 'capteurs/suivrebetail.html', {
         'user_id': user.id,
-        'zones_data_json': zones_data_json
+        'zones_data_json': zone_data_json
     })
+
 
 
 #gestion des animaux partie enregistrement des animaux par l'admin
