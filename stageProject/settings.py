@@ -47,14 +47,29 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'stageproject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
 
-CHANNEL_LAYERS = {
+'''CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],  # Adresse de Redis
         },
     },
+}'''
+
+
+#Pour redis en ligne
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("REDIS_URL")],
+            # Si Upstash nécessite TLS, ajoute aussi:
+            "symmetric_encryption_keys": [os.environ.get("REDIS_ENCRYPTION_KEY", "")],  # facultatif
+        },
+    },
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -160,6 +175,8 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
+
 
 
 
