@@ -137,7 +137,7 @@ ASGI_APPLICATION = 'stageproject.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'stage_database',   # Remplacez par le nom de votre base de données
@@ -146,6 +146,14 @@ DATABASES = {
         'HOST': 'localhost',                   # Si vous utilisez PostgreSQL localement
         'PORT': '5432',                        # Le port par défaut de PostgreSQL
     }
+}'''
+
+
+import os
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 
