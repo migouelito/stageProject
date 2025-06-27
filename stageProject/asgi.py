@@ -17,7 +17,7 @@ application = ProtocolTypeRouter({
     ),
 })'''
 
-import os
+'''import os
 import django
 from django.core.asgi import get_asgi_application
 from django.core.management import call_command
@@ -66,4 +66,26 @@ application = ProtocolTypeRouter({
             re_path(r"^ws/positions/$", PositionConsumer.as_asgi()),
         ])
     ),
+})'''
+
+import os
+import django
+from django.core.asgi import get_asgi_application
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from django.urls import re_path
+from capteurs.consumers import PositionConsumer
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stageProject.settings")
+django.setup()
+
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter([
+            re_path(r"^ws/positions/$", PositionConsumer.as_asgi()),
+        ])
+    ),
 })
+
