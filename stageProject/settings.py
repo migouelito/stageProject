@@ -88,7 +88,7 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "https://stageproject.onrender.com"
+MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct
