@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -116,7 +117,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 ROOT_URLCONF = 'stageProject.urls'
 
-import os
+
 
 # Chemin absolu vers le répertoire où les fichiers sont stockés
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
