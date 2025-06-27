@@ -1,0 +1,112 @@
+Parfait 👌 ! Tu as donc un projet web complet avec :
+
+    🎨 Frontend : HTML, CSS, JavaScript
+
+    🐍 Backend : Django (Python)
+
+    🗄️ Base de données : PostgreSQL
+
+Et tu veux l’héberger gratuitement en ligne 24h/24. Voici la solution idéale pour ton besoin :
+✅ 🔥 Render.com → Le meilleur choix pour ton projet
+✔️ Avantages :
+
+    Héberge gratuitement des apps Django
+
+    Fournit une base PostgreSQL gratuite
+
+    Déploiement facile via GitHub
+
+    Domaine gratuit (https://tonapp.onrender.com)
+
+    Compatible avec fichiers statiques (HTML/CSS/JS)
+
+✅ Étapes pour héberger ton projet Django + PostgreSQL sur Render
+🧰 Pré-requis :
+
+    Un compte GitHub
+
+    Un compte Render
+
+    Ton projet Django doit être sur GitHub
+
+🚀 Étape 1 : Prépare ton projet Django
+
+    ✅ Dans ton projet Django, assure-toi d’avoir :
+
+        Un fichier requirements.txt (avec pip freeze > requirements.txt)
+
+        Un fichier manage.py à la racine
+
+        Un fichier render.yaml (facultatif mais conseillé)
+
+    ✅ Ajoute gunicorn dans requirements.txt :
+
+gunicorn
+
+✅ Dans settings.py :
+
+    Ajoute :
+
+ALLOWED_HOSTS = ['.onrender.com']
+
+Configure la base de données avec dj-database-url :
+
+    pip install dj-database-url
+
+Et dans settings.py :
+
+    import dj_database_url
+
+    DATABASES = {
+        'default': dj_database_url.config(default='postgres://...')
+    }
+
+🧠 Étape 2 : Déploie sur Render
+
+    ✅ Va sur : https://dashboard.render.com/
+
+    ✅ Clique sur "New Web Service"
+
+    ✅ Connecte ton GitHub et choisis ton dépôt
+
+    ✅ Renseigne :
+
+        Build command : pip install -r requirements.txt
+
+        Start command : gunicorn nom_du_projet.wsgi
+
+        Environment : Python
+
+        Port : 8000 (Render détecte automatiquement)
+
+    ✅ Render va installer les dépendances et lancer ton app.
+
+🛢️ Étape 3 : Ajouter une base PostgreSQL gratuite
+
+    Sur Render, clique sur "New PostgreSQL"
+
+    Il va te créer une base de données PostgreSQL gratuite (limite 90 jours d'inactivité)
+
+    Copie l’URL de connexion et ajoute-la comme variable d’environnement dans ton service Django :
+
+    Exemple :
+
+    DATABASE_URL=postgres://user:password@host:5432/dbname
+
+✅ Résultat
+
+➡️ Ton site Django avec HTML/CSS/JS et PostgreSQL est en ligne 24h/24 gratuitement.
+
+Exemple de lien :
+
+https://monprojet.onrender.com
+
+🎁 Tu veux que je t’aide à :
+
+    Générer un render.yaml ?
+
+    Ajouter les bons paramètres dans settings.py ?
+
+    Écrire les variables d’environnement ?
+
+Dis-moi juste si tu veux que je t’aide pas à pas en fonction de ton projet actuel.
