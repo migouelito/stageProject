@@ -24,8 +24,6 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from capteurs import routing  # Import des routes WebSocket
 
-
-
 # Définir le fichier settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stageproject.settings')
 
