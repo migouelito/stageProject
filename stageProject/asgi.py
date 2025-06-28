@@ -1,5 +1,5 @@
 # asgi.py
-import os
+'''import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
@@ -15,7 +15,7 @@ application = ProtocolTypeRouter({
             re_path(r"^ws/positions/$", PositionConsumer.as_asgi()),
         ])
     ),
-})
+})'''
 
 '''import os
 import django
@@ -68,7 +68,7 @@ application = ProtocolTypeRouter({
     ),
 })'''
 
-'''import os
+import os
 import django
 from django.core.asgi import get_asgi_application
 
@@ -88,4 +88,4 @@ application = ProtocolTypeRouter({
         ])
     ),
 })
-'''
+
