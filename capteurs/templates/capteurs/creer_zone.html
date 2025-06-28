@@ -268,10 +268,11 @@
         <form method="POST" id="zoneForm">
             {% csrf_token %}
             
-            <div class="input-group">
-                <label>Nom :</label>
-                <input type="text" name="nom" required placeholder="Nom de la zone">
-            </div>
+          <div class="input-group">
+    <label>Nom : <span style="color: red;">*</span></label>
+    <input type="text" name="nom" required placeholder="Nom de la zone">
+</div>
+
 
             <div class="input-group">
                 <label>Utilisateur :</label>
