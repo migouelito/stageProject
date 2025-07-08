@@ -1,172 +1,405 @@
 <style>
-    * { box-sizing: border-box; }
+ * { 
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f8faff;
+    min-height: 100vh;
+    padding: 0;
+}
+
+.main-wrapper {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0;
+    padding: 30px;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+    padding: 25px;
+    background: #008000;
+    border-radius: 10px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 128, 0, 0.3);
+}
+
+.container-header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    animation: loadBar 1s forwards;
+    border-radius: 0 0 20px 20px;
+}
+
+.container-header h1 {
+    font-weight: 1000;
+    color: white;
+    margin: 0;
+    font-size: 2em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes loadBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.form-container {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-container h2 {
+    font-size: 1.8em;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+}
+
+.form-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: #008000;
+    border-radius: 2px;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+form label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+form input[type="text"], form textarea, form select {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e8f0fe;
+    border-radius: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8faff;
+}
+
+form input[type="text"]:focus, form textarea:focus, form select:focus {
+    border-color: #008000;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 128, 0, 0.1);
+    background: white;
+    transform: translateY(-2px);
+}
+
+form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.btn-action {
+    background: #ffffff;
+    color: #000000;
+    padding: 15px 30px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+}
+
+.map-container {
+    position: relative;
+    height: 500px;
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(0, 128, 0, 0.1);
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    border-radius: 22px;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.map-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.map-controls button {
+    background: #000000;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.map-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.loading-indicator {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #008000;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#info-forme {
+    font-weight: 600;
+    margin: 15px 0;
+    color: #2c3e50;
+    padding: 12px 15px;
+    background: #f8faff;
+    border-left: 4px solid #008000;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-container, .map-container {
+    animation: fadeInUp 0.6s ease;
+}
+
+.form-container {
+    animation-delay: 0.1s;
+}
+
+.map-container {
+    animation-delay: 0.2s;
+}
+
+@media (max-width: 768px) {
+    .main-wrapper {
+        padding: 20px;
+    }
     
     .container-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        position: relative;
-    }
-
-    .container-header::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0%;
-        height: 6px;
-        background-color: black;
-        animation: loadBar 1s forwards;
-    }
-
-    .container-header h1 {
-        font-weight: 1000;
-        color: #008000;
-        margin: 0 0 15px 0;
-        padding-left: 0;
-    }
-
-    @keyframes loadBar {
-        0% { width: 0%; }
-        100% { width: 100%; }
-    }
-
-    .form-container {
-        background-color: white;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        margin-bottom: 30px;
-    }
-
-    .form-container h2 {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    .input-group {
-        margin-bottom: 20px;
-    }
-
-    form label {
-        font-weight: 600;
-        color: #424242;
-        margin-bottom: 8px;
-        display: block;
-        font-size: 15px;
-    }
-
-    form input[type="text"], form textarea, form select {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 15px;
-        transition: border-color 0.3s;
-    }
-
-    form input[type="text"]:focus, form textarea:focus, form select:focus {
-        border-color: #4CAF50;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
-    }
-
-    form textarea {
-        min-height: 100px;
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .btn-action {
-   background: linear-gradient(145deg, #4CAF50, #3d8b40);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 1000;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-    }
-
-    .btn-action:hover {
-        background-color: #45a049;
-        transform: scale(1.05);
-    }
-
-    .btn-secondary {
-        background-color: #e74c3c;
-    }
-
-    .btn-secondary:hover {
-        background-color: #c0392b;
-    }
-    #map {
-        height: 100%;
-        width: 100%;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
     }
     
+    .container-header h1 {
+        font-size: 1.4em;
+    }
+    
+    .map-container {
+        height: 400px;
+    }
+}
 </style>
 
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block content %}<div class="container-header" id="header-bar">
-    
-    <h1>Modifier la zone de pâturage</h1>
-    <div>
-        <button class="btn-action">Valider</button>
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<div class="main-wrapper">
+    <div class="container-header" id="header-bar">
+        <h1> Modifier la zone de pâturage de {{zone.nom}}</h1>
+        <div>
+            <button class="btn-action">✓ Valider</button>
+        </div>
+    </div>
+
+    <!-- Formulaire de saisie -->
+    <div class="form-container">
+        <h2>Informations de la zone</h2>
+        <form method="POST" id="zone-form">
+            {% csrf_token %}
+            
+            <div class="input-group">
+                <label for="zone-nom">Nom de la zone</label>
+                <input type="text" id="zone-nom" name="nom" value="{{ zone.nom }}" placeholder="Entrez le nom de la zone">
+            </div>
+        
+            <div class="input-group">
+                <label for="zone-utilisateur">Utilisateur</label>
+                <select id="zone-utilisateur" name="user">
+                    {% for utilisateur in utilisateurs %}
+                        <option value="{{ utilisateur.id }}" {% if utilisateur.id == zone.user.id %}selected{% endif %}>{{ utilisateur.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        
+            <div class="input-group">
+                <label for="zone-description">Description de la zone</label>
+                <textarea id="zone-description" name="description" placeholder="Décrivez la zone de pâturage">{{ zone.description }}</textarea>
+            </div>
+        
+            <div class="input-group">
+                <label for="zone-active-securite">Statut de sécurité</label>
+                <select id="zone-active-securite" name="active_securite">
+                    <option value="True" {% if zone.active_securite %}selected{% endif %}>🟢 Activée</option>
+                    <option value="False" {% if not zone.active_securite %}selected{% endif %}>🔴 Désactivée</option>
+                </select>
+            </div>
+            
+        </form>
+    </div>
+
+    <div class="map-container" style="position: relative;">
+        <div class="map-overlay">
+            📍 Dessinez ou modifiez la zone sur la carte
+        </div>
+        <div class="floating-stats">
+            <div class="stat-item">
+                <div class="stat-icon green"></div>
+                <span>Capteurs actifs</span>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon blue"></div>
+                <span>Zone sécurisée</span>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon orange"></div>
+                <span>Temps réel</span>
+            </div>
+        </div>
+        <div id="map" style="height: 500px;"></div>
+
+     <!-- 💡 Compteur animaux détectés X / Y -->
+<div id="animal-count" class="animal-counter">
+    🐄 Animaux détectés : 
+    <span id="animal-detected-count">0</span> / 
+    <span id="animal-total-count">{{ capteurs_ids|length }}</span>
+</div>
+
+<style>
+    .animal-counter {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 280px;
+        pointer-events: none;
+    }
+
+    .animal-counter span {
+        font-weight: 700;
+        color: #28a745;
+    }
+</style>
+
     </div>
 </div>
-
-<!-- Formulaire de saisie -->
-<div class="form-container">
-    <form method="POST" id="zone-form">
-        {% csrf_token %}
-        
-        <div class="input-group">
-            <label for="zone-nom">Nom de la zone</label>
-            <input type="text" id="zone-nom" name="nom" value="{{ zone.nom }}" placeholder="Entrez le nom de la zone">
-        </div>
-    
-        <div class="input-group">
-            <label for="zone-utilisateur">Utilisateur</label>
-            <select id="zone-utilisateur" name="user">
-                {% for utilisateur in utilisateurs %}
-                    <option value="{{ utilisateur.id }}" {% if utilisateur.id == zone.user.id %}selected{% endif %}>{{ utilisateur.username }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    
-        <div class="input-group">
-            <label for="zone-description">Description de la zone</label>
-            <textarea id="zone-description" name="description" placeholder="Décrivez la zone de pâturage">{{ zone.description }}</textarea>
-        </div>
-    
-        <div class="input-group">
-            <label for="zone-active-securite">Statut de sécurité</label>
-            <select id="zone-active-securite" name="active_securite">
-                <option value="True" {% if zone.active_securite %}selected{% endif %}>Activée</option>
-                <option value="False" {% if not zone.active_securite %}selected{% endif %}>Désactivée</option>
-            </select>
-        </div>
-        
-    </form>
-    
-</div>
-
-<div id="map"></div>
-
-
-
-<div id="map"></div>
 
 <!-- Leaflet + Leaflet.Draw -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -174,16 +407,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-
 <script>
     const userId = "{{ user_id }}";
     const zoneId = "{{ zone_id }}";
-    
+
+    // Récupération de la liste des capteurs autorisés (passée depuis Django)
+    const capteursIdsAutorises = JSON.parse('{{ capteurs_ids|safe|escapejs }}'); 
+    // Si capteurs_ids est une liste python, safe + escapejs la convertit en JS array
+
     // Données de la zone (JSON) passées par Django
     const zoneData = JSON.parse("{{ zone_data_json|escapejs }}");
 
     const map = L.map('map').setView([0, 0], 2);  // Centrage initial de la carte
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
 
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
@@ -195,58 +434,76 @@
         },
         draw: {
             rectangle: {
-                shapeOptions: { color: 'green', weight: 5 }
+                shapeOptions: { 
+                    color: '#28a745', 
+                    weight: 3,
+                    fillOpacity: 0.2
+                }
             },
             circle: {
-                shapeOptions: { color: 'green' }
+                shapeOptions: { 
+                    color: '#28a745',
+                    weight: 3,
+                    fillOpacity: 0.2
+                }
             },
             polygon: {
-                shapeOptions: { color: 'green' }
+                shapeOptions: { 
+                    color: '#28a745',
+                    weight: 3,
+                    fillOpacity: 0.2
+                }
             },
             polyline: {
-                shapeOptions: { color: 'green' }
+                shapeOptions: { 
+                    color: '#28a745',
+                    weight: 3
+                }
             },
             marker: true
         }
     });
     map.addControl(drawControl);
 
-// Dessiner la zone existante si des données sont disponibles
-if (zoneData) {
-    if (zoneData.forme === 'cercle') {
-        const circle = L.circle([zoneData.latitude, zoneData.longitude], {
-            color: 'green',
-            radius: zoneData.rayon
-        }).addTo(drawnItems);
-
-        // Utiliser fitBounds pour ajuster la vue en fonction du rayon du cercle
-        map.fitBounds(circle.getBounds());  // Ajuster la vue pour le cercle
-    } else if (zoneData.forme === 'rectangle' || zoneData.forme === 'carre') {
-        const latlngs = [
-            [zoneData.coin1_lat, zoneData.coin1_lon],
-            [zoneData.coin2_lat, zoneData.coin2_lon],
-            [zoneData.coin3_lat, zoneData.coin3_lon],
-            [zoneData.coin4_lat, zoneData.coin4_lon]
-        ];
-        const rectangle = L.polygon(latlngs, { color: 'green' }).addTo(drawnItems);
-        map.fitBounds(rectangle.getBounds());  // Ajuster la vue pour la zone
-    } else if (zoneData.forme === 'polygon' || zoneData.forme === 'polyline') {
-        const latlngs = zoneData.coins;
-        const polygon = L.polygon(latlngs, { color: 'green' }).addTo(drawnItems);
-        map.fitBounds(polygon.getBounds());  // Ajuster la vue pour la zone
+    // Dessiner la zone existante si des données sont disponibles
+    if (zoneData) {
+        if (zoneData.forme === 'cercle') {
+            const circle = L.circle([zoneData.latitude, zoneData.longitude], {
+                color: '#28a745',
+                fillOpacity: 0.2,
+                radius: zoneData.rayon
+            }).addTo(drawnItems);
+            map.fitBounds(circle.getBounds());
+        } else if (zoneData.forme === 'rectangle' || zoneData.forme === 'carre') {
+            const latlngs = [
+                [zoneData.coin1_lat, zoneData.coin1_lon],
+                [zoneData.coin2_lat, zoneData.coin2_lon],
+                [zoneData.coin3_lat, zoneData.coin3_lon],
+                [zoneData.coin4_lat, zoneData.coin4_lon]
+            ];
+            const rectangle = L.polygon(latlngs, { 
+                color: '#28a745',
+                fillOpacity: 0.2
+            }).addTo(drawnItems);
+            map.fitBounds(rectangle.getBounds());
+        } else if (zoneData.forme === 'polygon' || zoneData.forme === 'polyline') {
+            const latlngs = zoneData.coins;
+            const polygon = L.polygon(latlngs, { 
+                color: '#28a745',
+                fillOpacity: 0.2
+            }).addTo(drawnItems);
+            map.fitBounds(polygon.getBounds());
+        }
+    } else {
+        // Si aucune zone n'est définie, centrer sur la position utilisateur si possible
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const userLatitude = position.coords.latitude;
+            const userLongitude = position.coords.longitude;
+            map.setView([userLatitude, userLongitude], 6);
+        }, function(error) {
+            map.setView([48.8566, 2.3522], 5);  // Paris par défaut
+        });
     }
-} else {
-    // Si aucune zone n'est définie, centrer sur le pays de l'utilisateur
-    navigator.geolocation.getCurrentPosition(function(position) {
-        const userLatitude = position.coords.latitude;
-        const userLongitude = position.coords.longitude;
-        map.setView([userLatitude, userLongitude], 6);  // Zoom sur la localisation de l'utilisateur
-    }, function(error) {
-        // Si la géolocalisation échoue, centrer sur une position par défaut
-        map.setView([48.8566, 2.3522], 5);  // Par défaut, centrer sur Paris
-    });
-}
-
 
     // Fonction pour détecter si un rectangle est un carré
     function isSquare(latlngs) {
@@ -255,14 +512,13 @@ if (zoneData) {
         const d2 = map.distance(latlngs[1], latlngs[2]);
         const d3 = map.distance(latlngs[2], latlngs[3]);
         const d4 = map.distance(latlngs[3], latlngs[0]);
-
         const tolerance = 10; // Tolérance en mètres
         return Math.abs(d1 - d3) <= tolerance && Math.abs(d2 - d4) <= tolerance && Math.abs(d1 - d2) <= tolerance;
     }
 
-    // Dessin créé
+    // Gestion du dessin de la zone
     map.on('draw:created', function (e) {
-        drawnItems.clearLayers();  // On garde une seule forme
+        drawnItems.clearLayers();
         drawnItems.addLayer(e.layer);
     });
 
@@ -315,30 +571,31 @@ if (zoneData) {
 
         return drawingData;
     }
+
     document.querySelector('.btn-action').addEventListener('click', () => {
         const drawingData = getDrawingData();
-    
+
         if (!drawingData) {
             alert("Aucune zone dessinée !");
             return;
         }
-    
+
         // Collecte des données du formulaire
         const nom = document.getElementById('zone-nom').value;
         const description = document.getElementById('zone-description').value;
         const user = document.getElementById('zone-utilisateur').value;
-        const active_securite = document.getElementById('zone-active-securite').value; // ✅ Nouveau !
-    
+        const active_securite = document.getElementById('zone-active-securite').value;
+
         // Fusionner les données géométriques et du formulaire
         const formData = {
             nom: nom,
             description: description,
             user: user,
-            active_securite: active_securite, // ✅ Ajouter le statut ici
+            active_securite: active_securite,
             forme: drawingData.forme,
-            ...drawingData  // Ajouter les données de la forme géométrique
+            ...drawingData
         };
-    
+
         fetch(`/zones/updateposition/${zoneId}/`, {
             method: 'POST',
             headers: {
@@ -349,23 +606,17 @@ if (zoneData) {
         })
         .then(response => response.json())
         .then(data => {
-        if (data.message) {
-            // Optionnel : afficher un message de succès
-            //alert(data.message);
-            // Redirection vers la liste des zones
-            window.location.href = '/zone/liste_des_zones';
-        } else {
-            alert(data.error || "Erreur inconnue");
-        }
-    })
-
+            if (data.message) {
+                window.location.href = '/zone/liste_des_zones';
+            } else {
+                alert(data.error || "Erreur inconnue");
+            }
+        })
         .catch(error => {
             console.error("Erreur:", error);
             alert("Erreur de communication avec le serveur.");
         });
     });
-    
-    
 
     // Icône verte pour les capteurs
     function getGreenIcon() {
@@ -379,7 +630,7 @@ if (zoneData) {
         });
     }
 
-    // Connexion WebSocket pour afficher les positions des capteurs
+    // Connexion WebSocket pour afficher les positions des capteurs autorisés uniquement
     const socket = new WebSocket(`wss://{{ MY_GLOBAL_VARIABLE }}/ws/positions/?user_id=${userId}`);
 
     socket.onopen = () => {
@@ -389,9 +640,20 @@ if (zoneData) {
     const trackerMarkers = {};
     const trackerTimers = {};
 
+    // Nombre total de capteurs autorisés
+    const totalCapteursAutorises = capteursIdsAutorises.length;
+    // Compteur animaux détectés en temps réel
+    let totalAnimauxDetectes = 0;
+
     socket.onmessage = (e) => {
         const data = JSON.parse(e.data);
         const trackerId = data.tracker_id || "default";
+
+        // Vérifier si le capteur est autorisé
+        if (!capteursIdsAutorises.includes(parseInt(trackerId))) {
+            // Capteur non autorisé, on ignore
+            return;
+        }
 
         if (trackerTimers[trackerId]) clearTimeout(trackerTimers[trackerId]);
 
@@ -399,6 +661,8 @@ if (zoneData) {
             if (trackerMarkers[trackerId]) {
                 map.removeLayer(trackerMarkers[trackerId]);
                 delete trackerMarkers[trackerId];
+                totalAnimauxDetectes--;
+                document.getElementById("animal-detected-count").textContent = totalAnimauxDetectes;
             }
         }, 5000);
 
@@ -411,6 +675,8 @@ if (zoneData) {
             const marker = L.marker(position, { icon: getGreenIcon() }).addTo(map);
             marker.bindPopup(`🐄 Capteur ${trackerId}`, { autoPan: false });
             trackerMarkers[trackerId] = marker;
+            totalAnimauxDetectes++;
+            document.getElementById("animal-detected-count").textContent = totalAnimauxDetectes;
         }
     };
 
@@ -418,3 +684,4 @@ if (zoneData) {
     socket.onclose = (event) => console.warn("WebSocket fermé:", event.code);
 </script>
 {% endblock %}
+

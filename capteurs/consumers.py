@@ -41,7 +41,7 @@ class PositionConsumer(AsyncWebsocketConsumer):
                         }
                     )
 
-    async def send_position(self, event):
+    '''async def send_position(self, event):
         latitude = event['latitude']
         longitude = event['longitude']
         tracker_id = event['tracker_id']
@@ -55,6 +55,7 @@ class PositionConsumer(AsyncWebsocketConsumer):
         parsed_query = parse_qs(query_string)
         current_user_id = parsed_query.get('user_id', [None])[0]
 
+        
         if not current_user_id:
             return
 
@@ -72,8 +73,26 @@ class PositionConsumer(AsyncWebsocketConsumer):
             'longitude': longitude,
             'tracker_id': tracker_id,
             'type_animal': type_animal  # Inclusion dans l'envoi final
-        }))
+        }))'''
 
+    async def send_position(self, event):
+        latitude = event['latitude']
+        longitude = event['longitude']
+        tracker_id = event['tracker_id']
+        type_animal = event.get('type_animal')
+
+        # Vérification zone (facultatif)
+        dans_zone = await self.is_capteur_in_zone(tracker_id, latitude, longitude)
+        print(f"📍 Capteur {tracker_id} est dans la zone ? {'✅ Oui' if dans_zone else '❌ Non'}")
+
+        # ✅ Envoi direct (sans filtrage par utilisateur)
+        await self.send(text_data=json.dumps({
+            'latitude': latitude,
+            'longitude': longitude,
+            'tracker_id': tracker_id,
+            'type_animal': type_animal,
+            'dans_zone': dans_zone
+        }))
 
 
     @sync_to_async
@@ -98,3 +117,9 @@ class PositionConsumer(AsyncWebsocketConsumer):
         from capteurs.models import Capteur  # ✅ import local ici
         capteurs = Capteur.get_capteurs_for_user(user)
         return capteurs.filter(identifiant=tracker_id).exists()
+
+
+    @sync_to_async
+    def is_tracker_unregistered(self, tracker_id):
+        from capteurs.models import Capteur
+        return not Capteur.objects.filter(identifiant=tracker_id).exists()

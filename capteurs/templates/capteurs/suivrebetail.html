@@ -1,7 +1,3 @@
-{% extends 'base/base.html' %}
-
-{% block content %}
-{% load static %}
 
 <style>
     * {
@@ -12,7 +8,7 @@
 
     body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #008000 0%, #008000 100%);
+        background: linear-gradient(135deg, #fffffff 0%, #fffffff 100%);
         min-height: 100vh;
         overflow-x: hidden;
     }
@@ -25,10 +21,10 @@
     }
 
     .container-header {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+        background:green ;/* linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);*/
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 20px;
+        border-radius: 10px;
         padding: 25px 30px;
         margin: 20px;
         margin-bottom: 25px;
@@ -63,7 +59,7 @@
 
     .container-header h1 {
     color: #ffffff; /* Blanc pur */
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 1000;
     text-shadow: 
         0 4px 8px rgba(0, 0, 0, 0.3),
@@ -76,7 +72,7 @@
 
 
     .container-header h1::before {
-        content: '🐄';
+        /*content: '🐄';*/
         font-size: 1.8rem;
         -webkit-text-fill-color: initial;
         filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
@@ -90,12 +86,12 @@
 
     .btn-retour {
         background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
-        color: #333;
+        color: #000000;
         padding: 12px 24px;
         border: none;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 15px;
         text-decoration: none;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 
@@ -371,35 +367,99 @@
     }
 </style>
 
+{% extends 'base/base.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <div class="main-container">
     <div class="container-header">
-        <h1>Suivez en temps réel le mouvement de votre bétail</h1>
+        <h1>Suivez le mouvement de votre bétail dans la zone de {{zone_nom}} </h1>
         <a href="{% url 'liste_des_zones' %}" class="btn-retour">
-            <span class="icon">←</span>
             Retour à la liste des zones
+         <span class="icon"><i class="fas fa-arrow-right"></i></span>
+
         </a>
     </div>
 
-    <div class="map-container">
-        <div class="status-indicator">
-            Connexion active
-        </div>
-        
+    <div class="map-container" style="position: relative;">
+        <div class="status-indicator">Connexion active</div>
+
         <div class="floating-controls">
             <div class="control-btn" title="Centrer la carte" onclick="centerMap()">🎯</div>
             <div class="control-btn" title="Mode plein écran" onclick="toggleFullscreen()">⛶</div>
             <div class="control-btn" title="Actualiser" onclick="refreshData()">↻</div>
         </div>
-        
-        <div class="animal-counter" id="animalCounter">
-            0 animaux détectés
-        </div>
-        
-        <div id="map"></div>
-        
+
+        <!-- Suppression de ce compteur ici -->
+        <!-- <div class="animal-counter" id="animalCounter">0 animaux détectés</div> -->
+
+        <div id="map" style="height: 600px;"></div>
+
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
         </div>
+
+        <!-- Nouveau compteur en bas à droite -->
+<!-- Compteur d'animaux en bas à droite dans un petit conteneur -->
+<div id="animalCountDisplay" class="animal-counter">
+    <span class="animal-counter-icon">🐄</span>
+    <div class="animal-counter-text">
+        <span class="animal-counter-number">0 détecté(s)</span>
+        <span class="animal-counter-label">{{ capteurs_avec_zone|length }} capteurs</span>
+    </div>
+</div>
+    <style>
+    .animal-counter {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        top: auto;
+        left: auto;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        color: #333;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 240px;
+    }
+
+
+    .animal-counter-icon {
+        font-size: 20px;
+        color: #28a745;
+    }
+
+    .animal-counter-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .animal-counter-number {
+        font-size: 16px;
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    .animal-counter-label {
+        font-size: 12px;
+        color: #666;
+    }
+</style>
+
+
+
+
+
     </div>
 </div>
 
@@ -407,23 +467,27 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 <script>
-const userId = "{{ user_id | escapejs }}"; // Ajout de escapejs pour sécuriser
-console.log('user_id récupéré:', userId);
+const userId = "{{ user_id|escapejs }}";
+const capteursAutorises = [
+    {% for capteur_id in capteurs_avec_zone %}
+        "{{ capteur_id }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
 
-// Validation de MY_GLOBAL_VARIABLE
-const wsHost = "{{ MY_GLOBAL_VARIABLE | escapejs }}";
+const wsHost = "{{ MY_GLOBAL_VARIABLE|escapejs }}";
 if (!wsHost || typeof wsHost !== 'string' || wsHost.trim() === '') {
     console.error('Erreur: MY_GLOBAL_VARIABLE n\'est pas défini ou invalide');
-    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, rgba(255, 69, 58, 0.9) 0%, rgba(255, 45, 85, 0.9) 100%)';
+    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, #ff453a, #ff2d55)';
     document.querySelector('.status-indicator').textContent = 'Erreur de configuration';
     throw new Error('MY_GLOBAL_VARIABLE non défini');
 }
 
 const trackerMarkers = {};
+const trackerTimeouts = {};
 const map = L.map('map').setView([0, 0], 2);
 let animalCount = 0;
 
-// Masquer le loader après initialisation
+// Masquer le loader
 setTimeout(() => {
     document.getElementById('loadingOverlay').style.opacity = '0';
     setTimeout(() => {
@@ -431,19 +495,22 @@ setTimeout(() => {
     }, 500);
 }, 1500);
 
-// Tile layer avec style sombre
+// Fond de carte
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 19
 }).addTo(map);
 
 function updateAnimalCounter() {
-    const counter = document.getElementById('animalCounter');
-    counter.textContent = `${animalCount} animaux détectés`;
+    // Suppression de la mise à jour de l'ancien compteur car il n'existe plus
+    const animalCountDisplay = document.getElementById('animalCountDisplay');
+    if (animalCountDisplay) {
+        animalCountDisplay.textContent = `${animalCount} animaux détectés / ${capteursAutorises.length} total`;
+    }
 }
 
 function getAnimalIcon(type_animal) {
-    let iconUrl = '';
+    let iconUrl;
     switch(type_animal) {
         case 'boeuf':
             iconUrl = '{% static "utilisateurs/images/boeufl.png" %}';
@@ -456,7 +523,7 @@ function getAnimalIcon(type_animal) {
             iconUrl = '{% static "utilisateurs/images/iconsinfo.png" %}';
     }
     return new L.Icon({
-        iconUrl: iconUrl,
+        iconUrl,
         shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
         iconSize: [50, 50],
         iconAnchor: [25, 50],
@@ -482,88 +549,41 @@ function toggleFullscreen() {
 }
 
 function refreshData() {
-    // Animation de refresh
-    const refreshBtn = document.querySelector('.control-btn:last-child');
-    refreshBtn.style.transform = 'rotate(360deg)';
-    setTimeout(() => {
-        refreshBtn.style.transform = '';
-    }, 500);
-    
-    // Ici vous pouvez ajouter la logique de refresh
-    console.log('Actualisation des données...');
+    const btn = document.querySelector('.control-btn:last-child');
+    btn.style.transform = 'rotate(360deg)';
+    setTimeout(() => btn.style.transform = '', 500);
+    console.log('Actualisation demandée...');
 }
 
-// Création du WebSocket avec encodage de userId
-const socket = new WebSocket(`wss://${wsHost}/ws/positions/?user_id=${encodeURIComponent(userId)}`);
-
-socket.onopen = () => {
-    console.log('WebSocket connecté !');
-    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, rgba(0, 128, 0, 0.9) 0%, rgba(0, 128, 0, 0.9) 100%)';
-};
-
-socket.onerror = (error) => {
-    console.error('WebSocket Error:', error);
-    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, rgba(255, 69, 58, 0.9) 0%, rgba(255, 45, 85, 0.9) 100%)';
-    document.querySelector('.status-indicator').textContent = 'Connexion échouée';
-};
-
-socket.onclose = (event) => {
-    console.warn('WebSocket fermé:', event.code);
-    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(255, 152, 0, 0.9) 100%)';
-    document.querySelector('.status-indicator').textContent = 'Connexion fermée';
-};
-
+// Chargement des zones
 const zoneLayers = {};
-let zonesData;
+let zonesData = [];
 try {
-    zonesData = JSON.parse('{{ zones_data_json | escapejs }}');
+    zonesData = JSON.parse('{{ zones_data_json|escapejs }}');
 } catch (e) {
-    console.error('Erreur lors du parsing de zones_data_json:', e);
-    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, rgba(255, 69, 58, 0.9) 0%, rgba(255, 45, 85, 0.9) 100%)';
-    document.querySelector('.status-indicator').textContent = 'Erreur de données JSON';
-    zonesData = []; // Valeur par défaut pour éviter l'arrêt
+    console.error('Erreur JSON zones:', e);
+    document.querySelector('.status-indicator').textContent = 'Erreur JSON zones';
 }
 
 const allBounds = [];
-
 zonesData.forEach(zone => {
-    const forme = zone.forme;
     try {
         let latLngs;
-
-        if (forme === 'polygon' && zone.coins && zone.coins.length > 2) {
+        if (zone.forme === 'polygon') {
             latLngs = zone.coins.map(pt => [pt[0], pt[1]]);
             const layer = L.polygon(latLngs, {
-                color: '#008000',
-                weight: 3,
-                fillOpacity: 0.2,
-                fillColor: '#008000'
-            }).addTo(map).bindPopup(`
-                <div style="text-align: center; font-weight: bold;">
-                    🏞️ Zone #${zone.id}
-                    <br><span style="color: #666; font-size: 12px;">Polygone</span>
-                </div>
-            `);
-            zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer: layer };
+                color: '#008000', weight: 3, fillOpacity: 0.2, fillColor: '#008000'
+            }).addTo(map).bindPopup(`🏞️ Zone #${zone.id}<br><span style="font-size:12px;">Polygone</span>`);
+            zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer };
             allBounds.push(...latLngs);
-        } else if (forme === 'cercle' && zone.latitude && zone.longitude && zone.rayon) {
+        } else if (zone.forme === 'cercle') {
             const center = [zone.latitude, zone.longitude];
             const layer = L.circle(center, {
-                radius: zone.rayon,
-                color: '#008000',
-                weight: 3,
-                fillColor: '#008000',
-                fillOpacity: 0.2
-            }).addTo(map).bindPopup(`
-                <div style="text-align: center; font-weight: bold;">
-                    🎯 Zone #${zone.id}
-                    <br><span style="color: #666; font-size: 12px;">Cercle - Rayon: ${zone.rayon}m</span>
-                </div>
-            `);
-            zoneLayers[zone.id] = { type: 'circle', coords: center, radius: zone.rayon, layer: layer };
-            const circleBounds = layer.getBounds();
-            allBounds.push(circleBounds.getSouthWest(), circleBounds.getNorthEast());
-        } else if (forme === 'rectangle' && zone.coin1_lat) {
+                radius: zone.rayon, color: '#008000', weight: 3, fillOpacity: 0.2, fillColor: '#008000'
+            }).addTo(map).bindPopup(`🎯 Zone #${zone.id}<br><span style="font-size:12px;">Cercle - Rayon: ${zone.rayon}m</span>`);
+            zoneLayers[zone.id] = { type: 'circle', coords: center, radius: zone.rayon, layer };
+            allBounds.push(layer.getBounds().getSouthWest(), layer.getBounds().getNorthEast());
+        } else if (zone.forme === 'rectangle') {
             latLngs = [
                 [zone.coin1_lat, zone.coin1_lon],
                 [zone.coin2_lat, zone.coin2_lon],
@@ -572,23 +592,13 @@ zonesData.forEach(zone => {
                 [zone.coin1_lat, zone.coin1_lon]
             ];
             const layer = L.polygon(latLngs, {
-                color: '#008000',
-                weight: 3,
-                fillOpacity: 0.2,
-                fillColor: '#008000'
-            }).addTo(map).bindPopup(`
-                <div style="text-align: center; font-weight: bold;">
-                    📐 Zone #${zone.id}
-                    <br><span style="color: #666; font-size: 12px;">Rectangle</span>
-                </div>
-            `);
-            zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer: layer };
+                color: '#008000', weight: 3, fillOpacity: 0.2, fillColor: '#008000'
+            }).addTo(map).bindPopup(`📐 Zone #${zone.id}<br><span style="font-size:12px;">Rectangle</span>`);
+            zoneLayers[zone.id] = { type: 'polygon', coords: latLngs, layer };
             allBounds.push(...latLngs);
-        } else {
-            console.warn(`Zone #${zone.id} forme inconnue: ${forme}`);
         }
     } catch (e) {
-        console.error(`Erreur zone #${zone.id}:`, e);
+        console.error('Erreur chargement zone :', e);
     }
 });
 
@@ -596,85 +606,104 @@ if (allBounds.length > 0) {
     map.fitBounds(allBounds, { padding: [20, 20] });
 }
 
+// WebSocket
+const socket = new WebSocket(`wss://${wsHost}/ws/positions/?user_id=${encodeURIComponent(userId)}`);
+
+socket.onopen = () => {
+    console.log('WebSocket connecté');
+    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, #008000, #008000)';
+};
+
+socket.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, #ff453a, #ff2d55)';
+    document.querySelector('.status-indicator').textContent = 'Connexion échouée';
+};
+
+socket.onclose = (event) => {
+    console.warn('WebSocket fermé:', event.code);
+    document.querySelector('.status-indicator').style.background = 'linear-gradient(135deg, #ffc107, #ff9800)';
+    document.querySelector('.status-indicator').textContent = 'Connexion fermée';
+};
+
 socket.onmessage = function (e) {
     let data;
     try {
         data = JSON.parse(e.data);
     } catch (err) {
-        console.error('Erreur lors du parsing des données WebSocket:', err);
-        return; // Arrêter le traitement si les données sont invalides
+        console.error('Erreur parsing WebSocket:', err);
+        return;
     }
 
-    const trackerId = data.tracker_id || 'default';
+    const trackerId = (data.tracker_id || 'default').toString();
+    if (!capteursAutorises.includes(trackerId)) {
+        console.warn(`Capteur ${trackerId} non autorisé`);
+        return;
+    }
+
     const type_animal = data.type_animal || 'unknown';
     const icon = getAnimalIcon(type_animal);
     const currentLatLng = [data.latitude, data.longitude];
 
+    // Supprimer ancien timeout
+    if (trackerTimeouts[trackerId]) {
+        clearTimeout(trackerTimeouts[trackerId]);
+    }
+
     if (trackerMarkers[trackerId]) {
         trackerMarkers[trackerId].setLatLng(currentLatLng);
         trackerMarkers[trackerId]._popup.setContent(`
-            <div style="text-align: center; font-weight: bold; color: #333;">
-                🐄 ${type_animal}
-                <br><span style="color: #666; font-size: 12px;">ID: ${trackerId}</span>
-                <br><span style="color: #999; font-size: 11px;">Lat: ${data.latitude.toFixed(6)}</span>
-                <br><span style="color: #999; font-size: 11px;">Lng: ${data.longitude.toFixed(6)}</span>
-            </div>
+            🐄 ${type_animal}<br>ID: ${trackerId}<br>Lat: ${data.latitude.toFixed(6)}<br>Lng: ${data.longitude.toFixed(6)}
         `);
     } else {
-        const marker = L.marker(currentLatLng, {
-            icon: icon,
-            riseOnHover: true
-        }).addTo(map);
-        
+        const marker = L.marker(currentLatLng, { icon, riseOnHover: true }).addTo(map);
         marker.bindPopup(`
-            <div style="text-align: center; font-weight: bold; color: #333;">
-                🐄 ${type_animal}
-                <br><span style="color: #666; font-size: 12px;">ID: ${trackerId}</span>
-                <br><span style="color: #999; font-size: 11px;">Lat: ${data.latitude.toFixed(6)}</span>
-                <br><span style="color: #999; font-size: 11px;">Lng: ${data.longitude.toFixed(6)}</span>
-            </div>
+            🐄 ${type_animal}<br>ID: ${trackerId}<br>Lat: ${data.latitude.toFixed(6)}<br>Lng: ${data.longitude.toFixed(6)}
         `, { autoPan: false });
-        
         trackerMarkers[trackerId] = marker;
         animalCount++;
         updateAnimalCounter();
     }
 
-    // Vérification des zones avec animations
+    // Timer suppression après 5s d'inactivité
+    trackerTimeouts[trackerId] = setTimeout(() => {
+        if (trackerMarkers[trackerId]) {
+            map.removeLayer(trackerMarkers[trackerId]);
+            delete trackerMarkers[trackerId];
+            delete trackerTimeouts[trackerId];
+            animalCount--;
+            updateAnimalCounter();
+        }
+    }, 5000);
+
+    // Mise à jour de la couleur des zones
     Object.values(zoneLayers).forEach(zone => {
         let inside = false;
         if (zone.type === 'polygon') {
             inside = L.polygon(zone.coords).getBounds().contains(currentLatLng);
         } else if (zone.type === 'circle') {
-            const dist = map.distance(currentLatLng, zone.coords);
-            inside = dist <= zone.radius;
+            inside = map.distance(currentLatLng, zone.coords) <= zone.radius;
         }
-
-        const newColor = inside ? '#008000' : '#ff4757';
-        const newFillColor = inside ? '#008000' : '#ff4757';
-        
         zone.layer.setStyle({
-            color: newColor,
-            fillColor: newFillColor,
+            color: inside ? '#008000' : '#ff4757',
+            fillColor: inside ? '#008000' : '#ff4757',
             weight: inside ? 4 : 3,
             fillOpacity: inside ? 0.3 : 0.2
         });
     });
 };
 
-// Styles CSS pour les marqueurs animés
+// Styles
 const style = document.createElement('style');
 style.textContent = `
     .animal-marker {
         transition: all 0.3s ease;
         filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
     }
-    
     .animal-marker:hover {
         transform: scale(1.1);
         filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
     }
-    
     .leaflet-marker-icon {
         transition: all 0.3s ease;
     }
@@ -683,3 +712,5 @@ document.head.appendChild(style);
 </script>
 
 {% endblock %}
+
+

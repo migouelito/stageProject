@@ -492,6 +492,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 def modifier_zone(request, pk):
+  
     # Récupérer la zone de sécurité par son ID (pk)
     zone = get_object_or_404(ZoneSecurite, pk=pk)
 
@@ -511,7 +512,8 @@ def modifier_zone(request, pk):
     utilisateurs = User.objects.all()
     return render(request, 'capteurs/modifier_zone.html', {
         'zone': zone,
-        'utilisateurs': utilisateurs
+        'utilisateurs': utilisateurs,
+    
     })
 
 
@@ -527,6 +529,8 @@ class ZoneSecuriteView(ListView):
     model = ZoneSecurite
     template_name = 'capteurs/modifier_zone.html'
     context_object_name = 'zones'
+
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -554,13 +558,18 @@ class ZoneSecuriteView(ListView):
             'coins': zone.coins if isinstance(zone.coins, (list, dict)) else json.loads(zone.coins) if zone.coins else []
         }
 
-        # Convertir en JSON pour l'utiliser dans le template
         context['zone_data_json'] = json.dumps(zone_data)
 
-        # Récupérer la liste des utilisateurs liés à la zone (ajuster selon ton modèle)
-        #utilisateurs = self.request.user.get_all_related_users()
+        # Récupérer la liste des utilisateurs liés à la zone
         utilisateurs = self.request.user.get_all_related_users().exclude(id=self.request.user.id)
         context['utilisateurs'] = utilisateurs
+
+        # Récupérer les identifiants des capteurs liés à la zone
+        capteurs_ids = list(
+            Capteur.objects.filter(zone_securite=zone).values_list('identifiant', flat=True)
+        )
+        context['capteurs_ids'] = capteurs_ids
+
         return context
 
 
@@ -580,22 +589,29 @@ from .models import ZoneSecurite, User
 
 @login_required
 def creer_zone(request):
-    # Récupération des utilisateurs liés à l'utilisateur connecté
+    # Récupération des utilisateurs liés à l'utilisateur connecté (hors lui-même)
     utilisateurs = request.user.get_all_related_users().exclude(id=request.user.id)
-
+    
+    # Récupération des IDs des capteurs liés à l'utilisateur qui ont une zone
+    capteurs_ids = list(
+        Capteur.objects.filter(
+            user=request.user,
+            zone_securite__isnull=False
+        ).values_list('identifiant', flat=True)
+    )
     
     if request.method == 'POST':
         try:
-            # Validation des données obligatoires
             nom = request.POST.get('nom')
             description = request.POST.get('description')
             forme = request.POST.get('forme')
             utilisateur_id = request.POST.get('utilisateur')
             
+            # Vérification des champs obligatoires
             if not all([nom, description, forme, utilisateur_id]):
                 return JsonResponse({'error': 'Tous les champs obligatoires doivent être remplis'}, status=400)
             
-            # Vérification que l'utilisateur cible fait bien partie des relations autorisées
+            # Vérifier que l'utilisateur sélectionné est bien autorisé
             user = User.objects.get(id=utilisateur_id)
             if user not in utilisateurs:
                 return JsonResponse({'error': 'Utilisateur non autorisé'}, status=403)
@@ -607,12 +623,11 @@ def creer_zone(request):
                 user=user,
             )
 
-            # Gestion des différentes formes
+            # Selon la forme, récupérer les coordonnées
             if forme == 'cercle':
                 zone.latitude = request.POST.get('latitude')
                 zone.longitude = request.POST.get('longitude')
                 zone.rayon = request.POST.get('rayon')
-                
                 if None in [zone.latitude, zone.longitude, zone.rayon]:
                     return JsonResponse({'error': 'Données manquantes pour le cercle'}, status=400)
 
@@ -620,16 +635,14 @@ def creer_zone(request):
                 required_fields = ['coin1_lat', 'coin1_lon', 'coin2_lat', 'coin2_lon', 'coin3_lat', 'coin3_lon']
                 for field in required_fields:
                     setattr(zone, field, request.POST.get(field))
-                
                 if None in [getattr(zone, f) for f in required_fields]:
                     return JsonResponse({'error': 'Données manquantes pour le triangle'}, status=400)
 
             elif forme == 'rectangle':
                 required_fields = ['coin1_lat', 'coin1_lon', 'coin2_lat', 'coin2_lon', 
-                                 'coin3_lat', 'coin3_lon', 'coin4_lat', 'coin4_lon']
+                                   'coin3_lat', 'coin3_lon', 'coin4_lat', 'coin4_lon']
                 for field in required_fields:
                     setattr(zone, field, request.POST.get(field))
-                
                 if None in [getattr(zone, f) for f in required_fields]:
                     return JsonResponse({'error': 'Données manquantes pour le rectangle'}, status=400)
 
@@ -637,7 +650,6 @@ def creer_zone(request):
                 coins = request.POST.get('coins')
                 if not coins:
                     return JsonResponse({'error': 'Coordonnées du polygone manquantes'}, status=400)
-                
                 try:
                     coins_list = json.loads(coins)
                     if not isinstance(coins_list, list):
@@ -662,7 +674,13 @@ def creer_zone(request):
             return JsonResponse({'error': 'Utilisateur introuvable'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    return render(request, 'capteurs/creer_zone.html', {'utilisateurs': utilisateurs})
+    
+    # Rendu du template avec les données nécessaires
+    return render(request, 'capteurs/creer_zone.html', {
+        'utilisateurs': utilisateurs,
+        'user_id': request.user.id,
+        'capteurs_ids': capteurs_ids,  # Liste d'IDs prête à être utilisée dans JS
+    })
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -673,6 +691,8 @@ import json
 
 @csrf_exempt
 def update_position(request, zone_id):
+
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -743,7 +763,7 @@ def update_position(request, zone_id):
                 zone.longitude = data.get('longitude')
             
             zone.save()
-            messages.success(request, f"Zone creé avec succès.")
+            messages.success(request, f"Zone modifiée avec succès.")
             return JsonResponse({'message': 'Zone mise à jour avec succès !'}, status=200)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'JSON invalide'}, status=400)
@@ -1390,6 +1410,8 @@ from django.http import Http404
 
 
 
+
+
 @login_required
 def suivreBetail(request, user_id, zone_id):
     # Vérifie si l'utilisateur existe
@@ -1410,6 +1432,7 @@ def suivreBetail(request, user_id, zone_id):
     except json.JSONDecodeError:
         coins = None
 
+    # Zone au format JSON
     zone_data = {
         'id': zone.id,
         'forme': zone.forme,
@@ -1426,13 +1449,19 @@ def suivreBetail(request, user_id, zone_id):
         'coin4_lon': zone.coin4_lon,
         'coins': coins,
     }
+    zone_data_json = json.dumps([zone_data])
 
-    zone_data_json = json.dumps([zone_data])  # on envoie comme une liste (si le template attend plusieurs zones)
+    # Capteurs liés à cette zone
+    capteurs = Capteur.objects.filter(zone_securite=zone)
+    capteurs_ids = list(capteurs.values_list('identifiant', flat=True))
 
     return render(request, 'capteurs/suivrebetail.html', {
         'user_id': user.id,
-        'zones_data_json': zone_data_json
+        'zones_data_json': zone_data_json,
+        'capteurs_avec_zone': capteurs_ids,  # <- Ajout au contexte
+        'zone_nom':zone.nom,
     })
+
 
 
 

@@ -1,604 +1,806 @@
+<style>
+* { 
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f8faff;
+    min-height: 100vh;
+    padding: 0;
+}
+
+.main-wrapper {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0;
+    padding: 30px;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+    padding: 25px;
+    background: #008000;
+    border-radius: 10px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 128, 0, 0.3);
+}
+
+.container-header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    animation: loadBar 1s forwards;
+    border-radius: 0 0 20px 20px;
+}
+
+.container-header h1 {
+    font-weight: 1000;
+    color: white;
+    margin: 0;
+    font-size: 2em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes loadBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.form-container {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-container h2 {
+    font-size: 1.8em;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-weight: 1000;
+    text-align: center;
+    position: relative;
+}
+
+.form-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: #008000;
+    border-radius: 2px;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+form label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+form input[type="text"], form textarea, form select {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e8f0fe;
+    border-radius: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8faff;
+}
+
+form input[type="text"]:focus, form textarea:focus, form select:focus {
+    border-color: #008000;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 128, 0, 0.1);
+    background: white;
+    transform: translateY(-2px);
+}
+
+form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.btn-action {
+    background: #ffffff;
+    color: #000000;
+    padding: 15px 30px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+}
+
+.map-container {
+    position: relative;
+    height: 500px;
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(0, 128, 0, 0.1);
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    border-radius: 22px;
+}
+
+.map-overlay {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.map-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.map-controls button {
+    background: #000000;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.map-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.loading-indicator {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #008000;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#info-forme {
+    font-weight: 600;
+    margin: 15px 0;
+    color: #2c3e50;
+    padding: 12px 15px;
+    background: #f8faff;
+    border-left: 4px solid #008000;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-container, .map-container {
+    animation: fadeInUp 0.6s ease;
+}
+
+.form-container {
+    animation-delay: 0.1s;
+}
+
+.map-container {
+    animation-delay: 0.2s;
+}
+
+@media (max-width: 768px) {
+    .main-wrapper {
+        padding: 20px;
+    }
+    
+    .container-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .container-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .map-container {
+        height: 400px;
+    }
+}
+    </style>
+
 {% extends 'base/base.html' %}
 {% load static %}
 
 {% block content %}
-    <title>Définir la zone de pâturage</title>
+<title>Définir la zone de pâturage</title>
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-draw/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     
+    <!-- Ajout de la police Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        .page-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .container-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            position: relative;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .container-header::before {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 0%; /* Débute à 0% */
-            height: 6px;
-            background-color: black; /* Change la couleur en noir */
-            animation: loadBar 0.5s ease-out forwards; /* Animation plus rapide */
-            border-radius: 4px;
-        }
-        
-        .container-header h1 {
-            font-weight: 1000;
-            color: #008000;
-            margin: 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        @keyframes loadBar {
-            0% { width: 0%; }
-            100% { width: 100%; } /* Atteint 100% à la fin */
-        }
-        
-        .btn-valider-header {
-            background: linear-gradient(145deg, #4CAF50, #3d8b40);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            cursor: pointer;
+        .animal-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
             font-size: 16px;
-            font-weight: 1000;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-valider-header:hover {
-            background: linear-gradient(145deg, #43a047, #388e3c);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        }
-        
-        .btn-valider-header:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        #map-container {
-            position: relative;
-            height: 550px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            margin: 30px 0;
-        }
-        
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-        
-        .form-container {
-            background-color: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        
-        #info-forme {
-            font-weight: 600;
-            margin: 15px 0;
             color: #333;
-            padding: 12px 15px;
-            background-color: #f1f8e9;
-            border-left: 4px solid #8BC34A;
-            border-radius: 4px;
-            font-size: 15px;
-        }
-        
-        .messages {
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-        
-        .error {
-            background-color: #ffebee;
-            border-left: 6px solid #ef5350;
-            color: #b71c1c;
-        }
-        
-        .success {
-            background-color: #e8f5e9;
-            border-left: 6px solid #66bb6a;
-            color: #1b5e20;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        form label {
-            font-weight: 600;
-            color: #424242;
-            margin-bottom: 8px;
-            display: block;
-            font-size: 15px;
-        }
-        
-        form input[type="text"], form textarea, form select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        
-        form input[type="text"]:focus, form textarea:focus, form select:focus {
-            border-color: #4CAF50;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
-        }
-        
-        .map-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            background-color: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .animal-counter-icon {
+            font-size: 24px;
+            color: #28a745;
+        }
+
+        .animal-counter-text {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 2px;
         }
-        
-        .map-controls button {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
+
+        .animal-counter-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #28a745;
         }
-        
-        .map-controls button:hover {
-            background-color: #f5f5f5;
-            border-color: #bbb;
+
+        .animal-counter-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 400;
         }
-        
-        .loading-indicator {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .loading-spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4CAF50;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 2s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .leaflet-control-attribution {
-            font-size: 10px;
-        }
-        
-        /* Adaptation pour mobile */
-        @media (max-width: 768px) {
-            .container-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .btn-valider-header {
-                width: 100%;
-                text-align: center;
-            }
-            
-            #map-container {
-                height: 400px;
-            }
-            
-            .form-container {
-                padding: 15px;
-            }
-        }
-        
-        
     </style>
 
-    
+    <div class="main-wrapper">
+        <div class="loading-indicator" id="loading">
+            <div class="loading-spinner"></div>
+        </div>
 
-<div class="page-container">
-    <div class="loading-indicator" id="loading">
-        <div class="loading-spinner"></div>
-    </div>
+        <div class="container-header" id="header-bar">
+            <h1>
+                Définissez la zone de pâturage 
+            </h1>
 
-    <div class="container-header" id="header-bar">
-        <h1>Définissez la zone de pâturage</h1>
-        <button type="submit" form="zoneForm" class="btn-valider-header" id="btnValider">Valider</button>
-    </div>
-
-
-
-    <div class="form-container">
-        <form method="POST" id="zoneForm">
-            {% csrf_token %}
-            
-          <div class="input-group">
-    <label>Nom : <span style="color: red;">*</span></label>
-    <input type="text" name="nom" required placeholder="Nom de la zone">
-</div>
-
-
-            <div class="input-group">
-                <label>Utilisateur :</label>
-                <select name="utilisateur" required>
-                    {% for utilisateur in utilisateurs %}
-                        <option value="{{ utilisateur.id }}">{{ utilisateur.username }}</option>
-                    {% endfor %}
-                </select>
+            <div>
+                <button type="submit" form="zoneForm" class="btn-action" id="btnValider">Valider ✓</button>
             </div>
-            
+        </div>
 
-            <div class="input-group">
-                <label>Description :</label>
-                <textarea name="description" rows="4" required placeholder="Décrivez cette zone de pâturage"></textarea>
+        <div class="form-container">
+            <h2>Informations de la zone</h2>
+            <form method="POST" id="zoneForm">
+                {% csrf_token %}
+                
+                <div class="input-group">
+                    <label>Nom : <span style="color: red;">*</span></label>
+                    <input type="text" name="nom" required placeholder="Nom de la zone">
+                </div>
+
+                <div class="input-group">
+                    <label>Utilisateur :</label>
+                    <select name="utilisateur" required>
+                        {% for utilisateur in utilisateurs %}
+                            <option value="{{ utilisateur.id }}">{{ utilisateur.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Description :</label>
+                    <textarea name="description" rows="4" required placeholder="Décrivez cette zone de pâturage"></textarea>
+                </div>
+
+                <div id="info-forme">Veuillez dessiner une forme sur la carte.</div>
+
+                <!-- Champs cachés -->
+                <input type="hidden" name="forme" id="forme">
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="rayon" id="rayon">
+                <input type="hidden" name="coin1_lat" id="coin1_lat">
+                <input type="hidden" name="coin1_lon" id="coin1_lon">
+                <input type="hidden" name="coin2_lat" id="coin2_lat">
+                <input type="hidden" name="coin2_lon" id="coin2_lon">
+                <input type="hidden" name="coin3_lat" id="coin3_lat">
+                <input type="hidden" name="coin3_lon" id="coin3_lon">
+                <input type="hidden" name="coin4_lat" id="coin4_lat">
+                <input type="hidden" name="coin4_lon" id="coin4_lon">
+                <input type="hidden" name="coins" id="coins">
+            </form>
+        </div>
+
+        <div class="map-container">
+            <div class="map-overlay">
+                📍 Dessinez ou modifiez la zone sur la carte
             </div>
+            <div class="map-controls">
+                <button id="btnLocate">Ma position</button>
+                <button id="btnReset">Réinitialiser</button>
+            </div>
+            <div id="map"></div>
+        </div>
 
-            <div id="info-forme">Veuillez dessiner une forme sur la carte.</div>
-
-            <!-- Champs cachés -->
-            <input type="hidden" name="forme" id="forme">
-            <input type="hidden" name="latitude" id="latitude">
-            <input type="hidden" name="longitude" id="longitude">
-            <input type="hidden" name="rayon" id="rayon">
-            <input type="hidden" name="coin1_lat" id="coin1_lat">
-            <input type="hidden" name="coin1_lon" id="coin1_lon">
-            <input type="hidden" name="coin2_lat" id="coin2_lat">
-            <input type="hidden" name="coin2_lon" id="coin2_lon">
-            <input type="hidden" name="coin3_lat" id="coin3_lat">
-            <input type="hidden" name="coin3_lon" id="coin3_lon">
-            <input type="hidden" name="coin4_lat" id="coin4_lat">
-            <input type="hidden" name="coin4_lon" id="coin4_lon">
-            <input type="hidden" name="coins" id="coins">
-        </form>
-    </div>
-
-    <div id="map-container">
-        <div id="map"></div>
-        <div class="map-controls">
-            <button id="btnLocate">Ma position</button>
-            <button id="btnReset">Réinitialiser</button>
+        <!-- Compteur d'animaux -->
+        <div class="animal-counter" id="animalCounter">
+            <div class="animal-counter-icon">🐄</div>
+            <div class="animal-counter-text">
+                <div class="animal-counter-number" id="animalCount">0</div>
+                <div class="animal-counter-label">Animaux détectés</div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Ajout de la police Montserrat -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script>
+        // ID utilisateur depuis le contexte Django
+        const userId = "{{ user_id }}";
+        // Coordonnées de Ouagadougou, Burkina Faso
+        const defaultCoords = [12.3714, -1.5197];
+        const defaultZoom = 13;
 
-<script>
-    // Configuration initiale
-    const defaultCoords = [14.6937, -17.4441]; // Dakar, Sénégal par défaut
-    const defaultZoom = 13;
-    
-    // Initialisation de la carte
-    var map = L.map('map').setView(defaultCoords, defaultZoom);
+        // Liste des IDs des capteurs à filtrer (ne pas afficher sur la carte)
+        const capteursIdsFiltres = {{ capteurs_ids|safe }};
 
-    // Couche de carte principale
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+        // Initialisation de la carte sur Ouagadougou
+        var map = L.map('map').setView(defaultCoords, defaultZoom);
 
-    // Groupe pour les formes dessinées
-    var drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+        // Couche principale
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
 
-    // Configuration des outils de dessin
-    var drawControl = new L.Control.Draw({
-        edit: { featureGroup: drawnItems },
-        draw: {
-            polygon: {
-                allowIntersection: false,
-                showArea: true,
-                shapeOptions: {
-                    color: '#4CAF50',
-                    fillOpacity: 0.2
-                }
-            },
-            rectangle: {
-                shapeOptions: {
-                    color: '#4CAF50',
-                    fillOpacity: 0.2
-                }
-            },
-            circle: {
-                shapeOptions: {
-                    color: '#4CAF50',
-                    fillOpacity: 0.2
-                }
-            },
-            marker: false,
-            polyline: false,
-            circlemarker: false
-        }
-    });
-    map.addControl(drawControl);
+        // Groupe pour les formes dessinées
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
 
-    // Fonction d'initialisation avec géolocalisation
-    function initMap() {
-        // Afficher l'indicateur de chargement
-        document.getElementById('loading').style.display = 'flex';
-        
-        // Vérifier la géolocalisation
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    // Succès de géolocalisation
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    
-                    // Zoomer sur la position de l'utilisateur
-                    map.setView([userLat, userLng], 13);
-                    
-                    // Rechercher le pays
-                    lookupCountry(userLat, userLng);
-                    
-                    // Cacher l'indicateur de chargement
-                    document.getElementById('loading').style.display = 'none';
+        // Outils de dessin
+        var drawControl = new L.Control.Draw({
+            edit: { featureGroup: drawnItems },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true,
+                    shapeOptions: {
+                        color: '#28a745',
+                        fillOpacity: 0.2
+                    }
                 },
-                function(error) {
-                    // Erreur de géolocalisation, utiliser les coordonnées par défaut
-                    console.log("Erreur de géolocalisation: ", error);
-                    document.getElementById('loading').style.display = 'none';
+                rectangle: {
+                    shapeOptions: {
+                        color: '#28a745',
+                        fillOpacity: 0.2
+                    }
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                }
-            );
-        } else {
-            console.log("La géolocalisation n'est pas prise en charge par ce navigateur.");
-            document.getElementById('loading').style.display = 'none';
-        }
-    }
-    
-    // Fonction pour obtenir le pays à partir des coordonnées
-    function lookupCountry(lat, lng) {
-        // Utiliser l'API Nominatim pour la recherche inversée
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.address && data.address.country) {
-                    // Afficher le pays dans le titre de la page
-                    const countryName = data.address.country;
-                    const city = data.address.city || data.address.town || data.address.village || '';
-                    
-                    // Mettre à jour le titre avec le nom du pays/ville
-                    document.getElementById('header-bar').querySelector('h1').innerText = 
-                        `Définissez la zone de pâturage - ${city}, ${countryName}`;
-                }
-            })
-            .catch(error => {
-                console.error("Erreur lors de la recherche du pays:", error);
-            });
-    }
-    
-    // Bouton pour localiser l'utilisateur
-    document.getElementById('btnLocate').addEventListener('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    map.setView([userLat, userLng], 15);
+                circle: {
+                    shapeOptions: {
+                        color: '#28a745',
+                        fillOpacity: 0.2
+                    }
                 },
-                function(error) {
-                    alert("Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de confidentialité.");
-                }
-            );
-        } else {
-            alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
-        }
-    });
-    
-    // Bouton pour réinitialiser la vue de la carte
-    document.getElementById('btnReset').addEventListener('click', function() {
-        drawnItems.clearLayers();
-        resetFields();
-        document.getElementById('info-forme').innerText = "Veuillez dessiner une forme sur la carte.";
-    });
-
-    // Gestion des formes dessinées
-    map.on(L.Draw.Event.CREATED, function (event) {
-        drawnItems.clearLayers();
-        var layer = event.layer;
-        drawnItems.addLayer(layer);
-        
-        resetFields();
-        var infoForme = document.getElementById('info-forme');
-        
-        if (layer instanceof L.Circle) {
-            var center = layer.getLatLng();
-            var radius = layer.getRadius();
-            document.getElementById('forme').value = 'cercle';
-            document.getElementById('latitude').value = center.lat;
-            document.getElementById('longitude').value = center.lng;
-            document.getElementById('rayon').value = radius;
-            
-            // Calculer la superficie approximative (en km²)
-            const areaKm = Math.PI * Math.pow(radius/1000, 2);
-            infoForme.innerText = `Forme dessinée : Cercle (Superficie: ${areaKm.toFixed(2)} km²)`;
-        }
-        else if (layer instanceof L.Rectangle) {
-            var bounds = layer.getBounds();
-            var corners = [
-                bounds.getNorthWest(),
-                bounds.getNorthEast(),
-                bounds.getSouthEast(),
-                bounds.getSouthWest()
-            ];
-            document.getElementById('forme').value = 'rectangle';
-            for (var i = 0; i < 4; i++) {
-                document.getElementById('coin' + (i+1) + '_lat').value = corners[i].lat;
-                document.getElementById('coin' + (i+1) + '_lon').value = corners[i].lng;
+                marker: false,
+                polyline: false,
+                circlemarker: false
             }
+        });
+        map.addControl(drawControl);
+
+        // WebSocket pour capteurs
+        const socket = new WebSocket(`wss://{{ MY_GLOBAL_VARIABLE }}/ws/positions/?user_id=${userId}`);
+
+        const trackerMarkers = {};
+        const trackerTimers = {};
+        let animalCount = 0;
+
+        // Fonction pour mettre à jour le compteur d'animaux
+        function updateAnimalCounter() {
+            const activeAnimals = Object.keys(trackerMarkers).length;
+            animalCount = activeAnimals;
+            document.getElementById('animalCount').textContent = animalCount;
             
-            // Calculer la superficie approximative
-            const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000; // km
-            const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000; // km
-            const areaKm = width * height;
-            
-            infoForme.innerText = `Forme dessinée : Rectangle (Superficie: ${areaKm.toFixed(2)} km²)`;
+            // Animation du compteur
+            const counter = document.getElementById('animalCounter');
+            counter.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                counter.style.transform = 'scale(1)';
+            }, 200);
         }
-        else if (layer instanceof L.Polygon) {
-            var latlngs = layer.getLatLngs()[0];
-            if (latlngs.length === 4 && isRectangle(latlngs)) {
-                document.getElementById('forme').value = 'rectangle';
-                for (var i = 0; i < 4; i++) {
-                    document.getElementById('coin' + (i+1) + '_lat').value = latlngs[i].lat;
-                    document.getElementById('coin' + (i+1) + '_lon').value = latlngs[i].lng;
+
+        socket.onopen = () => {
+            console.log("WebSocket connecté !");
+        };
+
+        socket.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            const trackerId = data.tracker_id || "default";
+
+            // FILTRAGE: si capteur dans liste filtrée, ne pas afficher
+            if (capteursIdsFiltres.includes(parseInt(trackerId))) {
+                // Supprimer si déjà sur la carte
+                if (trackerMarkers[trackerId]) {
+                    map.removeLayer(trackerMarkers[trackerId]);
+                    delete trackerMarkers[trackerId];
+                    updateAnimalCounter();
                 }
-                
-                // Calculer une superficie approximative pour ce rectangle
-                const bounds = L.latLngBounds(latlngs);
-                const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000; // km
-                const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000; // km
-                const areaKm = width * height;
-                
-                infoForme.innerText = `Forme dessinée : Rectangle (Superficie: ${areaKm.toFixed(2)} km²)`;
+                return;  // Ignore ce capteur
+            }
+
+            if (trackerTimers[trackerId]) clearTimeout(trackerTimers[trackerId]);
+
+            trackerTimers[trackerId] = setTimeout(() => {
+                if (trackerMarkers[trackerId]) {
+                    map.removeLayer(trackerMarkers[trackerId]);
+                    delete trackerMarkers[trackerId];
+                    updateAnimalCounter();
+                }
+            }, 5000);
+
+            const position = [data.latitude, data.longitude];
+
+            if (trackerMarkers[trackerId]) {
+                trackerMarkers[trackerId].setLatLng(position);
+                trackerMarkers[trackerId].getPopup().setContent(`🐄 Capteur ${trackerId} - Type ${data.type_animal}`);
             } else {
-                document.getElementById('forme').value = 'polygon';
-                var coords = [];
-                for (var i = 0; i < latlngs.length; i++) {
-                    coords.push([latlngs[i].lat, latlngs[i].lng]);
-                }
-                document.getElementById('coins').value = JSON.stringify(coords);
-                
-                // Calculer l'aire approximative du polygone
-                const areaKm = calculatePolygonArea(latlngs) / 1000000; // conversion m² en km²
-                
-                infoForme.innerText = `Forme dessinée : Polygone à ${latlngs.length} côtés (Superficie: ${areaKm.toFixed(2)} km²)`;
+                const marker = L.marker(position, { icon: getGreenIcon() }).addTo(map);
+                marker.bindPopup(`🐄 Capteur ${trackerId} - Type ${data.type_animal}`, { autoPan: false });
+                trackerMarkers[trackerId] = marker;
+                updateAnimalCounter();
+            }
+        };
+
+        socket.onerror = (error) => console.error("WebSocket error:", error);
+        socket.onclose = (event) => console.warn("WebSocket fermé:", event.code);
+
+        // Icône verte
+        function getGreenIcon() {
+            return new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+        }
+
+        // Géolocalisation avec position par défaut sur Ouagadougou
+        function initMap() {
+            document.getElementById('loading').style.display = 'flex';
+            
+            // Définir le titre avec Ouagadougou par défaut
+            document.getElementById('header-bar').querySelector('h1').innerText = 
+                'Définissez la zone de pâturage - Ouagadougou, Burkina Faso';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        // Vérifier si l'utilisateur est près de Ouagadougou (dans un rayon de 100km)
+                        const distanceToOuaga = calculateDistance(userLat, userLng, defaultCoords[0], defaultCoords[1]);
+                        
+                        if (distanceToOuaga <= 100) {
+                            // Si proche de Ouagadougou, utiliser la position de l'utilisateur
+                            map.setView([userLat, userLng], 15);
+                            lookupCountry(userLat, userLng);
+                        } else {
+                            // Sinon, rester sur Ouagadougou
+                            map.setView(defaultCoords, defaultZoom);
+                        }
+                        
+                        document.getElementById('loading').style.display = 'none';
+                    },
+                    function(error) {
+                        console.log("Erreur de géolocalisation: ", error);
+                        // En cas d'erreur, rester sur Ouagadougou
+                        map.setView(defaultCoords, defaultZoom);
+                        document.getElementById('loading').style.display = 'none';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                console.log("La géolocalisation n'est pas prise en charge par ce navigateur.");
+                // Rester sur Ouagadougou
+                map.setView(defaultCoords, defaultZoom);
+                document.getElementById('loading').style.display = 'none';
             }
         }
-    });
 
-    // Fonction pour calculer l'aire d'un polygone en mètres carrés
-    function calculatePolygonArea(latlngs) {
-        // Utiliser la formule de l'aire de Gauss (méthode du lacet)
-        let area = 0;
-        const numPoints = latlngs.length;
+        // Fonction pour calculer la distance entre deux points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
         
-        // Convertir les coordonnées en mercator pour un calcul plus précis
-        const projectedPoints = latlngs.map(point => {
-            const y = point.lat * Math.PI / 180;
-            const x = point.lng * Math.PI / 180;
-            return {
-                x: 6378137 * x, // Rayon terrestre * longitude en radians
-                y: 6378137 * Math.log(Math.tan(Math.PI/4 + y/2))
-            };
+        // Recherche pays
+        function lookupCountry(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address && data.address.country) {
+                        const countryName = data.address.country;
+                        const city = data.address.city || data.address.town || data.address.village || 'Ouagadougou';
+                        document.getElementById('header-bar').querySelector('h1').innerText = 
+                            `Définissez la zone de pâturage - ${city}, ${countryName}`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la recherche du pays:", error);
+                });
+        }
+        
+        // Bouton "Ma position"
+        document.getElementById('btnLocate').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        map.setView([userLat, userLng], 15);
+                        lookupCountry(userLat, userLng);
+                    },
+                    function(error) {
+                        alert("Impossible d'obtenir votre position. Veuillez vérifier vos paramètres de confidentialité.");
+                    }
+                );
+            } else {
+                alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
+            }
         });
         
-        for (let i = 0; i < numPoints; i++) {
-            const j = (i + 1) % numPoints;
-            area += projectedPoints[i].x * projectedPoints[j].y;
-            area -= projectedPoints[j].x * projectedPoints[i].y;
+        // Bouton "Réinitialiser"
+        document.getElementById('btnReset').addEventListener('click', function() {
+            drawnItems.clearLayers();
+            resetFields();
+            document.getElementById('info-forme').innerText = "Veuillez dessiner une forme sur la carte.";
+        });
+
+        // Gestion des formes dessinées
+        map.on(L.Draw.Event.CREATED, function (event) {
+            drawnItems.clearLayers();
+            var layer = event.layer;
+            drawnItems.addLayer(layer);
+            
+            resetFields();
+            var infoForme = document.getElementById('info-forme');
+            
+            if (layer instanceof L.Circle) {
+                var center = layer.getLatLng();
+                var radius = layer.getRadius();
+                document.getElementById('forme').value = 'cercle';
+                document.getElementById('latitude').value = center.lat;
+                document.getElementById('longitude').value = center.lng;
+                document.getElementById('rayon').value = radius;
+                const areaKm = Math.PI * Math.pow(radius/1000, 2);
+                infoForme.innerText = `Forme dessinée : Cercle (Superficie: ${areaKm.toFixed(2)} km²)`;
+            }
+            else if (layer instanceof L.Rectangle) {
+                var bounds = layer.getBounds();
+                var corners = [
+                    bounds.getNorthWest(),
+                    bounds.getNorthEast(),
+                    bounds.getSouthEast(),
+                    bounds.getSouthWest()
+                ];
+                document.getElementById('forme').value = isSquare(corners) ? 'carre' : 'rectangle';
+                for (var i = 0; i < 4; i++) {
+                    document.getElementById('coin' + (i+1) + '_lat').value = corners[i].lat;
+                    document.getElementById('coin' + (i+1) + '_lon').value = corners[i].lng;
+                }
+                const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000;
+                const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000;
+                const areaKm = width * height;
+                infoForme.innerText = `Forme dessinée : ${isSquare(corners) ? 'Carré' : 'Rectangle'} (Superficie: ${areaKm.toFixed(2)} km²)`;
+            }
+            else if (layer instanceof L.Polygon) {
+                var latlngs = layer.getLatLngs()[0];
+                if (latlngs.length === 4 && isRectangle(latlngs)) {
+                    document.getElementById('forme').value = isSquare(latlngs) ? 'carre' : 'rectangle';
+                    for (var i = 0; i < 4; i++) {
+                        document.getElementById('coin' + (i+1) + '_lat').value = latlngs[i].lat;
+                        document.getElementById('coin' + (i+1) + '_lon').value = latlngs[i].lng;
+                    }
+                    const bounds = L.latLngBounds(latlngs);
+                    const width = bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000;
+                    const height = bounds.getNorthWest().distanceTo(bounds.getSouthWest()) / 1000;
+                    const areaKm = width * height;
+                    infoForme.innerText = `Forme dessinée : ${isSquare(latlngs) ? 'Carré' : 'Rectangle'} (Superficie: ${areaKm.toFixed(2)} km²)`;
+                } else {
+                    document.getElementById('forme').value = 'polygon';
+                    var coords = [];
+                    for (var i = 0; i < latlngs.length; i++) {
+                        coords.push([latlngs[i].lat, latlngs[i].lng]);
+                    }
+                    document.getElementById('coins').value = JSON.stringify(coords);
+                    const areaKm = calculatePolygonArea(latlngs) / 1000000;
+                    infoForme.innerText = `Forme dessinée : Polygone à ${latlngs.length} côtés (Superficie: ${areaKm.toFixed(2)} km²)`;
+                }
+            }
+        });
+
+        // Fonctions utilitaires pour forme
+        function isSquare(latlngs) {
+            if (latlngs.length !== 4) return false;
+            const d1 = map.distance(latlngs[0], latlngs[1]);
+            const d2 = map.distance(latlngs[1], latlngs[2]);
+            const d3 = map.distance(latlngs[2], latlngs[3]);
+            const d4 = map.distance(latlngs[3], latlngs[0]);
+            const tolerance = 10;
+            return Math.abs(d1 - d3) <= tolerance && Math.abs(d2 - d4) <= tolerance && Math.abs(d1 - d2) <= tolerance;
         }
-        
-        return Math.abs(area) / 2;
-    }
 
-    function isRectangle(latlngs) {
-        if (latlngs.length !== 4) return false;
-        var lat1 = latlngs[0].lat.toFixed(6);
-        var lat2 = latlngs[1].lat.toFixed(6);
-        var lat3 = latlngs[2].lat.toFixed(6);
-        var lat4 = latlngs[3].lat.toFixed(6);
-        var lng1 = latlngs[0].lng.toFixed(6);
-        var lng2 = latlngs[1].lng.toFixed(6);
-        var lng3 = latlngs[2].lng.toFixed(6);
-        var lng4 = latlngs[3].lng.toFixed(6);
-        return ((lat1 === lat2 && lat3 === lat4 && lng1 === lng4 && lng2 === lng3) ||
-                (lat1 === lat4 && lat2 === lat3 && lng1 === lng2 && lng3 === lng4));
-    }
-
-    function resetFields() {
-        document.getElementById('forme').value = '';
-        document.getElementById('latitude').value = '';
-        document.getElementById('longitude').value = '';
-        document.getElementById('rayon').value = '';
-        document.getElementById('coin1_lat').value = '';
-        document.getElementById('coin1_lon').value = '';
-        document.getElementById('coin2_lat').value = '';
-        document.getElementById('coin2_lon').value = '';
-        document.getElementById('coin3_lat').value = '';
-        document.getElementById('coin3_lon').value = '';
-        document.getElementById('coin4_lat').value = '';
-        document.getElementById('coin4_lon').value = '';
-        document.getElementById('coins').value = '';
-    }
-
-    document.getElementById('zoneForm').addEventListener('submit', function(e) {
-        if (document.getElementById('forme').value === '') {
-            e.preventDefault();
-            alert('Veuillez dessiner une forme sur la carte avant de soumettre le formulaire.');
-        } else {
-            // Afficher l'indicateur de chargement pendant la soumission
-            document.getElementById('loading').style.display = 'flex';
+        function calculatePolygonArea(latlngs) {
+            let area = 0;
+            const numPoints = latlngs.length;
+            const projectedPoints = latlngs.map(point => {
+                const y = point.lat * Math.PI / 180;
+                const x = point.lng * Math.PI / 180;
+                return {
+                    x: 6378137 * x,
+                    y: 6378137 * Math.log(Math.tan(Math.PI/4 + y/2))
+                };
+            });
+            for (let i = 0; i < numPoints; i++) {
+                const j = (i + 1) % numPoints;
+                area += projectedPoints[i].x * projectedPoints[j].y;
+                area -= projectedPoints[j].x * projectedPoints[i].y;
+            }
+            return Math.abs(area) / 2;
         }
-    });
 
-    // Initialiser la carte avec géolocalisation au chargement
-    window.addEventListener('load', initMap);
-</script>
+        function isRectangle(latlngs) {
+            if (latlngs.length !== 4) return false;
+            var lat1 = latlngs[0].lat.toFixed(6);
+            var lat2 = latlngs[1].lat.toFixed(6);
+            var lat3 = latlngs[2].lat.toFixed(6);
+            var lat4 = latlngs[3].lat.toFixed(6);
+            var lng1 = latlngs[0].lng.toFixed(6);
+            var lng2 = latlngs[1].lng.toFixed(6);
+            var lng3 = latlngs[2].lng.toFixed(6);
+            var lng4 = latlngs[3].lng.toFixed(6);
+            return ((lat1 === lat2 && lat3 === lat4 && lng1 === lng4 && lng2 === lng3) ||
+                    (lat1 === lat4 && lat2 === lat3 && lng1 === lng2 && lng3 === lng4));
+        }
 
+        function resetFields() {
+            document.getElementById('forme').value = '';
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+            document.getElementById('rayon').value = '';
+            document.getElementById('coin1_lat').value = '';
+            document.getElementById('coin1_lon').value = '';
+            document.getElementById('coin2_lat').value = '';
+            document.getElementById('coin2_lon').value = '';
+            document.getElementById('coin3_lat').value = '';
+            document.getElementById('coin3_lon').value = '';
+            document.getElementById('coin4_lat').value = '';
+            document.getElementById('coin4_lon').value = '';
+            document.getElementById('coins').value = '';
+        }
+
+        document.getElementById('zoneForm').addEventListener('submit', function(e) {
+            if (document.getElementById('forme').value === '') {
+                e.preventDefault();
+                alert('Veuillez dessiner une forme sur la carte avant de soumettre le formulaire.');
+            } else {
+                document.getElementById('loading').style.display = 'flex';
+            }
+        });
+
+        // Init carte au chargement
+        window.addEventListener('load', initMap);
+    </script>
 {% endblock %}
