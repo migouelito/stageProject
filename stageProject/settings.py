@@ -48,19 +48,19 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'stageproject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
 
-CHANNEL_LAYERS = {
+'''CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],  # Adresse de Redis
         },
     },
-}
+}'''
 
 
 #Pour redis en ligne
 
-'''CHANNEL_LAYERS = {
+CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
@@ -69,7 +69,7 @@ CHANNEL_LAYERS = {
             "symmetric_encryption_keys": [os.environ.get("REDIS_ENCRYPTION_KEY", "")],  # facultatif
         },
     },
-}'''
+}
 
 
 REST_FRAMEWORK = {
@@ -104,7 +104,7 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "middle-carol-opposed-castle.trycloudflare.com"
+MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct
@@ -153,7 +153,7 @@ ASGI_APPLICATION = 'stageproject.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'stage_database',   # Remplacez par le nom de votre base de données
@@ -162,10 +162,10 @@ DATABASES = {
         'HOST': 'localhost',                   # Si vous utilisez PostgreSQL localement
         'PORT': '5432',                        # Le port par défaut de PostgreSQL
     }
-}
+}'''
 
 
-'''import os
+import os
 import dj_database_url
 
 
@@ -175,7 +175,7 @@ DATABASES = {
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
-}'''
+}
 
 
 
