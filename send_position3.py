@@ -5,7 +5,7 @@ from datetime import datetime
 
 async def send_positions():
     # Connexion au WebSocket avec user_id dans l'URL
-    uri = "wss://ons-jill-keyword-motel.trycloudflare.com/ws/positions/"
+    uri = "wss://stageproject.onrender.com/ws/positions/"
     reconnect_delay = 5  # Délai de reconnexion en secondes
     
     while True:  # Boucle de reconnexion principale
