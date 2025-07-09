@@ -17,7 +17,7 @@ application = ProtocolTypeRouter({
     ),
 })'''
 
-'''import os
+import os
 import django
 from django.core.asgi import get_asgi_application
 from django.core.management import call_command
@@ -66,9 +66,9 @@ application = ProtocolTypeRouter({
             re_path(r"^ws/positions/$", PositionConsumer.as_asgi()),
         ])
     ),
-})'''
+})
 
-import os
+'''import os
 import django
 from django.core.asgi import get_asgi_application
 
@@ -87,5 +87,5 @@ application = ProtocolTypeRouter({
             re_path(r"^ws/positions/$", PositionConsumer.as_asgi()),
         ])
     ),
-})
+})'''
 
