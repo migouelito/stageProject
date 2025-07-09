@@ -42,21 +42,21 @@ INSTALLED_APPS = [
     'realtime',  # L'application que tu viens de créer
     'channels',
     'rest_framework_simplejwt',  
-    #'rest_framework_simplejwt.token_blacklist', 
+    'rest_framework_simplejwt.token_blacklist', 
     'utilisateurs',
     'capteurs',
 ]
 
 ASGI_APPLICATION = 'stageproject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
 
-'''CHANNEL_LAYERS = {
+CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],  # Adresse de Redis
         },
     },
-}'''
+}
 
 
 #Pour redis en ligne
@@ -73,11 +73,11 @@ CHANNEL_LAYERS = {
 }
 
 
-REST_FRAMEWORK = {
+'''REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-}
+}'''
 
 from datetime import timedelta
 
@@ -116,7 +116,9 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
+#MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
+MY_GLOBAL_VARIABLE = "sheffield-cr-bridges-would.trycloudflare.com"
+
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{MY_GLOBAL_VARIABLE}",  # <- ici c'est correct

@@ -48,10 +48,32 @@ from django.contrib.auth import authenticate
 
 User = get_user_model()
 
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, allow_blank=True, required=False)
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'telephone', 'owner']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'telephone', 'owner', 'password']
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+
+        # Mettre à jour les autres champs normalement
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # Mettre à jour le mot de passe uniquement s’il est non vide
+        if password is not None and password.strip() != "":
+            instance.set_password(password)
+
+        instance.save()
+        return instance
+
+
 
 
 class EmailTokenObtainPairSerializer(serializers.Serializer):

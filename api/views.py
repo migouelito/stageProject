@@ -41,14 +41,16 @@ class UserDetail(APIView):
         return Response(serializer.data)  # Retourne les données de l'utilisateur dans la réponse
 
     def put(self, request):
-        # Met à jour l'utilisateur authentifié avec les données envoyées dans la requête
         user = request.user
-        serializer = UserSerializer(user, data=request.data, partial=True)  # Utilisation de partial=True pour permettre la mise à jour partielle
-
+        print("Données reçues dans la requête PUT :", request.data)  # Log des données reçues
+        
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()  # Sauvegarde les modifications
-            return Response(serializer.data)  # Retourne les nouvelles données de l'utilisateur après la mise à jour
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Retourne les erreurs si la validation échoue
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            print("Erreurs de validation :", serializer.errors)  # Log des erreurs si invalides
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from rest_framework.permissions import IsAuthenticated  # Utilise l'authentification
 from rest_framework.authentication import TokenAuthentication  # Utilise TokenAuthentication

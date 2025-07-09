@@ -4,6 +4,8 @@ from .views import *
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 from .views import UserProfileView
+from rest_framework_simplejwt.views import TokenVerifyView
+
 
 urlpatterns = [
     # Endpoint pour obtenir un token d'accès et un token de rafraîchissement
@@ -11,6 +13,8 @@ urlpatterns = [
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
     path('api/user/', UserDetail.as_view(), name='user-detail'),  # Route pour accéder et modifier les informations de l'utilisateur
     path('api/user/login/', UserProfileView.as_view(), name='user-profile'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
 
        # autres urls
     path('api/protected/', ProtectedView.as_view(), name='protected_view'),
