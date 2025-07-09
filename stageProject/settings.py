@@ -80,13 +80,24 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 
-SIMPLE_JWT = {
+'''SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Durée de validité du token d'accès
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Durée de validité du token de rafraîchissement
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,  # ✅ AJOUT OBLIGATOIRE
+}'''
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # ⏱ Durée du token d'accès (très courte ici, utile pour tests)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # 🔁 Durée de validité du refresh token (7 jours)
+    'ROTATE_REFRESH_TOKENS': True,                  # 🔄 Active la rotation automatique des refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,               # 🚫 Blackliste l’ancien refresh token après rotation
+    'ALGORITHM': 'HS256',                           # 🔐 Algorithme utilisé pour signer les tokens
+    'SIGNING_KEY': SECRET_KEY,                      # 🗝 Utilise la clé secrète du projet pour signer les JWT
 }
+
 
 
 AUTH_USER_MODEL="utilisateurs.User"
