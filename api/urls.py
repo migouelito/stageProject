@@ -9,7 +9,7 @@ urlpatterns = [
     # Endpoint pour obtenir un token d'accès et un token de rafraîchissement
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/user/', UserDetail.as_view(), name='user-detail'),  # Route pour accéder et modifier les informations de l'utilisateur
+    #path('api/user/', UserDetail.as_view(), name='user-detail'),  # Route pour accéder et modifier les informations de l'utilisateur
     path('api/user/', UserProfileView.as_view(), name='user-profile'),
 
        # autres urls
