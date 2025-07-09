@@ -49,14 +49,14 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'stageproject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
 
-CHANNEL_LAYERS = {
+'''CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],  # Adresse de Redis
         },
     },
-}
+}'''
 
 
 #Pour redis en ligne
@@ -73,11 +73,11 @@ CHANNEL_LAYERS = {
 }
 
 
-'''REST_FRAMEWORK = {
+REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-}'''
+}
 
 from datetime import timedelta
 
