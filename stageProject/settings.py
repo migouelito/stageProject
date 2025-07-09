@@ -116,8 +116,8 @@ MIDDLEWARE = [
 ]
 
 # settings.py
-#MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
-MY_GLOBAL_VARIABLE = "sheffield-cr-bridges-would.trycloudflare.com"
+MY_GLOBAL_VARIABLE = "stageproject.onrender.com"
+#MY_GLOBAL_VARIABLE = "sheffield-cr-bridges-would.trycloudflare.com"
 
 
 CSRF_TRUSTED_ORIGINS = [
