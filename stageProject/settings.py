@@ -91,7 +91,7 @@ from datetime import timedelta
 }'''
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # ⏱ Durée du token d'accès (très courte ici, utile pour tests)
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # ⏱ Durée du token d'accès (très courte ici, utile pour tests)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # 🔁 Durée de validité du refresh token (7 jours)
     'ROTATE_REFRESH_TOKENS': True,                  # 🔄 Active la rotation automatique des refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,               # 🚫 Blackliste l’ancien refresh token après rotation
