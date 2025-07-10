@@ -948,6 +948,8 @@
    <!-- Bande blanche en haut -->
    <div class="top-white-bar">
     <div class="top-right-bar">
+
+        
         <!-- Notifications -->
         <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" id="notifications-link">
             <div class="icon-container" style="position: relative;">
@@ -959,6 +961,8 @@
                 {% endif %}
             </div>
         </a>
+
+        
         <div class="profile-dropdown">
        <a href="#" class="profile-trigger" id="profile-link-icon" data-user-id="{{ user.id }}">
             <div class="avatar-container">

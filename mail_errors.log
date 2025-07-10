@@ -22130,3 +22130,142 @@ django.db.utils.ProgrammingError: relation "token_blacklist_outstandingtoken" do
 LINE 1: INSERT INTO "token_blacklist_outstandingtoken" ("user_id", "...
                     ^
 "POST /api/token/ HTTP/1.1" 500 217640
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 204, in _get_response
+    self.check_response(response, callback)
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 332, in check_response
+    raise ValueError(
+ValueError: The view capteurs.views.dashboard didn't return an HttpResponse object. It returned None instead.
+"GET /accueil HTTP/1.1" 500 67077
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919
+Internal Server Error: /accueil
+Traceback (most recent call last):
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/migouel/programmation/Python/gestionEtudiants/stageProject/capteurs/views.py", line 257, in dashboard
+    'statistiques_zone': Statistiques.statistique_zone(user),  # Ajouter les statistiques de zone
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Statistiques' has no attribute 'statistique_zone'
+"GET /accueil HTTP/1.1" 500 71919

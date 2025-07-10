@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistiques des Capteurs</title>
@@ -58,8 +57,8 @@
             box-shadow: var(--shadow-hover);
         }
         
-        .container-header h2 {
-            font-size: 1.8rem;
+        .container-header h1 {
+            font-size: 2rem;
             font-weight: 1000;
             color: #008000; /* Vert #008000 comme demandé */
             letter-spacing: -0.5px;
@@ -170,6 +169,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 30px;
+            margin-bottom: 40px;
         }
         
         .chart-container {
@@ -236,6 +236,126 @@
             height: calc(100% - 50px);
             width: 100%;
         }
+
+        .content-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .zones-container {
+            background: var(--card-gradient);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            transition: var(--transition);
+            height: 420px;
+            overflow-y: auto;
+        }
+
+        .zones-container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .zones-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .zones-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #000000;
+            border-radius: 3px;
+        }
+
+        .zones-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .zones-table th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #000000;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .zone-row {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .zone-row:hover {
+            background: #f8f9fa;
+        }
+
+        .zone-row td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.85rem;
+        }
+
+        .zone-arrow {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 0.7rem;
+            transition: transform 0.2s ease;
+        }
+
+        .zone-arrow.rotated {
+            transform: rotate(90deg);
+        }
+
+        .details-row {
+            background: #f8f9fa;
+            transition: all 0.2s ease;
+            display: none; /* Cacher les détails par défaut */
+        }
+
+        .details-content {
+            padding: 15px 20px;
+        }
+
+        .details-chart-container {
+            background: var(--card-gradient);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            height: 300px;
+            transition: var(--transition);
+        }
+
+        .details-chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .details-chart-wrapper {
+            position: relative;
+            height: calc(100% - 30px);
+            width: 100%;
+        }
+
+        .no-animals {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
         
         .no-data {
             grid-column: 1 / -1;
@@ -252,7 +372,7 @@
         }
         
         @media (max-width: 768px) {
-            .charts-container {
+            .content-row {
                 grid-template-columns: 1fr;
             }
             
@@ -267,6 +387,11 @@
             
             .container-header h2 {
                 font-size: 1.5rem;
+            }
+
+            .zones-container {
+                padding: 20px;
+                height: auto;
             }
         }
         
@@ -295,10 +420,16 @@
             animation-delay: 0.4s;
             opacity: 0;
         }
+
+        .zones-container {
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
     </style>
     <body>
         <div class="container-header">
-            <h2>Tableau de bord des statistiques</h2>
+            <h1>Tableau de bord des statistiques</h1>
             <i class="fas fa-chart-line" style="font-size: 1.8rem; color: #008000;"></i>
         </div>
     
@@ -334,7 +465,7 @@
             </div>
         </div>
     
-        <div class="charts-container">
+        <div class="content-row">
             <div class="chart-container">
                 <div class="chart-header">
                     <h3>Répartition des appareils par animal</h3>
@@ -349,44 +480,148 @@
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
-    
-         
 
-            <div class="chart-container" id="zone-stats-container">
-                <div class="chart-header">
-                    <h3>Statistiques par zone</h3>
-                </div>
-                <div class="chart-wrapper">
-                    <div id="zone-stats-content" style="height: 100%; overflow-y: auto;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background-color: #f5f5f5;">
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Zone</th>
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Appareils actifs</th>
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Appareils inactifs</th>
-                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Total animaux</th> <!-- Nouvelle colonne -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for zone_name, stats in statistiques_zone.items %}
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">{{ zone_name }}</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #38b000;">{{ stats.actifs }}</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #d90429;">{{ stats.inactifs }}</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #ddd; color: #000000;">{{ stats.total_animaux }}</td> <!-- Nouvelle cellule pour le total -->
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            
-                        </table>
-                    </div>
-                </div>
+            <div class="zones-container">
+                <h3 class="zones-title">Statistiques par Zone</h3>
+                <table class="zones-table">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th>Appareils actifs</th>
+                            <th>Appareils inactifs</th>
+                            <th>Total animaux</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zone_name, stats in statistiques_zone.items %}
+                        <tr class="zone-row" onclick="toggleDetails('{{ forloop.counter }}', {{ stats.par_type|safe }})">
+                            <td>
+                                <span class="zone-arrow" id="arrow-{{ forloop.counter }}">▶</span>
+                                {{ zone_name }}
+                            </td>
+                            <td style="color: #38b000;">{{ stats.actifs }}</td>
+                            <td style="color: #d90429;">{{ stats.inactifs }}</td>
+                            <td>{{ stats.total_animaux }}</td>
+                        </tr>
+                        <tr class="details-row" id="details-{{ forloop.counter }}">
+                            <td colspan="4">
+                                <div class="details-content">
+                                    {% if stats.par_type %}
+                                        <div class="details-chart-container">
+                                            <div class="details-chart-wrapper">
+                                                <canvas id="zoneChart-{{ forloop.counter }}"></canvas>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="no-animals">Aucun animal détecté</div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-    
         </div>
-    
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
         <script>
+            // Tableau pour stocker les instances de Chart.js pour chaque zone
+            const zoneCharts = {};
+
+            function toggleDetails(id, animalData) {
+                const detailsRow = document.getElementById('details-' + id);
+                const arrow = document.getElementById('arrow-' + id);
+                const canvasId = 'zoneChart-' + id;
+
+                if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
+                    detailsRow.style.display = 'table-row';
+                    arrow.innerHTML = '▼';
+                    arrow.classList.add('rotated');
+
+                    // Si des données d'animaux existent, créer le diagramme circulaire
+                    if (animalData && Object.keys(animalData).length > 0) {
+                        // Détruire le chart précédent s'il existe
+                        if (zoneCharts[id]) {
+                            zoneCharts[id].destroy();
+                        }
+
+                        const labels = Object.keys(animalData);
+                        const data = Object.values(animalData);
+                        // Générer des couleurs dynamiques pour chaque animal
+                        const colors = labels.map((_, index) => {
+                            const hue = (index * 137.5) % 360; // Utiliser un ratio doré pour des couleurs variées
+                            return `hsl(${hue}, 70%, 50%)`;
+                        });
+
+                        const ctx = document.getElementById(canvasId).getContext('2d');
+                        zoneCharts[id] = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: data,
+                                    backgroundColor: colors,
+                                    borderColor: ['#fff'],
+                                    borderWidth: 3,
+                                    hoverOffset: 10
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '70%',
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 20,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle',
+                                            font: {
+                                                size: 13,
+                                                weight: '500'
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#2b2d42',
+                                        titleFont: {
+                                            size: 14,
+                                            weight: 'bold'
+                                        },
+                                        bodyFont: {
+                                            size: 13
+                                        },
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `${context.raw} capteurs`; // Afficher uniquement le nombre
+                                            }
+                                        },
+                                        padding: 12,
+                                        cornerRadius: 8
+                                    }
+                                },
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: true
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    detailsRow.style.display = 'none';
+                    arrow.innerHTML = '▶';
+                    arrow.classList.remove('rotated');
+
+                    // Détruire le chart s'il existe
+                    if (zoneCharts[id]) {
+                        zoneCharts[id].destroy();
+                        delete zoneCharts[id];
+                    }
+                }
+            }
+
             document.addEventListener("DOMContentLoaded", function () {
                 const capteursParAnimal = {
                     {% for animal, count in capteurs_par_animal.items %}
@@ -436,6 +671,16 @@
     
                 if (data.length > 0) {
                     const ctxBar = document.getElementById('barChart').getContext('2d');
+                    // Générer des couleurs dynamiques pour chaque barre
+                    const colors = labels.map((_, index) => {
+                        const hue = (index * 137.5) % 360; // Utiliser un ratio doré pour des couleurs variées
+                        return `hsl(${hue}, 70%, 50%)`;
+                    });
+                    const hoverColors = labels.map((_, index) => {
+                        const hue = (index * 137.5) % 360;
+                        return `hsl(${hue}, 70%, 40%)`; // Légèrement plus sombre pour le survol
+                    });
+
                     new Chart(ctxBar, {
                         type: 'bar',
                         data: {
@@ -443,12 +688,12 @@
                             datasets: [{
                                 label: 'Nombre de capteurs',
                                 data: data,
-                                backgroundColor: '#000000',
+                                backgroundColor: colors,
                                 borderColor: '#ffffff',
                                 borderWidth: 10,
                                 borderRadius: 8,
                                 barThickness: 40,
-                                hoverBackgroundColor: '#333333',
+                                hoverBackgroundColor: hoverColors,
                             }]
                         },
                         options: {
@@ -579,7 +824,5 @@
                 }
             });
         </script>
-
-        
     </body>  
 {% endblock %}

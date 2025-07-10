@@ -69,7 +69,7 @@
     outline: none;
     font-family: 'Segoe UI', sans-serif;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 1000;
     color: #1a1a1a;
     background-color: #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -93,9 +93,9 @@
 /* Add Button */
 .add-btn {
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
-    color: #005500;
+    color: #008000;
     padding: 10px 20px;
-    border: 2px solid #005500;
+    border: 5px solid #008000;
     border-radius: 12px;
     text-decoration: none;
     display: inline-flex;
@@ -525,7 +525,7 @@
                             <!-- Voir ce que se passe dans la zone -->
                             <div class="tooltip">
                                 <a href="{% url 'suivrebetail' user_id=zone.user.id zone_id=zone.id %}">
-                                    <img src="{% static 'images/zone.png' %}" alt="Voir la zone">
+                                    <img src="{% static 'utilisateurs/images/eye.png' %}" alt="Voir la zone">
                                 </a>
                                 <div class="tooltiptext">Suivre en direct le bétail</div>
                             </div>

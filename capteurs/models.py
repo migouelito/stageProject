@@ -353,36 +353,49 @@ class Statistiques:
             zones_utilisateur = ZoneSecurite.objects.filter(user=user)
             return Capteur.objects.filter(zone_securite__in=zones_utilisateur, actif=False).count()
         
-   
+
     @staticmethod
     def statistique_zone(user):
         """
-        Récupère le nombre de capteurs actifs, inactifs et le nombre total d'animaux
-        pour chaque zone de sécurité associée à un utilisateur (propriétaire ou sous-utilisateur).
+        Récupère les statistiques par zone : capteurs actifs, inactifs, total d'animaux
+        et décompte par type d'animal (ex: Chien, Cabri, Bœuf...).
         """
         if user.owner is None:
-            # Cas propriétaire : récupérer les zones de sécurité des sub-utilisateurs
+            # Propriétaire : toutes les zones de ses sub-utilisateurs
             utilisateurs = user.get_all_related_users()
             zones_utilisateur = ZoneSecurite.objects.filter(user__in=utilisateurs)
         else:
-            # Cas sous-utilisateur : récupérer uniquement ses zones de sécurité
+            # Sous-utilisateur : uniquement ses zones
             zones_utilisateur = ZoneSecurite.objects.filter(user=user)
 
         statistiques = {}
 
         for zone in zones_utilisateur:
-            # Compter les capteurs actifs et inactifs pour cette zone
-            capteurs_actifs = Capteur.objects.filter(zone_securite=zone, actif=True).count()
-            capteurs_inactifs = Capteur.objects.filter(zone_securite=zone, actif=False).count()
+            capteurs_zone = Capteur.objects.filter(zone_securite=zone)
 
-            # Compter le nombre total d'animaux (capteurs) pour cette zone
-            total_animaux = Capteur.objects.filter(zone_securite=zone).count()
+            # Nombre de capteurs actifs, inactifs et total
+            capteurs_actifs = capteurs_zone.filter(actif=True).count()
+            capteurs_inactifs = capteurs_zone.filter(actif=False).count()
+            total_animaux = capteurs_zone.count()
 
-            # Ajouter les statistiques de cette zone dans le dictionnaire
+            # Statistiques par type d'animal dans la zone
+            stats_animaux = (
+                capteurs_zone
+                .values('type_animal__type_animal')
+                .annotate(nombre=Count('id'))
+            )
+
+            animaux_par_type = {
+                item['type_animal__type_animal']: item['nombre']
+                for item in stats_animaux
+            }
+
+            # Résultat pour cette zone
             statistiques[zone.nom] = {
                 "actifs": capteurs_actifs,
                 "inactifs": capteurs_inactifs,
-                "total_animaux": total_animaux  # Ajout du nombre total d'animaux
+                "total_animaux": total_animaux,
+                "par_type": animaux_par_type  # 👈️ Ajout ici
             }
 
         return statistiques
