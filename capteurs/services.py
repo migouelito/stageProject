@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timezone
 from .models import ZoneSecurite
 
-def verifier_zones_en_boucle():
+'''def verifier_zones_en_boucle():
     while True:
         now = datetime.now(timezone.utc)
         zones = ZoneSecurite.objects.all()
@@ -68,6 +68,80 @@ def verifier_zones_en_boucle():
                         zone.is_pred = True
                         zone.save()
                         print(f"✅ Zone {zone.nom} : tous capteurs ok → is_pred=True")
+                        envoyer_message_alerte(zone, "Les animaux sont en sécurité.")
+                    else:
+                        zone.save()
+                        print(f"Zone {zone.nom} : is_zone=True (is_pred déjà True)")
+                else:
+                    print(f"Zone {zone.nom} : déjà marquée sécurisée")
+
+            print("-" * 50)
+
+        time.sleep(1)'''
+
+def verifier_zones_en_boucle():
+    while True:
+        now = datetime.now(timezone.utc)
+        zones = ZoneSecurite.objects.all()
+
+        for zone in zones:
+            if not zone.active_securite:
+                print(f"⏭️ Zone {zone.nom} : sécurité désactivée, ignorée.")
+                continue
+
+            capteurs = zone.capteur_set.all()
+            capteurs_a_verifier = []
+
+            for capteur in capteurs:
+                if not capteur.last_seen:
+                    print(f"🕳️ Capteur {capteur.identifiant} jamais actif → ignoré")
+                    continue
+
+                # Vérifier s’il est actif ou non (mais ne pas en tenir compte pour la sécurité)
+                if (now - capteur.last_seen).total_seconds() > 10:
+                    if capteur.actif:
+                        capteur.actif = False
+                        capteur.save()
+                        print(f"⚠️ Capteur {capteur.identifiant} devenu inactif")
+                else:
+                    if not capteur.actif:
+                        capteur.actif = True
+                        capteur.save()
+                        print(f"✅ Capteur {capteur.identifiant} redevenu actif")
+
+                # Ajouter dans tous les cas si déjà actif une fois
+                capteurs_a_verifier.append(capteur)
+
+            if not capteurs_a_verifier:
+                print(f"⚠️ Zone {zone.nom} : aucun capteur analysable → état inchangé")
+                continue
+
+            # Seule la position (is_zone) compte, même si le capteur est inactif
+            au_moins_un_hors_zone = any(not c.is_zone for c in capteurs_a_verifier)
+
+            ancien_is_zone = zone.is_zone
+            ancien_is_pred = zone.is_pred
+
+            if au_moins_un_hors_zone:
+                if zone.is_zone or zone.is_pred:
+                    zone.is_zone = False
+                    if zone.is_pred:
+                        zone.is_pred = False
+                        zone.save()
+                        print(f"❌ Zone {zone.nom} : capteur hors zone → is_pred=False")
+                        envoyer_message_alerte(zone, "Les animaux ne sont plus en sécurité.")
+                    else:
+                        zone.save()
+                        print(f"Zone {zone.nom} : is_zone=False (déjà is_pred=False)")
+                else:
+                    print(f"Zone {zone.nom} : déjà marquée non sécurisée")
+            else:
+                if not zone.is_zone or not zone.is_pred:
+                    zone.is_zone = True
+                    if not zone.is_pred:
+                        zone.is_pred = True
+                        zone.save()
+                        print(f"✅ Zone {zone.nom} : tous capteurs dans la zone → is_pred=True")
                         envoyer_message_alerte(zone, "Les animaux sont en sécurité.")
                     else:
                         zone.save()

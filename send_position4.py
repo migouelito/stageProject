@@ -23,9 +23,8 @@ async def send_positions():
                         # Données de position fixes avec type d'animal
                         position_data = {
                             "positions": [{
-                                #"tracker_id": 5002,
-                                "tracker_id": 1000,
-                                "latitude": 13.39558,
+                                "tracker_id": 2,
+                                "latitude": 12.39558,
                                 "longitude": -1.533435,
                                 "timestamp": datetime.now().isoformat(),
                                 "type_animal": "boeuf"  # Type de l’animal

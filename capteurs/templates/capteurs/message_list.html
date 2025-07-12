@@ -8,20 +8,17 @@
         <div class="header-content">
             <div class="header-title">
                 <div class="header-icon">
-                    <i class="fas fa-bell"></i>
+                    <img src="{% static 'utilisateurs/images/lettre.png' %}" alt="Alertes">
                 </div>
                 <div>
-                    <h1>Alertes de Zone</h1>
-                    <!-- <div class="header-subtitle">Système de monitoring des pâturages</div>-->
+                    <h1>Alertes des zones de securité</h1>
                 </div>
             </div>
             <div class="header-actions">
                 <div class="search-container">
-                    <i class="fas fa-search search-icon"></i>
                     <input type="text" class="search-input" placeholder="Rechercher dans les alertes..." id="searchInput">
                 </div>
-                <a href="{% url 'marquer_tout_comme_lu' %}" class="btn btn-primary">
-                    <i class="fas fa-check-double"></i>
+                <a href="{% url 'marquer_tout_comme_lu' %}" class="btn btn-success">
                     Tout marquer comme lu
                 </a>
             </div>
@@ -31,23 +28,22 @@
     <div class="stats-bar">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Total Alertes</span>
-                <div class="stat-icon" style="background: var(--primary-color);">
-                    <i class="fas fa-bell"></i>
-                </div>
+                <span class="stat-title">
+                    <img src="{% static 'utilisateurs/images/lettre.png' %}" alt="Total" class="stat-icon">
+                    Total Alertes
+                </span>
             </div>
             <div class="stat-value">{{ notifications|length }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-title">Non Lues</span>
-                <div class="stat-icon" style="background: var(--danger-color);">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
+                <span class="stat-title">
+                    <img src="{% static 'utilisateurs/images/lettre.png' %}" alt="Non lues" class="stat-icon">
+                    Non Lues
+                </span>
             </div>
-            <div class="stat-value">{{ notifications|length }}</div>
+            <div class="stat-value" id="unread-count">0</div>
         </div>
-       
     </div>
 
     <div class="alerts-container">
@@ -63,34 +59,32 @@
         <div class="alerts-list" id="alertsList">
             {% if notifications %}
                 {% for notification in notifications %}
-                    <div class="alert-item {% if not notification.is_read %}unread{% endif %}" data-id="{{ notification.id }}">
+                    <div class="alert-item {% if not notification.is_read %}unread{% endif %} {% if 'plus' in notification.corps_message.lower %}alert-critical{% else %}alert-normal{% endif %}" data-id="{{ notification.id }}">
                         <div class="alert-content">
-                            <div class="alert-icon {% if 'plus' in notification.corps_message.lower %}danger{% else %}success{% endif %}">
-                                {% if "plus" in notification.corps_message.lower %}
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                {% else %}
-                                    <i class="fas fa-check-circle"></i>
-                                {% endif %}
-                            </div>
                             <div class="alert-body">
                                 <div class="alert-header">
-                                    <div class="alert-zone">{{ notification.zone.nom }}</div>
-                                    <div class="alert-time">{{ notification.date_heure|date:"d/m/Y H:i" }}</div>
+                                    <div class="alert-zone">
+                                        <img src="{% static 'utilisateurs/images/lettre.png' %}" alt="Zone" class="{% if 'plus' in notification.corps_message.lower %}icon-red{% else %}icon-green{% endif %}">
+                                        {{ notification.zone.nom }}
+                                    </div>
+                                    <div class="alert-time">
+                                        {{ notification.date_heure|date:"d/m/Y H:i" }}
+                                    </div>
                                 </div>
                                 <div class="alert-message">{{ notification.corps_message }}</div>
                                 <div class="alert-actions">
-                                    {% if "plus" in notification.corps_message.lower %}
-                                        <span class="alert-badge badge-danger">
-                                            <i class="fas fa-exclamation-triangle"></i> Critique
-                                        </span>
-                                    {% endif %}
+                                    <span class="alert-badge">
+                                        {% if "plus" in notification.corps_message.lower %}
+                                            Critique
+                                        {% else %}
+                                            Normal
+                                        {% endif %}
+                                    </span>
                                     {% if notification.is_read %}
-                                        <span class="alert-badge badge-read">
-                                            <i class="fas fa-check-double"></i> Lu
-                                        </span>
+                                        <span class="alert-badge">Lu</span>
                                     {% else %}
-                                        <a href="{% url 'marquer_comme_lu' notification.id %}" class="btn btn-outline btn-sm">
-                                            <i class="fas fa-eye"></i> Marquer comme lu
+                                        <a href="{% url 'marquer_comme_lu' notification.id %}" class="btn btn-success btn-sm">
+                                            Marquer comme lu
                                         </a>
                                     {% endif %}
                                 </div>
@@ -100,9 +94,6 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-bell-slash"></i>
-                    </div>
                     <div class="empty-title">Aucune alerte trouvée</div>
                     <div class="empty-text">Il n'y a aucune notification pour le moment.</div>
                 </div>
@@ -113,20 +104,19 @@
 
 <style>
     :root {
-        --primary-color: #16a34a;
-        --primary-light: #22c55e;
-        --primary-dark: #15803d;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --warning-color: #f59e0b;
-        --info-color: #06b6d4;
         --text-primary: #1a1a1a;
         --text-secondary: #4a5568;
         --text-light: #718096;
         --bg-primary: #ffffff;
         --bg-secondary: #f7fafc;
-        --bg-tertiary: #edf2f7;
         --border-color: #e2e8f0;
+        --success-color: #22c55e;
+        --success-dark: #16a34a;
+        --success-light: #dcfce7;
+        --critical-color: #ef4444;
+        --critical-light: #fef2f2;
+        --normal-color: #22c55e;
+        --normal-light: #f0fdf4;
         --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -138,8 +128,8 @@
     }
 
     .alert-system {
-        max-width: 1200px;
-        margin: 0 auto;
+        width: 100%;
+        margin: 0;
         padding: 20px;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         color: var(--text-primary);
@@ -147,25 +137,14 @@
     }
 
     .header {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(34, 197, 94, 0.2);
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-xl);
         padding: 24px 32px;
         margin-bottom: 24px;
         box-shadow: var(--shadow-xl);
         position: relative;
         overflow: hidden;
-    }
-
-    .header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--success-color));
     }
 
     .header-content {
@@ -185,31 +164,25 @@
     .header-icon {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        background: var(--bg-secondary);
         border-radius: var(--radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-size: 18px;
-        box-shadow: 0 0 20px rgba(22, 163, 74, 0.3);
+        box-shadow: var(--shadow-md);
+        border: 2px solid var(--border-color);
+    }
+
+    .header-icon img {
+        width: 20px;
+        height: 20px;
     }
 
     .header h1 {
-        font-size: 28px;
+        font-size: 40px;
         font-weight: 1000;
-        color: #008000/*var(--text-primary);*/
+        color:var(--normal-color);
         margin: 0;
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .header-subtitle {
-        font-size: 14px;
-        color: var(--text-secondary);
-        margin-top: 4px;
     }
 
     .header-actions {
@@ -224,7 +197,7 @@
 
     .search-input {
         width: 320px;
-        padding: 12px 16px 12px 44px;
+        padding: 12px 16px;
         border: 2px solid var(--border-color);
         border-radius: var(--radius-lg);
         font-size: 14px;
@@ -235,26 +208,16 @@
 
     .search-input:focus {
         outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1), var(--shadow-md);
+        border-color: var(--text-secondary);
+        box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1), var(--shadow-md);
         transform: translateY(-1px);
-    }
-
-    .search-icon {
-        position: absolute;
-        left: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-light);
-        font-size: 16px;
     }
 
     .btn {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
         padding: 12px 20px;
-        border: none;
+        border: 2px solid var(--border-color);
         border-radius: var(--radius-lg);
         font-size: 14px;
         font-weight: 600;
@@ -264,42 +227,32 @@
         white-space: nowrap;
         position: relative;
         overflow: hidden;
+        background: var(--bg-primary);
+        color: var(--text-primary);
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    .btn-success {
+        background: var(--success-color);
         color: white;
+        border-color: var(--success-color);
         box-shadow: var(--shadow-md);
     }
 
-    .btn-primary::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.6s;
-    }
-
-    .btn-primary:hover {
+    .btn-success:hover {
+        background: var(--success-dark);
+        border-color: var(--success-dark);
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
     }
 
-    .btn-primary:hover::before {
-        left: 100%;
-    }
-
     .btn-outline {
         background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
+        color: var(--text-secondary);
+        border: 2px solid var(--text-secondary);
     }
 
     .btn-outline:hover {
-        background: var(--primary-color);
+        background: var(--text-secondary);
         color: white;
         transform: translateY(-1px);
     }
@@ -317,9 +270,8 @@
     }
 
     .stat-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(34, 197, 94, 0.1);
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
         padding: 20px;
         box-shadow: var(--shadow-md);
@@ -328,32 +280,16 @@
         overflow: hidden;
     }
 
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-lg);
-        border-color: rgba(34, 197, 94, 0.3);
-    }
-
-    .stat-card:hover::before {
-        transform: scaleX(1);
+        border-color: var(--text-secondary);
     }
 
     .stat-header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        gap: 8px;
         margin-bottom: 8px;
     }
 
@@ -363,18 +299,15 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .stat-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 14px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        width: 14px;
+        height: 14px;
+        opacity: 0.8;
     }
 
     .stat-value {
@@ -384,28 +317,17 @@
     }
 
     .alerts-container {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(34, 197, 94, 0.2);
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-xl);
         overflow: hidden;
         position: relative;
     }
 
-    .alerts-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--success-color), var(--primary-color), var(--primary-light));
-    }
-
     .alerts-header {
         padding: 24px 32px;
-        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+        background: var(--bg-secondary);
         border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: center;
@@ -427,13 +349,14 @@
         font-weight: 500;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
     }
 
     .filter-btn.active,
     .filter-btn:hover {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        background: var(--text-secondary);
         color: white;
-        border-color: var(--primary-color);
+        border-color: var(--text-secondary);
         transform: translateY(-1px);
         box-shadow: var(--shadow-md);
     }
@@ -442,7 +365,7 @@
         max-height: 600px;
         overflow-y: auto;
         scrollbar-width: thin;
-        scrollbar-color: var(--primary-color) transparent;
+        scrollbar-color: var(--text-secondary) transparent;
     }
 
     .alerts-list::-webkit-scrollbar {
@@ -454,7 +377,7 @@
     }
 
     .alerts-list::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, var(--primary-color), var(--primary-light));
+        background: var(--text-secondary);
         border-radius: 3px;
     }
 
@@ -469,28 +392,30 @@
     }
 
     .alert-item:hover {
-        background: linear-gradient(90deg, rgba(22, 163, 74, 0.02), rgba(34, 197, 94, 0.05), rgba(22, 163, 74, 0.02));
+        background: var(--bg-secondary);
     }
 
     .alert-item.unread {
-        background: linear-gradient(90deg, rgba(22, 163, 74, 0.05) 0%, transparent 100%);
-        border-left: 4px solid var(--primary-color);
+        background: var(--bg-secondary);
+        border-left: 4px solid var(--text-secondary);
     }
 
-    .alert-item.unread::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(180deg, var(--primary-color), var(--success-color));
-        animation: pulse-green 2s infinite;
+    .alert-item.alert-normal {
+        background: var(--normal-light);
+        border-left: 4px solid var(--normal-color);
     }
 
-    @keyframes pulse-green {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+    .alert-item.alert-critical {
+        background: var(--critical-light);
+        border-left: 4px solid var(--critical-color);
+    }
+
+    .alert-item.alert-normal:hover {
+        background: var(--success-light);
+    }
+
+    .alert-item.alert-critical:hover {
+        background: var(--critical-light);
     }
 
     .alert-content {
@@ -498,47 +423,6 @@
         display: flex;
         gap: 16px;
         align-items: flex-start;
-    }
-
-    .alert-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 18px;
-        flex-shrink: 0;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .alert-icon.danger {
-        background: linear-gradient(135deg, var(--danger-color), #dc2626);
-        animation: pulse-danger 2s infinite;
-    }
-
-    .alert-icon.success {
-        background: linear-gradient(135deg, var(--success-color), var(--primary-color));
-    }
-
-    .alert-icon.warning {
-        background: linear-gradient(135deg, var(--warning-color), #d97706);
-    }
-
-    .alert-icon.info {
-        background: linear-gradient(135deg, var(--info-color), #0891b2);
-    }
-
-    @keyframes pulse-danger {
-        0%, 100% { 
-            transform: scale(1); 
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-        50% { 
-            transform: scale(1.05); 
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
-        }
     }
 
     .alert-body {
@@ -558,16 +442,28 @@
         font-size: 16px;
         font-weight: 600;
         color: var(--text-primary);
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .alert-zone img {
+        width: 14px;
+        height: 14px;
+        opacity: 0.8;
+    }
+
+    .icon-green {
+        filter: hue-rotate(120deg); /* Vert */
+    }
+
+    .icon-red {
+        filter: hue-rotate(0deg); /* Rouge */
     }
 
     .alert-time {
         font-size: 12px;
         color: var(--text-light);
-        white-space: nowrap;
     }
 
     .alert-message {
@@ -584,46 +480,22 @@
     }
 
     .alert-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
         padding: 4px 8px;
         border-radius: var(--radius-sm);
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-
-    .badge-danger {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger-color);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .badge-success {
-        background: rgba(22, 163, 74, 0.1);
-        color: var(--primary-color);
-        border: 1px solid rgba(22, 163, 74, 0.2);
-    }
-
-    .badge-read {
-        background: rgba(107, 114, 128, 0.1);
+        background: var(--bg-secondary);
         color: var(--text-secondary);
-        border: 1px solid rgba(107, 114, 128, 0.2);
+        border: 1px solid var(--border-color);
+        text-align: center;
     }
 
     .empty-state {
         text-align: center;
         padding: 80px 32px;
         color: var(--text-light);
-    }
-
-    .empty-icon {
-        font-size: 64px;
-        margin-bottom: 16px;
-        opacity: 0.5;
-        color: var(--primary-color);
     }
 
     .empty-title {
@@ -665,6 +537,10 @@
         .stats-bar {
             grid-template-columns: repeat(2, 1fr);
         }
+        
+        .filters {
+            flex-wrap: wrap;
+        }
     }
 </style>
 
@@ -680,22 +556,15 @@
             
             const matches = zone.includes(input) || time.includes(input) || content.includes(input);
             alert.style.display = matches ? "" : "none";
-            
-            if (matches && input.length > 0) {
-                alert.style.transform = "scale(1.02)";
-                alert.style.boxShadow = "0 8px 25px rgba(22, 163, 74, 0.15)";
-            } else {
-                alert.style.transform = "scale(1)";
-                alert.style.boxShadow = "none";
-            }
         });
+
+        updateUnreadCount();
     }
 
     function filterAlerts(filter) {
         const alerts = document.querySelectorAll(".alert-item");
         const filterBtns = document.querySelectorAll(".filter-btn");
         
-        // Mettre à jour les boutons actifs
         filterBtns.forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
 
@@ -707,7 +576,7 @@
                     show = alert.classList.contains('unread');
                     break;
                 case 'critical':
-                    show = alert.querySelector('.badge-danger') !== null;
+                    show = alert.querySelector('.alert-message').innerText.toLowerCase().includes('plus');
                     break;
                 case 'today':
                     const timeText = alert.querySelector('.alert-time').innerText;
@@ -719,12 +588,18 @@
             
             alert.style.display = show ? "" : "none";
         });
+
+        updateUnreadCount();
     }
 
-    // Event listeners
+    function updateUnreadCount() {
+        const unreadAlerts = document.querySelectorAll(".alert-item.unread:not([style*='display: none'])");
+        const unreadCountElement = document.getElementById("unread-count");
+        unreadCountElement.textContent = unreadAlerts.length;
+    }
+
     document.getElementById('searchInput').addEventListener('input', searchAlerts);
 
-    // Animation d'entrée
     document.addEventListener('DOMContentLoaded', function() {
         const alertItems = document.querySelectorAll('.alert-item');
         alertItems.forEach((item, index) => {
@@ -737,7 +612,6 @@
             }, index * 100);
         });
 
-        // Animation des stats
         const statCards = document.querySelectorAll('.stat-card');
         statCards.forEach((card, index) => {
             card.style.opacity = '0';
@@ -748,6 +622,8 @@
                 card.style.transform = 'translateY(0)';
             }, index * 150);
         });
+
+        updateUnreadCount();
     });
 </script>
 

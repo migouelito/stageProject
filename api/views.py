@@ -233,36 +233,44 @@ from capteurs.models import ZoneSecurite
 from rest_framework.permissions import IsAuthenticated
 import json
 
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from capteurs.models import ZoneSecurite, Capteur
+
+import json
 @api_view(['GET'])
 def suivre_betail_api(request):
-    user = request.user  # Récupère l'utilisateur authentifié via le token
+    user = request.user
 
     if not user.is_authenticated:
         return Response({'error': 'Authentication required'}, status=401)
 
-    # Par défaut : ses propres zones
     related_users = [user]
-
-    # Si l'utilisateur est un parent (donc sans owner)
     if not user.owner:
         related_users += list(user.sub_users.all())
 
-    # On filtre les zones selon l'utilisateur ou ses sub-users (si c’est un parent)
     zones = ZoneSecurite.objects.filter(user__in=related_users)
 
     zones_data = []
     for zone in zones:
-        # Conversion du champ 'coins' si nécessaire
         try:
             coins = json.loads(zone.coins) if zone.coins else None
         except json.JSONDecodeError:
             coins = None
 
+        capteurs = Capteur.objects.filter(zone_securite=zone)
+        capteurs_data = list(capteurs.values('identifiant'))
+
+        # 👉 Ajouter le nom de la zone à chaque capteur
+        for capteur in capteurs_data:
+            capteur['zone_nom'] = zone.nom
+
         zones_data.append({
             'id': zone.id,
-            'nom':zone.nom,
+            'nom': zone.nom,
             'forme': zone.forme,
-            'statut':zone.active_securite,
+            'statut': zone.active_securite,
             'latitude': zone.latitude,
             'longitude': zone.longitude,
             'rayon': zone.rayon,
@@ -274,10 +282,14 @@ def suivre_betail_api(request):
             'coin3_lon': zone.coin3_lon,
             'coin4_lat': zone.coin4_lat,
             'coin4_lon': zone.coin4_lon,
-            'coins': coins,  # Données de coins converties
+            'coins': coins,
+            'capteurs': capteurs_data,
         })
 
     return Response({'zones_data': zones_data})
+
+
+
 
 
 from rest_framework.views import APIView

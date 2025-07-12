@@ -482,11 +482,13 @@
             {% for utilisateur in users %}
                 <tr>
                     <td>
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                             width="20" height="20" fill="currentColor" 
-                             viewBox="0 0 16 16" style="margin-right: 8px; vertical-align: middle;">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 100-6 3 3 0 000 6z"/>
-                        </svg>
+                     <svg xmlns="http://www.w3.org/2000/svg" 
+     width="40" height="40" fill="currentColor" 
+     viewBox="0 0 16 16" style="margin-right: 8px; vertical-align: middle;">
+  <path d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37c.324-.508.693-.97 1.1-1.384C4.935 10.327 6.386 10 8 10c1.614 0 3.065.327 4.368.986.407.414.776.876 1.1 1.384A7 7 0 0 0 8 1z"/>
+</svg>
+
                         {{ utilisateur.username }}
                     </td>
                     <td>{{ utilisateur.last_name }}</td>

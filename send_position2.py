@@ -5,7 +5,7 @@ from datetime import datetime
 
 async def send_positions():
     # Connexion au WebSocket avec user_id dans l'URL
-    uri = "wss://stageproject.onrender.com/ws/positions/"
+    uri = "wss://campus-hawaii-holly-larry.trycloudflare.com/ws/positions/"
     reconnect_delay = 5  # Délai de reconnexion en secondes
     
     while True:  # Boucle de reconnexion principale
@@ -23,7 +23,8 @@ async def send_positions():
                         # Données de position fixes avec type d'animal
                         position_data = {
                             "positions": [{
-                                "tracker_id": 5001,
+                                #"tracker_id": 5001,
+                                "tracker_id": 1005,
                                 "latitude": 12.39558,
                                 "longitude": -1.533435,
                                 "timestamp": datetime.now().isoformat(),
