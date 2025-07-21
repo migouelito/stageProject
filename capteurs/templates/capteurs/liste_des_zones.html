@@ -470,6 +470,55 @@
         padding: 8px 16px;
     }
 }
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;  /* largeur augmentée */
+  height: 34px; /* hauteur augmentée */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 🔴 Rouge vif par défaut */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ff1e00;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* ⚪ Rond du switch */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;  /* diamètre du rond augmenté */
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* ✅ Vert vif quand activé */
+input:checked + .slider {
+  background-color: #008000;
+}
+
+/* Déplacement du rond quand activé */
+input:checked + .slider:before {
+  transform: translateX(26px); /* déplacement ajusté */
+}
+
+
 </style>
 
 <div class="container-header">
@@ -492,7 +541,7 @@
                 <th>Nom de la zone</th>
                 <th>Description</th>
                 <th>Etat de la sécurité</th>
-                <th>Éleveur</th>
+                <th>Employé</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -501,19 +550,24 @@
                 <tr>
                     <td>{{ zone.nom }}</td>
                     <td>{{ zone.description }}</td>
-                    <td>
-                        {% if zone.active_securite %}
-                            <span style="display: flex; align-items: center;">
-                                <span style="width: 18px; height: 18px; background-color: #4CAF50; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
-                                Activée
-                            </span>
-                        {% else %}
-                            <span style="display: flex; align-items: center;">
-                                <span style="width: 18px; height: 18px; background-color: #ff0000; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
-                                Désactivée
-                            </span>
-                        {% endif %}
-                    </td>
+                  <td>
+<form method="post" action="{% url 'changer_etat_zone' zone.id %}">
+    {% csrf_token %}
+    <span style="margin-right: 8px; font-weight: bold; color: {% if zone.active_securite %}green{% else %}red{% endif %};">
+        {% if zone.active_securite %}
+            Active
+        {% else %}
+            Désactivée
+        {% endif %}
+    </span>
+    <label class="switch">
+        <input type="checkbox" name="active" onchange="this.form.submit()" {% if zone.active_securite %}checked{% endif %}>
+        <span class="slider round"></span>
+    </label>
+</form>
+
+
+
                     <td>
                         <svg xmlns="http://www.w3.org/2000/svg" 
                                 width="40" height="40" fill="currentColor" 

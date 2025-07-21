@@ -5,21 +5,15 @@
 {% block content %}
 
 <div class="animal-page-container">
-    <div class="animal-header-section">
-        <div class="animal-header-content">
-            <h1 class="animal-page-title">Liste des catégories d'animaux</h1>
-            <p class="animal-page-subtitle">Gérez et suivez les types d'animaux dans votre exploitation</p>
+    <div class="container-header">
+        <div class="header-content">
+            <h1>Liste des catégories d'animaux</h1>
         </div>
-    </div>
-
-
-
-    <div class="animal-search-section">
-        <div class="animal-search-container">
-            <input type="text" id="searchInput" class="animal-search-input" placeholder="Rechercher une catégorie..." onkeyup="searchAnimals()">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher une catégorie..." onkeyup="searchAnimals()">
         </div>
-        <a href="#" class="animal-add-btn" id="showAddFormBtn">
-            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un animal" class="animal-icon"> Ajouter un animal
+        <a href="#" class="add-btn" id="showAddFormBtn">
+            <img src="{% static 'utilisateurs/images/ajouter.png' %}" alt="Ajouter un animal" class="icon"> Ajouter un animal
         </a>
     </div>
 
@@ -123,112 +117,112 @@
     box-sizing: border-box;
 }
 
-.animal-header-section {
-    background: var(--animal-gradient-primary);
-    border-radius: 16px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.animal-header-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-}
-
-.animal-header-content {
-    position: relative;
-    z-index: 1;
-}
-
-.animal-page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.3rem;
-    letter-spacing: -0.025em;
-}
-
-.animal-page-subtitle {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 400;
-}
-
-.animal-messages-container {
-    margin-bottom: 2rem;
-}
-
-
-
-.animal-search-section {
+/* Styles pour container-header */
+.container-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
+    margin-bottom: 20px;
+    position: relative;
+    flex-wrap: wrap;
 }
 
-.animal-search-container {
+.container-header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 6px;
+    background: #000000;
+    animation: loadBar 1s forwards;
+}
+
+@keyframes loadBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.header-content h1 {
+    font-size: 30px;
+    font-weight: 1000;
+    color: var(--animal-primary-color);
+    letter-spacing: 1px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 0 0 10px 0;
+}
+
+
+.search-container {
     flex-grow: 1;
-    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
 }
 
-.animal-search-input {
+#searchInput {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
+    max-width: 400px;
+    padding: 10px 40px 10px 15px;
     border: 1px solid var(--animal-border-color);
-    font-size: 0.95rem;
-    color: var(--animal-text-primary);
-    background: white;
-    box-shadow: var(--animal-shadow-light);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23005500' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 20px;
-    transition: all 0.3s ease;
-}
-
-.animal-search-input:focus {
-    border-color: var(--animal-primary-color);
-    box-shadow: 0 0 8px rgba(0, 128, 0, 0.3);
+    border-radius: 8px;
     outline: none;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 1000;
+    color: var(--animal-text-primary);
+    background-color: #fff;
+    box-shadow: var(--animal-shadow-light);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23005500' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    transition: all 0.3s ease-in-out;
 }
 
-.animal-add-btn {
+#searchInput::placeholder {
+    color: var(--animal-text-secondary);
+    font-style: italic;
+}
+
+#searchInput:focus {
+    border-color: var(--animal-primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.25);
+}
+
+.add-btn {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    color: var(--animal-primary-color);
+    padding: 8px 16px;
+    border: 5px solid var(--animal-primary-color);
+    border-radius: 10px;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    padding: 0.75rem 1.5rem;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--animal-shadow-medium);
+}
+
+.add-btn:hover {
     background: var(--animal-gradient-primary);
     color: white;
-    border-radius: 12px;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 600;
-    box-shadow: var(--animal-shadow-medium);
-    transition: all 0.3s ease;
-}
-
-.animal-add-btn:hover {
-    transform: translateY(-2px);
     box-shadow: var(--animal-shadow-large);
+    transform: translateY(-2px);
 }
 
-.animal-icon {
+.add-btn .icon {
     width: 20px;
     height: 20px;
-    margin-right: 0.5rem;
+    margin-right: 8px;
+    fill: currentColor;
 }
 
+/* Styles pour les cartes (inchangés) */
 .animal-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -386,6 +380,7 @@
     border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
 }
 
+/* Styles pour les modals (inchangés) */
 .animal-modal {
     display: none;
     position: fixed;
@@ -564,7 +559,7 @@
     box-shadow: var(--animal-shadow-light);
 }
 
-/* Styles pour le modal de suppression (alignés avec le template précédent) */
+/* Styles pour le modal de suppression */
 .modal {
     display: none;
     position: fixed;
@@ -690,68 +685,41 @@
     transform: translateY(-2px);
 }
 
-@media (max-width: 768px) {
-    .animal-page-container {
-        padding: 1rem;
+@media (max-width: 400px) {
+    .container-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 
-    .animal-header-section {
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .animal-page-title {
-        font-size: 1.5rem;
+    .header-content h1 {
+        font-size: 28px;
     }
 
     .animal-page-subtitle {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
     }
 
-    .animal-search-section {
-        flex-direction: column;
-        align-items: stretch;
+    .search-container {
+        width: 100%;
+        padding: 5px;
     }
 
-    .animal-search-container {
-        max-width: 100%;
+    #searchInput {
+        max-width: none;
+        font-size: 11px;
+        padding: 8px 35px 8px 12px;
     }
 
-    .animal-cards-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 11px;
+        padding: 6px 12px;
     }
 
-    .animal-card {
-        padding: 1.5rem;
-    }
-
-    .animal-image-container {
-        width: 80px;
-        height: 80px;
-        margin-right: 1rem;
-    }
-
-    .animal-title {
-        font-size: 1.25rem;
-    }
-
-    .animal-comment {
-        font-size: 0.85rem;
-    }
-
-    .animal-actions {
-        gap: 0.75rem;
-    }
-
-    .animal-action-btn {
-        width: 40px;
-        height: 40px;
-    }
-
-    .animal-action-icon {
-        width: 20px;
-        height: 20px;
+    .animal-page-container {
+        padding: 1rem;
     }
 
     .animal-modal-content {
@@ -777,10 +745,6 @@
         font-size: 13px;
         padding: 8px 16px;
     }
-
-    .animal-modal-actions {
-        justify-content: center;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -796,6 +760,10 @@
     .animal-card:hover {
         transform: none;
     }
+
+    .container-header::before {
+        animation: none;
+    }
 }
 </style>
 
@@ -804,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const addButton = document.getElementById('showAddFormBtn');
     if (addButton) {
         addButton.addEventListener('click', function (event) {
-            event.preventDefault(); // Empêche le comportement par défaut du lien
+            event.preventDefault();
             const modal = document.getElementById('addModal');
             modal.classList.add('show');
             document.getElementById('animalForm').reset();
@@ -818,7 +786,6 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error("L'élément avec l'ID 'showAddFormBtn' n'a pas été trouvé.");
     }
 
-    // Edit Modal
     window.editAnimal = function (animalId) {
         const modal = document.getElementById('addModal');
         modal.classList.add('show');
@@ -839,7 +806,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error("Erreur lors de la récupération de l'animal :", error));
     };
 
-    // Close Add/Edit Modal
     const closeModalBtn = document.getElementById('closeModalBtn');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function () {
@@ -847,7 +813,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Delete Modal
     let currentAnimalId = null;
 
     window.showDeleteModal = function (animalId) {
@@ -892,7 +857,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Close modals when clicking outside
     window.addEventListener('click', function (event) {
         const addModal = document.getElementById('addModal');
         const deleteModal = document.getElementById('deleteModal');
@@ -900,7 +864,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.target === deleteModal) deleteModal.classList.remove('show');
     });
 
-    // Search Function
     window.searchAnimals = function () {
         const input = document.getElementById("searchInput").value.toLowerCase();
         const cards = document.querySelectorAll(".animal-card");

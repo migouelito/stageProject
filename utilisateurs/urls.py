@@ -28,6 +28,7 @@ urlpatterns = [
     path('utilisateurs/modifier_utilisateur/<int:pk>/', ModifierUtilisateurView.as_view(), name='modifier_utilisateur'),
     path('utilisateurs/modifier_profil/<int:pk>/', views.modifierProfil.as_view(), name='modifier_profil'),
     path('utilisateurs/supprimer_utilisateur/<int:user_id>/', views.delete_user, name='supprimer_utilisateur'),
+    path('utilisateurs/changer_etat_user/<int:user_id>',views.changer_etat_user,name='changer_etat_user'),
 
 
 

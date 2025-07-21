@@ -453,6 +453,54 @@
             padding: 8px 16px;
         }
     }
+
+
+    .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;  /* largeur augmentée */
+  height: 34px; /* hauteur augmentée */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 🔴 Rouge vif par défaut */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ff1e00;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* ⚪ Rond du switch */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;  /* diamètre du rond augmenté */
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* ✅ Vert vif quand activé */
+input:checked + .slider {
+  background-color: #008000;
+}
+
+/* Déplacement du rond quand activé */
+input:checked + .slider:before {
+  transform: translateX(26px); /* déplacement ajusté */
+}
+
 </style>
 
 <div class="container-fluid">
@@ -483,11 +531,11 @@
                 <tr>
                     <td>
                      <svg xmlns="http://www.w3.org/2000/svg" 
-     width="40" height="40" fill="currentColor" 
-     viewBox="0 0 16 16" style="margin-right: 8px; vertical-align: middle;">
-  <path d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37c.324-.508.693-.97 1.1-1.384C4.935 10.327 6.386 10 8 10c1.614 0 3.065.327 4.368.986.407.414.776.876 1.1 1.384A7 7 0 0 0 8 1z"/>
-</svg>
+                        width="40" height="40" fill="currentColor" 
+                        viewBox="0 0 16 16" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37c.324-.508.693-.97 1.1-1.384C4.935 10.327 6.386 10 8 10c1.614 0 3.065.327 4.368.986.407.414.776.876 1.1 1.384A7 7 0 0 0 8 1z"/>
+                    </svg>
 
                         {{ utilisateur.username }}
                     </td>
@@ -496,11 +544,25 @@
                     <td>{{ utilisateur.telephone }}</td>
                     <td>{{ utilisateur.email }}</td>
                     <td>
-                        {% if utilisateur.is_active %}
-                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#28a745;"></span>
-                        {% else %}
-                            <span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:#dc3545;"></span>
-                        {% endif %}
+                    <form method="post" action="{% url 'changer_etat_user' utilisateur.id %}">
+                        {% csrf_token %}
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <span style="margin-bottom: 4px; font-weight: bold; color: {% if utilisateur.is_active %}#28a745{% else %}#dc3545{% endif %};">
+                                {% if utilisateur.is_active %}
+                                    Active
+                                {% else %}
+                                    Désactivé
+                                {% endif %}
+                            </span>
+                            <label class="switch">
+                                <input type="checkbox" name="active" onchange="this.form.submit()" {% if utilisateur.is_active %}checked{% endif %}>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </form>
+
+
+
                     </td>
                     <td class="actions">
                         <div class="tooltip">

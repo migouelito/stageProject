@@ -791,8 +791,15 @@ def supprimer_capteurs_zone(request, zone_id):
     capteurs_associes.delete()
 
     messages.success(request, f"{nb} capteur(s) associés à la zone {zone.nom} ont été supprimés.")
-    return redirect('liste_des_zones')
+    return redirect('zonesaveccapteurs')
 
+#methode pour activer et desactiver la zone
+@login_required
+def changer_etat_zone(request, zone_id):
+    zone = get_object_or_404(ZoneSecurite, id=zone_id)
+    zone.active_securite = not zone.active_securite
+    zone.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 from django.db import transaction

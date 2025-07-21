@@ -4,7 +4,7 @@ from django.db import models
 
 class User(AbstractUser):
     username = models.CharField(max_length=150, unique=False)
-    telephone = models.CharField(max_length=50, unique=True)
+    telephone = models.CharField(max_length=8, unique=True)
     email = models.EmailField(unique=True)
     owner = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='sub_users')
 

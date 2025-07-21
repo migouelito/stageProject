@@ -81,6 +81,16 @@ class CustomLogoutView(LogoutView):
         return redirect(self.next_page)
 
 
+#activer et desactivé un user
+from django.views.decorators.http import require_POST
+@require_POST
+def changer_etat_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_active = not user.is_active  # Inverse l'état
+    user.save()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
 from django.views.generic import ListView
 
 

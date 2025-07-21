@@ -23,6 +23,7 @@ urlpatterns = [
     path('capteurs/delete_message/<int:message_id>/',supprimer_message, name='supprimer_message'),
     path('messages/supprimer_tout_les_messages/', supprimer_tout_les_messages,name='supprimer_tout_les_messages'),
 
+
     path('zone/liste_des_zones', ListeDesZones.as_view(),name="liste_des_zones"),
     path("zones/zone_avec_capteurs/",ListeDesZonesAvecCapteurs.as_view(),name="zonesaveccapteurs"),
     path("zone/creer_zone", creer_zone, name="creer_zone"),
@@ -39,6 +40,7 @@ urlpatterns = [
     path('zone/securite/<int:user_id>/<int:zone_id>/', ZoneSecuriteView.as_view(), name="zone_securite"),
     path('zone/localisation_betail', ZoneSecuriteView.as_view(),name="localisation_betail"),
     path('zones/updateposition/<int:zone_id>/', update_position, name='update_position'),
+    path('zones/securite/<int:zone_id>/',changer_etat_zone,name='changer_etat_zone'),
 
     #route api
     path('api/position/', recevoir_position, name='recevoir_position'),

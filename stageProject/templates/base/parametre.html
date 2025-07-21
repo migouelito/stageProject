@@ -5,9 +5,9 @@
 {% block content %}
 
 <div class="about-page-container">
-    <div class="about-header-section">
-        <div class="about-header-content">
-            <h1 class="about-page-title">À propos de l'application</h1>
+    <div class="container-header">
+        <div class="header-content">
+            <h1>À propos de l'application</h1>
             <p class="about-page-subtitle">Découvrez les fonctionnalités de notre plateforme de gestion du bétail</p>
         </div>
     </div>
@@ -164,46 +164,48 @@
         box-sizing: border-box;
     }
 
-    .about-header-section {
-        background: var(--about-gradient-primary);
-        border-radius: 16px;
-        padding: 1.5rem 2rem;
-        margin-bottom: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
+    /* Styles pour container-header */
+ .container-header {
+    margin-bottom: 20px;
+    position: relative;
+}
 
-    .about-header-section::before {
+
+    .container-header::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
         bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
+        left: 0;
+        width: 0%;
+        height: 6px;
+        background:#000000;
+        animation: loadBar 1s forwards;
     }
 
-    .about-header-content {
-        position: relative;
-        z-index: 1;
+    @keyframes loadBar {
+        0% { width: 0%; }
+        100% { width: 100%; }
     }
 
-    .about-page-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 0.3rem;
-        letter-spacing: -0.025em;
+    .header-content h1 {
+        font-size: 30px;
+        font-weight: 1000;
+        color: var(--about-primary-color);
+        letter-spacing: 1px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 0 0 10px 0;
+    
     }
 
     .about-page-subtitle {
         font-size: 1rem;
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--about-text-secondary);
         font-weight: 400;
+        margin: 0;
+        
     }
 
+    /* Styles pour les messages (inchangés) */
     .about-messages-container {
         margin-bottom: 2rem;
     }
@@ -225,6 +227,7 @@
         border-radius: 50%;
     }
 
+    /* Styles pour les cartes (inchangés) */
     .about-features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -370,22 +373,23 @@
         background: #008000;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 400px) {
         .about-page-container {
             padding: 1rem;
         }
 
-        .about-header-section {
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 1.5rem;
+        .container-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
         }
 
-        .about-page-title {
-            font-size: 1.5rem;
+        .header-content h1 {
+            font-size: 28px;
         }
 
         .about-page-subtitle {
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .about-features-grid {
@@ -417,6 +421,10 @@
 
         .about-feature-card:hover {
             transform: none;
+        }
+
+        .container-header::before {
+            animation: none;
         }
     }
 </style>

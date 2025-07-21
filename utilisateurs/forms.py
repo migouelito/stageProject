@@ -174,8 +174,8 @@ class CreationUserForm(UserCreationForm):
         telephone = self.cleaned_data.get('telephone')
         if not telephone.isdigit():
             raise ValidationError("Le numéro de téléphone doit contenir uniquement des chiffres.")
-        if len(telephone) < 8:
-            raise ValidationError("Le numéro de téléphone est trop court.")
+        if len(telephone)!= 8 :
+            raise ValidationError("Le numéro de téléphone doit être de 8 chiffres.")
         return telephone
 
     def clean_first_name(self):
