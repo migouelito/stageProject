@@ -183,19 +183,19 @@ class ModifierCapteurView(UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        try:
-            response = super().form_valid(form)
-            messages.success(self.request, "Le capteur a été modifié avec succès ! ✅")
-            return response
-        except IntegrityError as e:
+      
+        messages.success(self.request, "Le capteur a été modifié avec succès !")
+        return super().form_valid(form)  # redirige vers get_success_url()
+       
+        '''except IntegrityError:
             form.add_error('identifiant', "Un capteur avec cet identifiant existe déjà.")
             return self.form_invalid(form)
         except Exception as e:
-            messages.error(self.request, f"Une erreur est survenue : {str(e)} ❌")
-            return self.form_invalid(form)
+            messages.error(self.request, f"Une erreur est survenue : {str(e)}")
+            return self.form_invalid(form)'''
 
     def form_invalid(self, form):
-        messages.error(self.request, "Il y a des erreurs dans le formulaire. Veuillez les corriger. ")
+        messages.error(self.request, "Un capteur avec cet identifiant existe déjà. ")
         return super().form_invalid(form)
 
     
@@ -394,7 +394,7 @@ from django.views.generic import ListView
 from .models import ZoneSecurite
 from utilisateurs.models import User  # Utilise ton modèle utilisateur personnalisé
 
-from django.db.models import Count  # ⬅️ Ajoute cette ligne
+from django.db.models import Count  
 
 class ListeDesZones(PermissionRequiredMixin, ListView):    
     template_name = 'capteurs/liste_des_zones.html'
@@ -668,6 +668,7 @@ def creer_zone(request):
                 return JsonResponse({'error': 'Type de forme non supporté'}, status=400)
 
             zone.save()
+            messages.success(request,"Zone créé eavec succès")
             return redirect('liste_des_zones')
 
         except User.DoesNotExist:

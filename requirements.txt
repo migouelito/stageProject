@@ -26,6 +26,7 @@ ecdsa==0.19.1
 esptool==4.8.1
 et_xmlfile==2.0.0
 future==1.0.0
+GDAL==3.8.4
 geocoder==1.38.1
 geographiclib==2.0
 geopy==2.4.1
@@ -70,5 +71,3 @@ uvicorn==0.34.2
 websocket-client==1.8.0
 websockets==15.0.1
 zope.interface==7.2
-dj-database-url
-
