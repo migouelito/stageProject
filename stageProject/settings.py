@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 ]
 
 ASGI_APPLICATION = 'stageProject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
+WSGI_APPLICATION = 'stageProject.wsgi.application'
+
 
 '''CHANNEL_LAYERS = {
     'default': {
