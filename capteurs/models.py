@@ -3,8 +3,8 @@ from utilisateurs.models import User
 from django.db import models
 from utilisateurs.models import User
 
-#from django.contrib.gis.geos import Point, Polygon
-#from django.contrib.gis.measure import D  # Utilisation de GeoDjango pour les unités de distance
+from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.measure import D  # Utilisation de GeoDjango pour les unités de distance
 from math import sqrt
 from django.utils import timezone
    #Methode pour les calculs
