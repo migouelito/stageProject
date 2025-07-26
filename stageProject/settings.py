@@ -42,15 +42,12 @@ INSTALLED_APPS = [
 ]
 
 ASGI_APPLICATION = 'stageProject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
-<<<<<<< HEAD
 
-=======
+
+
 WSGI_APPLICATION = 'stageProject.wsgi.application'
-<<<<<<< HEAD
->>>>>>> 4a2bc25 (Commit automatique : 2025-07-26 10:49:34)
 
-=======
->>>>>>> e46c457 (Commit automatique : 2025-07-26 10:48:13)
+
 
 CHANNEL_LAYERS = {
     'default': {
