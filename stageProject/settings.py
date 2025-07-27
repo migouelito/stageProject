@@ -43,19 +43,19 @@ INSTALLED_APPS = [
 
 ASGI_APPLICATION = 'stageProject.asgi.application'  # Remplace 'ton_projet' par le nom de ton projet
 
-CHANNEL_LAYERS = {
+'''CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('127.0.0.1', 6379)],  # Adresse de Redis
         },
     },
-}
+}'''
 
 
 #Pour redis en ligne
 
-'''CHANNEL_LAYERS = {
+CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
@@ -64,7 +64,7 @@ CHANNEL_LAYERS = {
             "symmetric_encryption_keys": [os.environ.get("REDIS_ENCRYPTION_KEY", "")],  # facultatif
         },
     },
-}'''
+}
 
 
 REST_FRAMEWORK = {
@@ -156,7 +156,7 @@ TEMPLATES = [
 
 
 
-'''import dj_database_url
+import dj_database_url
 
 
 
@@ -165,9 +165,9 @@ DATABASES = {
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
-}'''
+}
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
@@ -176,7 +176,7 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
     }
-}
+}'''
 
 
 
