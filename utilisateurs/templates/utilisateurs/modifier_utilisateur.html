@@ -414,7 +414,7 @@
                     </label>
                 </div>
            <div class="form-group select">
-    <label for="id_groups">gr</label>
+    <label for="id_groups"></label>
     <select name="groups" id="id_groups" class="form-control" disabled>
         {% for group in user.groups.all %}
             <option value="{{ group.pk }}" selected>{{ group.name }}</option>
