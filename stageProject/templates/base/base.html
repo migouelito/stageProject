@@ -400,7 +400,7 @@
                         <div class="icon-container">
                             <img src="{% static 'images/betail.png' %}" alt="Accueil">
                         </div>
-                        <span class="nav-text">Catégorie </span>
+                        <span class="nav-text">Animaux </span>
                     </a>
                     {% endif %}
 
@@ -824,117 +824,182 @@
         {% endfor %}
     </div>
 {% endif %}
-
 <style>
-   /* Style général de l'alerte */
-.alert {
-    font-size: 14px;
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    margin: 0.5rem 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    width: 840px;
-    height: 50px;
-    overflow: hidden;
-
-    transition: all 0.3s ease;
-    border-left: 3px solid;
-    opacity: 0;
-
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: alertEnter 0.4s forwards;
-
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    z-index: 1100;
-}
-
-/* Animation d'apparition */
-@keyframes alertEnter {
-    from {
+    .alert {
+        font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 15px;
+        border-radius: 12px;
+        padding: 0.75rem 1.25rem;
+        margin: 0.5rem 0;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 840px;
+        max-width: 90%;
+        min-height: 60px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border-left: 4px solid;
         opacity: 0;
-        transform: translateX(-50%) translateY(20px);
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: alertEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        z-index: 1100;
+        backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.95);
     }
-    to {
+
+    /* Animation d'apparition */
+    @keyframes alertEnter {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    /* Animation de sortie */
+    @keyframes alertExit {
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-30px);
+            filter: blur(2px);
+        }
+    }
+
+    .alert.alert-exit {
+        animation: alertExit 0.4s ease-out forwards;
+    }
+
+    /* Style pour les alertes de succès */
+    .alert-success {
+        background-color: rgba(40, 167, 69, 0.95);
+        color: white;
+        font-weight: 500;
+        border-left-color: #2ecc71;
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+    }
+
+    /* Style pour les erreurs et dangers */
+    .alert-error,
+    .alert-danger {
+        background-color: rgba(231, 76, 60, 0.95);
+        color: white;
+        font-weight: 500;
+        border-left-color: #e74c3c;
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Style pour les alertes d'information */
+    .alert-info {
+        background-color: rgba(52, 152, 219, 0.95);
+        color: white;
+        font-weight: 500;
+        border-left-color: #3498db;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Style pour les alertes d'avertissement */
+    .alert-warning {
+        background-color: rgba(241, 196, 15, 0.95);
+        color: white;
+        font-weight: 500;
+        border-left-color: #f1c40f;
+        box-shadow: 0 6px 20px rgba(241, 196, 15, 0.3);
+    }
+
+    /* Contenu de l'alerte */
+    .alert-content {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        padding-right: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Icône d'alerte */
+    .alert-icon {
+        margin-right: 12px;
+        font-size: 20px;
+        min-width: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Bouton de fermeture */
+    .alert-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        margin-left: 0.5rem;
+        color: white;
+        font-size: 18px;
+        opacity: 0.8;
+        transition: all 0.2s ease;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .alert-close:hover {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
     }
-}
 
-/* Animation de sortie */
-@keyframes alertExit {
-    to {
-        opacity: 0;
-        transform: translateY(-20px);
+    /* Effet de verre (glass morphism) */
+    .alert-glass {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        background-color: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
-}
 
-.alert.alert-exit {
-    animation: alertExit 0.4s forwards;
-}
+    .alert-success.alert-glass {
+        background-color: rgba(46, 204, 113, 0.85);
+    }
 
-/* Couleur pour les alertes de succès */
-.alert-success {
-    background-color: #28a745; /* Vert foncé */
-    color: white;
-    font-weight: bold;
-    border-left-color: #28a745;
-}
+    .alert-error.alert-glass,
+    .alert-danger.alert-glass {
+        background-color: rgba(231, 76, 60, 0.85);
+    }
 
-/* Couleur pour les erreurs et dangers */
-.alert-error,
-.alert-danger {
-    background-color: #FF0000; /* Rouge vif */
-    color: white;
-    font-weight: bold;
-    border-left-color: #FF0000;
-}
+    .alert-info.alert-glass {
+        background-color: rgba(52, 152, 219, 0.85);
+    }
 
-/* Couleur pour les alertes d'information */
-.alert-info {
-    background-color: #eff6ff;
-    color: #1e40af;
-    font-weight: bold;
-    border-left-color: #3b82f6;
-}
+    .alert-warning.alert-glass {
+        background-color: rgba(241, 196, 15, 0.85);
+    }
 
-/* Couleur pour les alertes d'avertissement */
-.alert-warning {
-    background-color: #ffa500; /* Orange */
-    color: white;
-    font-weight: bold;
-    border-left-color: #ffa500;
-}
-
-/* Bouton de fermeture */
-.alert-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 1rem;
-    color: white !important;
-    font-size: 18px;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-}
-
-.alert-close:hover {
-    opacity: 1;
-}
-
-    
-    
-    </style>
+    /* Responsive */
+    @media (max-width: 768px) {
+        .alert {
+            width: 90%;
+            min-height: 50px;
+            padding: 0.6rem 1rem;
+            font-size: 14px;
+        }
         
+        .alert-icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+    }
+</style>
         <div class="main-content">
        
 
@@ -998,7 +1063,6 @@
         
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         
-      
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const profileIcon = document.getElementById('profile-link-icon');
@@ -1043,7 +1107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Swal.fire({
             html: `
                 <div class="elegant-loader">
-                    <div class="loader-icon">👤</div>
                     <div class="loader-text">Chargement de votre profil...</div>
                     <div class="loader-spinner"></div>
                 </div>
@@ -1098,14 +1161,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="form-grid">
                         <div class="form-field">
                             <label class="form-label">
-                                <span class="label-icon">👤</span>
+                                <span class="label-icon"></span>
                                 Prénom
                             </label>
                             <div class="form-display-value">${userData.first_name || 'Non renseigné'}</div>
                         </div>
                         <div class="form-field">
                             <label class="form-label">
-                                <span class="label-icon">👥</span>
+                                <span class="label-icon"></span>
                                 Nom de famille
                             </label>
                             <div class="form-display-value">${userData.last_name || 'Non renseigné'}</div>
@@ -1171,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </svg>
         Modifier mon profil
     `,
-    confirmButtonColor: '#008000',
+    confirmButtonColor: '#22c55e',
     focusConfirm: false,
     backdrop: 'rgba(15, 23, 42, 0.4)',
     customClass: {
@@ -1210,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="form-grid">
                                 <div class="form-field">
                                     <label for="swal-input-firstname" class="form-label">
-                                        <span class="label-icon">👤</span>
+                                        <span class="label-icon"></span>
                                         Prénom
                                     </label>
                                     <input 
@@ -1224,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="form-field">
                                     <label for="swal-input-lastname" class="form-label">
-                                        <span class="label-icon">👥</span>
+                                        <span class="label-icon"></span>
                                         Nom de famille
                                     </label>
                                     <input 
@@ -1342,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Enregistrer les modifications
             `,
             cancelButtonText: ``,
-            confirmButtonColor: '#059669',
+            confirmButtonColor: '#16a34a',
             customClass: {
                 popup: 'edit-popup-modern',
                 confirmButton: 'modern-button save-button'
@@ -1436,13 +1499,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             Swal.fire({
                                 html: `
                                     <div class="success-animation">
-                                        <div class="success-icon">✅</div>
+                                        <div class="success-icon"></div>
                                         <h2 class="success-title">Profil mis à jour !</h2>
                                         <p class="success-message">${data.message || 'Vos modifications ont été enregistrées avec succès'}</p>
                                     </div>
                                 `,
                                 confirmButtonText: 'Parfait !',
-                                confirmButtonColor: '#059669',
+                                confirmButtonColor: '#16a34a',
                                 timer: 3000,
                                 customClass: {
                                     popup: 'success-popup',
@@ -1519,7 +1582,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButtonText: '🚪 Oui, me déconnecter',
             cancelButtonText: '❌ Annuler',
             confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#059669',
+            cancelButtonColor: '#16a34a',
             reverseButtons: true,
             customClass: {
                 popup: 'logout-popup',
@@ -1557,15 +1620,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ajout des styles CSS modernes et élégants
+    // Ajout des styles CSS modernes et élégants avec THÈME VERT
     const style = document.createElement('style');
     style.textContent = `
-        /* Variables CSS pour la cohérence */
+        /* Variables CSS pour la cohérence - THÈME VERT */
         :root {
-            --primary-color: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary-color: #008000;
-            --secondary-dark: #008000;
+            --primary-color: #22c55e;
+            --primary-dark: #16a34a;
+            --secondary-color: #22c55e;
+            --secondary-dark: #15803d;
             --danger-color: #dc2626;
             --warning-color: #d97706;
             --gray-50: #f9fafb;
@@ -1637,176 +1700,23 @@ document.addEventListener('DOMContentLoaded', () => {
             background: linear-gradient(135deg, var(--danger-color), #b91c1c) !important;
         }
 
-        /* Modal Profile - Affichage */
-        .profile-modal {
-            padding: 0;
-            margin: 0;
-        }
-
-        .profile-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            padding: 32px 24px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .avatar-container {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 16px;
-            z-index: 1;
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            box-shadow: var(--shadow-lg);
-            object-fit: cover;
-        }
-
-        .avatar-badge {
-            position: absolute;
-            bottom: -4px;
-            right: -4px;
-            background: white;
-            color: var(--primary-color);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-md);
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 4px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-username {
-            font-size: 16px;
-            opacity: 0.9;
-            margin: 0;
+        /* Affichage des valeurs dans le profil */
+        .form-display-value {
+            padding: 12px 16px;
+            background: #f0fdf4;
+            border: 2px solid #dcfce7;
+            border-radius: var(--radius-md);
+            font-size: 14px;
             font-weight: 500;
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-content {
-            padding: 32px 24px;
-            background: var(--gray-50);
-        }
-
-        .profile-section {
-            margin-bottom: 32px;
-        }
-
-        .profile-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--gray-200);
-        }
-
-        .section-icon {
-            color: var(--primary-color);
-            margin-right: 12px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
             color: var(--gray-800);
-            margin: 0;
-        }
-
-        .fields-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .field-card {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            border: 1px solid var(--gray-200);
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .field-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--primary-color);
-        }
-
-        .field-card.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .field-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .field-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .field-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--gray-500);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 6px;
-        }
-
-        .field-value {
-            font-size: 16px;
-            color: var(--gray-800);
-            font-weight: 500;
-            word-break: break-word;
+            min-height: 20px;
         }
 
         .username-highlight {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
             color: var(--primary-color) !important;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
+            border-color: var(--primary-color) !important;
+            font-weight: 600 !important;
         }
 
         /* Modal Edit - Modification */
@@ -1831,8 +1741,9 @@ document.addEventListener('DOMContentLoaded', () => {
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="edit-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="30" r="1" fill="white" opacity="0.1"/><circle cx="70" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="45" cy="15" r="0.5" fill="white" opacity="0.1"/><circle cx="15" cy="65" r="0.5" fill="white" opacity="0.1"/><circle cx="85" cy="45" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23edit-grain)"/></svg>');
-            opacity: 0.2;
+            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0.4;
         }
 
         .edit-avatar-container {
@@ -1884,7 +1795,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         .edit-form {
             padding: 32px 24px;
-            background: var(--gray-50);
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
             max-height: 500px;
             overflow-y: auto;
         }
@@ -1896,10 +1807,47 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-bottom: 24px;
             border: 1px solid var(--gray-200);
             box-shadow: var(--shadow-sm);
+            animation: slideInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         .form-section:last-child {
             margin-bottom: 0;
+        }
+
+        .form-section:nth-child(1) { 
+            animation-delay: 0.1s; 
+        }
+        .form-section:nth-child(2) { 
+            animation-delay: 0.2s; 
+        }
+        .form-section:nth-child(3) { 
+            animation-delay: 0.3s; 
+        }
+
+        /* Headers de section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-radius: 12px;
+            border-left: 4px solid #22c55e;
+        }
+
+        .section-icon {
+            color: var(--primary-color);
+            margin-right: 12px;
+            filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.2));
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #166534;
+            margin: 0;
         }
 
         .form-grid {
@@ -1930,10 +1878,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         .form-label.required {
             position: relative;
+            color: #166534;
         }
 
         .required-indicator {
-            color: var(--danger-color);
+            color: var(--primary-color);
             font-weight: 700;
             margin-left: 4px;
         }
@@ -1957,23 +1906,37 @@ document.addEventListener('DOMContentLoaded', () => {
         .form-input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
             transform: translateY(-1px);
+            background: #f0fdf4;
         }
 
         .form-input:hover {
-            border-color: var(--gray-400);
+            border-color: #16a34a;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
         }
 
         .form-input::placeholder {
             color: var(--gray-400);
         }
 
+        .form-input:invalid:not(:placeholder-shown) {
+            border-color: var(--danger-color);
+            background: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-input:valid:not(:placeholder-shown) {
+            border-color: var(--primary-color);
+            background: #f0fdf4;
+        }
+
         .form-hint {
             font-size: 12px;
-            color: var(--gray-500);
+            color: #16a34a;
             margin-top: 6px;
             font-style: italic;
+            font-weight: 500;
         }
 
         /* Animations de chargement */
@@ -2024,6 +1987,13 @@ document.addEventListener('DOMContentLoaded', () => {
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
+        }
+
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Animations de succès et erreur */
@@ -2133,21 +2103,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin: 10px !important;
             }
 
-            .profile-header, .edit-header {
+            .edit-header {
                 padding: 24px 16px;
             }
 
-            .profile-content, .edit-form {
+            .edit-form {
                 padding: 20px 16px;
             }
 
-            .fields-grid, .form-grid {
+            .form-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
-            }
-
-            .field-card {
-                padding: 16px;
             }
 
             .form-section {
@@ -2155,18 +2121,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin-bottom: 16px;
             }
 
-            .profile-avatar {
-                width: 60px;
-                height: 60px;
-            }
-
             .edit-avatar {
                 width: 55px;
                 height: 55px;
-            }
-
-            .profile-name {
-                font-size: 20px;
             }
 
             .edit-title {
@@ -2180,19 +2137,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         @media (max-width: 480px) {
-            .field-card {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-
-            .field-icon {
-                font-size: 20px;
-                margin-top: 0;
-            }
-
             .edit-form {
                 max-height: 400px;
+            }
+
+            .section-header {
+                padding: 0.75rem;
             }
         }
 
@@ -2207,8 +2157,25 @@ document.addEventListener('DOMContentLoaded', () => {
             outline-offset: 2px;
         }
 
-        /* Animations d'entrée */
-        .profile-modal, .edit-modal {
+        /* Messages de validation SweetAlert2 */
+        .swal2-validation-message {
+            background: var(--danger-color) !important;
+            color: white !important;
+            border-radius: var(--radius-md) !important;
+            font-weight: 500 !important;
+        }
+
+        /* Effets spéciaux pour les mots de passe */
+        .form-input[type="password"] {
+            font-family: monospace;
+        }
+
+        .form-input[type="password"]:focus {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Animation d'entrée pour les modals */
+        .edit-modal {
             animation: slideInUp 0.3s ease-out;
         }
 
@@ -2221,23 +2188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        /* Validation des formulaires */
-        .form-input:invalid {
-            border-color: var(--danger-color);
-        }
-
-        .form-input:valid {
-            border-color: var(--secondary-color);
-        }
-
-        /* Messages de validation SweetAlert2 */
-        .swal2-validation-message {
-            background: var(--danger-color) !important;
-            color: white !important;
-            border-radius: var(--radius-md) !important;
-            font-weight: 500 !important;
         }
     `;
     document.head.appendChild(style);
